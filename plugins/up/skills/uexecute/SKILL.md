@@ -16,6 +16,16 @@ Implement the approved `## Plan` from `docs/tasks/<slug>.md`. You are the dispat
 4. Build the checklist — one todo per plan phase (or per task if phases are coarse). Use TodoWrite.
 </required>
 
+## Brevity
+
+<required>
+Before writing anything into the task file (deviations, hands-off decisions, known risks), read `plugins/up/skills/_brevity.md`. Apply its five principles. Specifically:
+- `### Deviations from plan` — create the subsection only when a deviation happens. Do not add an empty "no deviations" line.
+- `### Hands-off decisions` — when every stage auto-approved with no interventions, collapse to a single entry `- all stages auto-approved, no interventions`. When a stage did intervene (reviewer fix, deferral, etc.), keep its own entry.
+- `### Deferred (needs user input)` — one line per deferral, with the concrete artifact the user needs (file path / command / question).
+The Exception clause still holds: deviations, deferrals, and known risks always carry evidence and "why".
+</required>
+
 ## Branch / worktree correctness
 
 <system-reminder>
@@ -157,7 +167,7 @@ A deviation is any structural change from what the plan says. File moved to a di
 When a deviation happens:
 
 1. Do not edit the Plan inline. The plan is the contract that was approved; it stays as-is for the review.
-2. Record the deviation in the task file's `## Conclusion` under a `### Deviations from plan` subsection (create if missing). Format: `- <what changed> — <why>`.
+2. Record the deviation in the task file's `## Conclusion` under a `### Deviations from plan` subsection (create if missing). Format: `- <what changed> — <why>`. If no deviation happens, do not create the subsection at all — per `_brevity.md`, empty subsections are deleted, not written.
 3. If the deviation is minor (renamed a helper, swapped two steps) — continue execution.
 4. If the deviation is structural enough that later phases in the plan no longer apply — stop executing. Invoke `up:uplan` with enough context (what was done, what no longer applies, what new reality is). Let the planner skill update the plan before resuming.
 </required>

@@ -30,6 +30,12 @@ Do **not** silently split the task here. Do not silently expand it either.
 
 Fill `## Plan` in `docs/tasks/<slug>.md`. Do not create a separate plan file.
 
+## Brevity
+
+<required>
+Before writing the Plan, read `plugins/up/skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Treat every subsection in the Format block below as optional — include only when the content is non-default. Failures, deviations, deferrals, and known risks always include evidence.
+</required>
+
 ## Process
 
 <required>
@@ -48,12 +54,14 @@ Fill `## Plan` in `docs/tasks/<slug>.md`. Do not create a separate plan file.
 
 ## Required contents
 
-Every plan has:
-- Approach: 2-3 sentences on the strategy and why it fits the Design
+Required always:
+- Approach: 1-2 sentences on the strategy and why it fits the Design
 - File structure: for each file, `path/to/file.ext:lineA-lineB` (create|modify) + affected class/method names
-- Per-file bullets: what changes, by name. As many bullets as needed, no filler.
+- Per-file bullets: what changes, by name
 - New/changed interfaces: signatures only
 - Invariants referenced: which Design invariants each phase preserves
+
+Required when relevant (omit the subsection when it would say "single phase, no deps", "none", or similar):
 - Test strategy: behaviors to cover. If `TDD: yes`, list the failing tests to write first.
 - Order + dependencies: phases, what blocks what
 - Open questions / risks / rollback: what could go wrong, how to back out
@@ -66,7 +74,7 @@ Optional:
 ```markdown
 ## Plan
 
-Approach: <2-3 sentences>
+Approach: <1-2 sentences>
 
 ### Phase 1 — <name>
 
@@ -79,13 +87,13 @@ Approach: <2-3 sentences>
 ### Phase 2 — <name>
 ...
 
-### Test strategy
+### Test strategy   (optional — omit if no tests / doc-only)
 <behavior list, per file or per phase>
 
-### Order & dependencies
+### Order & dependencies   (optional — omit for single-phase or obviously-sequential plans)
 <what blocks what, parallelizable phases>
 
-### Open questions / risks / rollback
+### Open questions / risks / rollback   (optional — omit if none non-trivial)
 - <item>
 ```
 

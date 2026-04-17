@@ -14,6 +14,12 @@ Review is a process, not just a section. Its end product is the `## Conclusion` 
 - Before opening a PR
 - Never skipped, regardless of task size
 
+## Brevity
+
+<required>
+Before writing the `## Conclusion`, read `plugins/up/skills/_brevity.md`. Apply its five principles. `Outcome:` is ≤1 sentence + the commit SHA — never re-narrate the diff. Omit subsections whose content would be "none" / "clean" / "no deviations" / "no findings" / the default: `Plan adherence`, `Review findings`, `Future work`, `Verified by`, `Deviations from plan`, `Known risks`. `Invariants:` stays — it carries audit value even on pass. The Exception clause still holds: findings, deviations, risks, and deferrals always carry evidence and "why".
+</required>
+
 ## Two roles, two attitudes
 
 <reviewer-role>
@@ -104,21 +110,21 @@ If fixes are substantial, re-dispatch the reviewer on the new diff.
 ```markdown
 ## Conclusion
 
-Outcome: <one paragraph — what works now>
+Outcome: <≤1 sentence + commit SHA. Don't re-narrate the diff.>
 
-Plan adherence: <any deviations already recorded during execute, summarized here>
+Invariants:
+- <each invariant> — <how it was verified>
 
-Invariants: <each invariant, and how it was verified>
+Plan adherence: <deviations>   (omit entire subsection if no deviations)
 
-Review findings:
+Review findings:   (omit entire subsection if no Critical or Important)
 - Critical: <resolved, how>
 - Important: <resolved or explicitly deferred with justification>
 
-Future work:
-- <item> — Justification: <Design-scope line that excluded this> OR <new fact discovered during execution>
-- (No unjustified items. This section is not a dumping ground for incomplete in-scope work.)
+Future work:   (omit entire subsection if none — do not write "none")
+- <item> — Justification: <Design-scope line> OR <new fact discovered>
 
-Verified by: <smoke tests run, manual checks, reviewer verdict>
+Verified by: <only non-default items: deferred smokes, manual checks the next reader needs to know about>   (omit if only the routine reviewer+verify ran)
 ```
 
 ## Receiving feedback — rules

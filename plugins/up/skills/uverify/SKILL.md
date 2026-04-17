@@ -7,6 +7,12 @@ description: Use after execute to confirm the change actually works end-to-end. 
 
 Confirm the change actually works — not "looks right", not "tests probably pass", but *verified by running the thing in this message*. Verify's verdict either advances the workflow to `up:ureview` or bounces it back to `up:uexecute` with remediation notes. A short summary is persisted to the task file's `## Verify` section so review (and later readers) see what was checked.
 
+## Brevity
+
+<required>
+Before writing the Verify section, read `plugins/up/skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Passed checks are one line; evidence citations attach to failures, deferrals, or genuinely surprising passes. Omit `Smoke:` and `Notes:` when there's nothing to report. The Exception clause still holds: failures always carry evidence and a clear "how it should have worked" note.
+</required>
+
 ## Phase 1 — Build the checklist (positive, negative, invariant)
 
 The checklist enumerates every behavior you'll actually run. Built from the Plan, Invariants, and Design, not imagined.
@@ -72,21 +78,46 @@ Format:
 **Result:** passed | failed
 
 Positive:
-- <check> → <pass/fail + 1-line evidence>
+- <check>                         (evidence only on fail or surprise)
+- <check> → <evidence>            (failure: required)
 
 Negative:
-- <check> → <pass/fail + 1-line evidence>
+- <check>
 
 Invariants:
-- <invariant> → <verified how>
+- <invariant>
 
-Smoke: `<command>` → <one-line result>
+Smoke: `<command>` → <one-line result>   (omit if no smoke test run or nothing to report)
 
-Notes: <anything unusual, skipped, or re-run — optional>
+Notes: <anomalies, re-runs, deferrals>   (omit if none)
 ```
 
 Write this whether verify passed or failed. On failure, the Notes section names what failed and points to where execute should pick up.
 </required>
+
+<good-example>
+Fully-passing terse form:
+```markdown
+## Verify
+
+**Result:** passed
+
+Positive:
+- POST /items {valid} → 201 with new id
+- Dataset.load("good.csv") → 3-column DataFrame
+
+Negative:
+- POST /items {missing name} → 400
+- Dataset.load("nope.csv") → FileNotFoundError
+
+Invariants:
+- `Dataset` does not import from `training/`
+- all DB writes go through `transaction()`
+
+Smoke: `curl -X POST /items ... → 201` — end-to-end OK
+```
+No `Notes:` (nothing anomalous), no evidence padding on passes.
+</good-example>
 
 ## Phase 5 — Consolidate: pass loops to review, fail loops to execute
 
