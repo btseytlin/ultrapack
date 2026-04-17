@@ -14,7 +14,7 @@ Applies to anything that outlives the conversation: code, comments, docstrings, 
 
 5. **Soft caps, hard judgment.** No word limits. Lean toward ≤1 screen for a Small task's full task file; ≤3 screens for Medium. Over? Cut.
 
-6. **No conversation bleed.** Don't stamp the current task, dispatch path, just-removed alternative, model name, or the user's last critique into long-lived artifacts. The artifact must stand alone after the chat is gone. Test: delete the conversation — does this text still make sense to a stranger six months from now?
+6. **No conversation bleed.** Don't stamp the current task, dispatch path, just-removed alternative, model name, or the user's last critique into long-lived artifacts. The artifact must stand alone after the chat is gone. Test: if the text only makes sense while the conversation is still around, it's bleed — cut it.
 
    - Negative: `// do X (NOT Y)` — `Y` was the user's last critique, already removed from the code; the comment now refers to nothing.
    - Negative: agent description "…Dispatched per-phase from up:uexecute. Fresh context, never sees session history or later phases. Sonnet 4.6." — dispatch mechanics, session semantics, and model are all bleed; the description should say what the agent *does*.
