@@ -55,9 +55,9 @@ Process skills (u-prefixed to dodge Claude Code built-ins):
 
 Discipline skills:
 - `up:test-driven-development` — RED → GREEN → REFACTOR, only when the task qualifies.
-- `up:data-engineering` — Sequential stages, idempotent/atomic/retriable, pre-flight checks.
-- `up:ml-experiments` — Overfit one batch, check for leaks, scale-up gated.
 - `up:git-worktrees` — Smart directory selection, safety verification.
+
+Removed in this release: `up:data-engineering`, `up:ml-experiments` — moved to user-level skills (they weren't spec-driven-dev scoped).
 
 ### Commands
 
