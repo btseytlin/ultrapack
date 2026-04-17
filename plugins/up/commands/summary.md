@@ -1,10 +1,10 @@
 ---
-description: Produce a handoff summary so another session can continue with zero context beyond CLAUDE.md, the codebase, and the handoff itself. Asks whether to append to the current task file or create a new handoff task file.
+description: Produce a summary so another session can continue with zero context beyond CLAUDE.md, the codebase, and the summary itself. Asks whether to append to the current task file or create a new summary task file.
 ---
 
-# /up:handoff
+# /up:summary
 
-Prepare a handoff summary so another agent session can continue this work without needing the current conversation.
+Prepare a summary so another agent session can continue this work without needing the current conversation.
 
 ## Process
 
@@ -15,7 +15,7 @@ Prepare a handoff summary so another agent session can continue this work withou
 - Review the conversation for decisions made, approaches tried, and blockers hit
 - Check `tmp/` for useful logs or intermediate files
 
-### 2. Draft the handoff
+### 2. Draft the summary
 
 Write with the sections below. Omit any section only if genuinely not applicable.
 
@@ -31,10 +31,10 @@ Write with the sections below. Omit any section only if genuinely not applicable
 ### 3. Ask the user where to put it
 
 <required>
-Show the drafted handoff, then ask:
+Show the drafted summary, then ask:
 
-1. Append to the current task file's `## Conclusion` as a `### Handoff — YYYY-MM-DD` subsection (provide the detected `docs/tasks/<slug>.md` path)
-2. Create a new file at `docs/tasks/handoff-<new-slug>.md` (propose a slug based on the current work)
+1. Append to the current task file's `## Conclusion` as a `### Summary — YYYY-MM-DD` subsection (provide the detected `docs/tasks/<slug>.md` path)
+2. Create a new file at `docs/tasks/summary-<new-slug>.md` (propose a slug based on the current work)
 
 Pick the destination based on the user's answer. Do not write anywhere without confirmation.
 </required>

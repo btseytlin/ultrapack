@@ -65,7 +65,7 @@ Removed in this release: `up:data-engineering`, `up:ml-experiments` — moved to
 - `/up:make <description>` — Orchestrate the full flow: slug → task file → design → branch → plan → execute → verify → review.
 - `/up:try` — Design one positive and one negative test case, run both, report.
 - `/up:step-back` — Circuit breaker: stop, diagnose why approaches failed, propose new direction.
-- `/up:handoff` — Produce a handoff summary so another session can continue with zero context.
+- `/up:summary` — Produce a summary so another session can continue with zero context.
 - `/up:reflect` — Reflect on the dialogue, extract learnings into CLAUDE.md / memory / docs.
 
 ### Agents
