@@ -10,26 +10,26 @@ Drives a task through the full ultrapack workflow: one task file at `docs/tasks/
 
 The user's description of the task follows the command. May be a one-liner ("fix the flaky login test") or a paragraph. Use it as the seed for the slug and the initial framing for `up:udesign`.
 
-**Hands-off activation:** if the first whitespace-delimited token of the arguments is the literal string `handsoff`, enable hands-off mode. Strip that token before deriving the slug or framing for design. Any other spelling (`hands-off`, `handsOff`, `--handsoff`) is treated as part of the description — only the bare token `handsoff` activates. See `## Hands-off mode` below for behavior.
+Hands-off activation: if the first whitespace-delimited token of the arguments is the literal string `handsoff`, enable hands-off mode. Strip that token before deriving the slug or framing for design. Any other spelling (`hands-off`, `handsOff`, `--handsoff`) is treated as part of the description — only the bare token `handsoff` activates. See `## Hands-off mode` below for behavior.
 
 ## Flow
 
 ### 1. Slug
 
-Propose a short kebab-case slug from the description (e.g. "fix-flaky-login-test"). Confirm with the user before creating anything. If they rename, use their version.
+Derive a kebab-case slug from the description, 3 words max (e.g. "flaky-login-test"), and proceed.
 
 ### 2. Resume check
 
 Before creating a new task file, check if `docs/tasks/<slug>.md` already exists.
 
-- **Exists:** read `**Status:**` from the header. Resume from the next stage:
+- Exists: read `**Status:**` from the header. Resume from the next stage:
   - `design` → continue design
   - `planning` → run `up:uplan`
   - `executing` → run `up:uexecute`
   - `reviewing` → run `up:ureview`
   - `done` → ask the user what they want to do (start a follow-up, re-open, view conclusion)
-- **Doesn't exist:** proceed to step 3.
-- **Multiple in-flight tasks:** if more than one `docs/tasks/*.md` has Status ≠ `done`, list them and ask which one the user means (or whether this is a new task).
+- Doesn't exist: proceed to step 3.
+- Multiple in-flight tasks: if more than one `docs/tasks/*.md` has Status ≠ `done`, list them and ask which one the user means (or whether this is a new task).
 
 ### 3. Create task file
 
@@ -74,13 +74,13 @@ Template:
 
 Based on the task description, classify size:
 
-- **Trivial** — one-line change, typo, rename. Skip Design and Plan. Go straight to Execute. Status file still created.
-- **Small** — single file or single concept change. Skip Design. Plan runs.
-- **Medium / Large** — full flow.
+- Trivial — one-line change, typo, rename. Skip Design and Plan. Go straight to Execute. Status file still created.
+- Small — single file or single concept change. Skip Design. Plan runs.
+- Medium / Large — full flow.
 
-**Interactive mode:** confirm the classification with the user before skipping any stage. When unsure, ask.
+Interactive mode: confirm the classification with the user before skipping any stage. When unsure, ask.
 
-**Hands-off mode:** do not confirm. Default to **Medium** (full flow) unless the scope is unambiguously Trivial (true one-liner in one file). Never auto-pick Small or auto-skip Design — Design is the one interactive stage preserved in hands-off. Append the choice to `## Conclusion → ### Hands-off decisions` as `- size: <classification> — <rationale>`.
+Hands-off mode: do not confirm. Default to Medium (full flow) unless the scope is unambiguously Trivial (true one-liner in one file). Never auto-pick Small or auto-skip Design — Design is the one interactive stage preserved in hands-off. Append the choice to `## Conclusion → ### Hands-off decisions` as `- size: <classification> — <rationale>`.
 
 ### 5. Design stage (unless skipped)
 
@@ -90,12 +90,12 @@ Invoke `up:udesign`. It populates `## Design`, `### Invariants`, `### Principles
 
 After Design (or immediately for trivial/small tasks), decide:
 
-- **Complex / long-running / touches many files** → suggest a dedicated branch + worktree. Use `up:git-worktrees`.
-- **Easy fix / small scope** → suggest working on current branch (usually `main`).
+- Complex / long-running / touches many files → suggest a dedicated branch + worktree. Use `up:git-worktrees`.
+- Easy fix / small scope → suggest working on current branch (usually `main`).
 
-**Interactive mode:** always confirm with the user. Often they want to work directly on main — that's fine.
+Interactive mode: always confirm with the user.
 
-**Hands-off mode:** default to **the safest reversible option** — always a dedicated branch + worktree via `up:git-worktrees`, never direct edits to `main`/`master`. Rationale: hands-off means the user won't approve each step, so the blast radius of any mistake must be contained to a branch the user can discard. Log the branch name and worktree path under `## Conclusion → ### Hands-off decisions`. The only exception: if `up:git-worktrees` itself fails (e.g. no gitignored worktree path available), log the failure under `### Deferred (needs user input)` and stop — do not silently fall back to working on `main`.
+Hands-off mode: default to the safest reversible option — always a dedicated branch + worktree via `up:git-worktrees`, never direct edits to `main`/`master`. Log the branch name and worktree path under `## Conclusion → ### Hands-off decisions`. The only exception: if `up:git-worktrees` itself fails (e.g. no gitignored worktree path available), log the failure under `### Deferred (needs user input)` and stop — do not silently fall back to working on `main`.
 
 If a branch is created, update the task file's `**Branch:**` and `**Worktree:**` headers.
 
@@ -119,11 +119,9 @@ Status → `reviewing`. Invoke `up:ureview`. It dispatches `up:ureviewer`, proce
 
 Once the task is concluded as `done`, run the docs-refresh check (see below).
 
-**Review is never skipped**, regardless of size.
-
 ### 11. Finish
 
-**Hands-off mode — first:** print the `## Conclusion → ### Hands-off decisions` list (and `### Deferred (needs user input)` if non-empty) to the user and ask verbatim: "Here's what I did to make it hands-off. Want to change anything?" Wait for the user's response before continuing. This is the only required interaction after Design.
+Hands-off mode — first: print the `## Conclusion → ### Hands-off decisions` list (and `### Deferred (needs user input)` if non-empty) to the user and ask verbatim: "Here's what I did to make it hands-off. Want to change anything?" Wait for the user's response before continuing.
 
 Then (both modes) present options to the user:
 - Merge / open PR (if on a branch)
@@ -157,7 +155,6 @@ Rules:
 
 Stop and ask the user when:
 
-- Slug conflicts with an existing task file and resume intent is ambiguous
 - Size classification is genuinely unclear (interactive only; in hands-off, default to Medium)
 - User has expressed a preference (branch, scope, TDD) that conflicts with the auto-inference
 - Any stage's skill returns a blocker
@@ -166,7 +163,7 @@ Stop and ask the user when:
 
 - Never skip Review (both modes)
 - Never auto-merge or auto-push — the user chooses at step 11 (both modes)
-- Never create a worktree without confirming in interactive mode. Hands-off auto-creates a worktree as the safe default (see `up:handsoff`)
+- Never create a worktree without confirming in interactive mode
 - Never edit `main` / `master` directly in hands-off (see `up:handsoff` safety principles)
 - Keep the task file as the single source of truth — each stage reads it, each stage writes to it
 - External spec / design docs (e.g. `docs/superpowers/specs/*.md`) are read-only during execute. If a stage finds the spec is wrong, surface it to the user — don't mutate it silently
