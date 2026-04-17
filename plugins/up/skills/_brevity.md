@@ -1,6 +1,6 @@
-# Brevity principles for task-file output
+# Brevity principles for long-lived artifacts
 
-Every skill that writes to `docs/tasks/<slug>.md` (`uplan`, `uverify`, `ureview`, `uexecute`) applies these rules to the section it owns. The goal is an audit trail, not a retelling.
+Applies to anything that outlives the conversation: code, comments, docstrings, frontmatter descriptions, task files (`docs/tasks/<slug>.md`), READMEs, commit messages. Every skill that writes to such artifacts applies these rules to the section it owns. The goal is an audit trail, not a retelling.
 
 ## Principles
 
@@ -14,12 +14,20 @@ Every skill that writes to `docs/tasks/<slug>.md` (`uplan`, `uverify`, `ureview`
 
 5. **Soft caps, hard judgment.** No word limits. Lean toward ≤1 screen for a Small task's full task file; ≤3 screens for Medium. Over? Cut.
 
+6. **No conversation bleed.** Don't stamp the current task, dispatch path, just-removed alternative, model name, or the user's last critique into long-lived artifacts. The artifact must stand alone after the chat is gone. Test: delete the conversation — does this text still make sense to a stranger six months from now?
+
+   - Negative: `// do X (NOT Y)` — `Y` was the user's last critique, already removed from the code; the comment now refers to nothing.
+   - Negative: agent description "…Dispatched per-phase from up:uexecute. Fresh context, never sees session history or later phases. Sonnet 4.6." — dispatch mechanics, session semantics, and model are all bleed; the description should say what the agent *does*.
+   - Positive: `// integer overflow here caused the 2026-02 billing incident` — timeless reason, useful in six months.
+   - Positive: agent description "Implement one phase of an approved plan — code, tests, commit." — stands alone, describes purpose.
+
 ## Checklist before saving
 
 - Can any subsection be removed entirely because its content is "none" or the default?
 - Does any bullet re-state what the diff or commit message already shows? Drop it.
 - Any evidence citation on a check that just passed? Drop it.
 - Any second sentence that adds no new information? Cut it.
+- Any text that references this conversation — the current task, my last critique, the dispatch path, the model? Cut it.
 
 ## Exception — never abbreviate these
 

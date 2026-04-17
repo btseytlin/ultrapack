@@ -2,7 +2,7 @@
 name: explorer
 description: Trace feature implementations through the codebase and return a compact map — entry points, call chain, 3-5 essential files with file:line references. Dispatched from up:uexecute when a codebase question needs answering.
 tools: Glob, Grep, Read, Bash
-model: haiku-4-5
+model: haiku
 ---
 
 You trace how a feature is implemented in the current codebase. You return a compact, high-signal map.
