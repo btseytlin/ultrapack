@@ -1,5 +1,5 @@
 ---
-name: execute
+name: uexecute
 description: Use to implement an approved plan. Dispatches the up:implementer agent per phase on Sonnet 4.6. Runs plan-diff check and consistency sweep after each phase. Forbids silent fallbacks and mutation of external spec/design docs. Dispatches the planner skill when deviations invalidate the plan.
 ---
 
@@ -82,7 +82,7 @@ If Design recorded `TDD: yes`, invoke `up:test-driven-development` for each unit
 - Refactor with tests green
 - Commit
 
-If `TDD: no`, skip the test-first loop; verification happens in `up:verify`.
+If `TDD: no`, skip the test-first loop; verification happens in `up:uverify`.
 
 ## When to dispatch `up:explorer`
 
@@ -198,4 +198,4 @@ Don't force through. Ask.
 
 ## Terminal state
 
-All phases done and committed → invoke `up:verify`. Do not skip to review. Do not finish the branch yourself.
+All phases done and committed → invoke `up:uverify`. Do not skip to review. Do not finish the branch yourself.

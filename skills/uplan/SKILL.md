@@ -5,7 +5,7 @@ description: Use after design to turn a validated spec into a lean implementatio
 
 # Plan
 
-Convert the approved Design into a lean, concrete implementation plan. Output fills the `## Plan` section of `docs/tasks/<slug>.md`. The plan is the contract that `up:execute` will follow.
+Convert the approved Design into a lean, concrete implementation plan. Output fills the `## Plan` section of `docs/tasks/<slug>.md`. The plan is the contract that `up:uexecute` will follow.
 
 ## What a plan is
 
@@ -43,7 +43,7 @@ Fill `## Plan` in `docs/tasks/<slug>.md`. Do not create a separate plan file.
 8. Backwards-compat check — restate Design's compat risks in concrete plan terms.
 9. Self-review inline (placeholders, consistency, invariants, spec coverage).
 10. Scope-creep / simpler-way check — see below. This is the final step before handoff.
-11. Present the plan to the user. On approval, invoke `up:execute`.
+11. Present the plan to the user. On approval, invoke `up:uexecute`.
 </required>
 
 ## Required contents
@@ -139,4 +139,4 @@ If this check surfaces real simplifications, rewrite the plan. Don't stack warni
 
 ## Terminal state
 
-Plan written, self-reviewed, scope-checked → present the highlights to the user and ask for approval. On approval, invoke `up:execute`.
+Plan written, self-reviewed, scope-checked → present the highlights to the user and ask for approval. On approval, invoke `up:uexecute`.

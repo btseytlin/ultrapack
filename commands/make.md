@@ -8,7 +8,7 @@ Drives a task through the full ultrapack workflow: one task file at `docs/tasks/
 
 ## Arguments
 
-The user's description of the task follows the command. May be a one-liner ("fix the flaky login test") or a paragraph. Use it as the seed for the slug and the initial framing for `up:design`.
+The user's description of the task follows the command. May be a one-liner ("fix the flaky login test") or a paragraph. Use it as the seed for the slug and the initial framing for `up:udesign`.
 
 ## Flow
 
@@ -23,8 +23,8 @@ Before creating a new task file, check if `docs/tasks/<slug>.md` already exists.
 - **Exists:** read `**Status:**` from the header. Resume from the next stage:
   - `design` → continue design
   - `planning` → run `up:uplan`
-  - `executing` → run `up:execute`
-  - `reviewing` → run `up:review`
+  - `executing` → run `up:uexecute`
+  - `reviewing` → run `up:ureview`
   - `done` → ask the user what they want to do (start a follow-up, re-open, view conclusion)
 - **Doesn't exist:** proceed to step 3.
 - **Multiple in-flight tasks:** if more than one `docs/tasks/*.md` has Status ≠ `done`, list them and ask which one the user means (or whether this is a new task).
@@ -43,7 +43,7 @@ Template:
 **Worktree:** none
 
 ## Design
-<empty — filled by up:design>
+<empty — filled by up:udesign>
 
 ### Invariants
 <empty>
@@ -55,10 +55,10 @@ Template:
 <empty — filled by up:uplan>
 
 ## Verify
-<empty — filled by up:verify>
+<empty — filled by up:uverify>
 
 ## Conclusion
-<empty — filled by up:review>
+<empty — filled by up:ureview>
 ```
 
 ### 4. Size classification
@@ -73,7 +73,7 @@ Based on the task description, classify size:
 
 ### 5. Design stage (unless skipped)
 
-Invoke `up:design`. It populates `## Design`, `### Invariants`, `### Principles`, and records `TDD: yes / no (reason)`. Status → `planning`.
+Invoke `up:udesign`. It populates `## Design`, `### Invariants`, `### Principles`, and records `TDD: yes / no (reason)`. Status → `planning`.
 
 ### 6. Branch & worktree decision
 
@@ -92,15 +92,15 @@ Invoke `up:uplan`. It populates `## Plan`. Status → `executing`.
 
 ### 8. Execute stage
 
-Invoke `up:execute`. Implements the plan, commits incrementally.
+Invoke `up:uexecute`. Implements the plan, commits incrementally.
 
 ### 9. Verify loop
 
-Invoke `up:verify`. On failure: `up:verify` describes how each failure *should* have worked, control returns to `up:execute`. Loop until verify passes.
+Invoke `up:uverify`. On failure: `up:uverify` describes how each failure *should* have worked, control returns to `up:uexecute`. Loop until verify passes.
 
 ### 10. Review stage
 
-Status → `reviewing`. Invoke `up:review`. It dispatches `up:reviewer`, processes findings, fills `## Conclusion`. Status → `done`.
+Status → `reviewing`. Invoke `up:ureview`. It dispatches `up:ureviewer`, processes findings, fills `## Conclusion`. Status → `done`.
 
 Once the task is concluded as `done`, run the docs-refresh check (see below).
 
@@ -133,7 +133,7 @@ What to look for:
 Rules:
 - If nothing needs updating: say so in one line and move on. Do not invent edits.
 - If updates are needed: make them directly, then summarize what changed in 1-3 lines (e.g. "README: fixed install instructions; CLAUDE.md: no change"). Do not prompt for approval first. Do not produce a detailed diff — the user will git-diff if they want.
-- Follow `up:document`: lead with why, lists over tables, no aspirational content, kill stale content.
+- Follow `up:udocument`: lead with why, lists over tables, no aspirational content, kill stale content.
 - Do not duplicate content across task file and project docs — pick one home per fact.
 
 ## Stop conditions

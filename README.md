@@ -1,6 +1,6 @@
 # ultrapack
 
-A lean, opinionated Claude Code skill pack for spec-driven, git-centered development. Internal name: `up`. Invocations always use the `up:` prefix (`up:design`, `/up:make`, `up:reviewer`).
+A lean, opinionated Claude Code skill pack for spec-driven, git-centered development. Internal name: `up`. Invocations always use the `up:` prefix (`up:udesign`, `/up:make`, `up:reviewer`).
 
 ## Philosophy
 
@@ -41,13 +41,13 @@ To pick up edits mid-session (the symlink means files are live on disk), just ru
 
 ### Skills (11)
 
-- `up:design` — Brainstorm requirements and approach; populate Design + Invariants + Principles.
+- `up:udesign` — Brainstorm requirements and approach; populate Design + Invariants + Principles.
 - `up:uplan` — Lean plan: files, line numbers, class/method/interface names, invariants, test strategy.
-- `up:execute` — Implement the plan, incremental commits, dispatch `up:explorer` when needed.
-- `up:verify` — Checklist of what should and shouldn't hold, smoke test, loop back on failure.
-- `up:review` — Dispatch `up:reviewer`, fill Conclusion with outcomes and deviations.
-- `up:document` — Guidance for docs, CLAUDE.md, READMEs, and in-code comments.
-- `up:debug` — Four-phase root-cause investigation; no fixes without reproduction.
+- `up:uexecute` — Implement the plan, incremental commits, dispatch `up:explorer` when needed.
+- `up:uverify` — Checklist of what should and shouldn't hold, smoke test, loop back on failure.
+- `up:ureview` — Dispatch `up:reviewer`, fill Conclusion with outcomes and deviations.
+- `up:udocument` — Guidance for docs, CLAUDE.md, READMEs, and in-code comments.
+- `up:udebug` — Four-phase root-cause investigation; no fixes without reproduction.
 - `up:test-driven-development` — RED → GREEN → REFACTOR, only when the task qualifies.
 - `up:data-engineering` — Sequential stages, idempotent/atomic/retriable, pre-flight checks.
 - `up:ml-experiments` — Overfit one batch, check for leaks, scale-up gated.
@@ -64,7 +64,7 @@ To pick up edits mid-session (the symlink means files are live on disk), just ru
 ### Agents (4)
 
 - `up:explorer` (Haiku 4.5) — Codebase tracing, file:line refs, essential-files list.
-- `up:implementer` (Sonnet 4.6) — One phase of a plan: code + tests + commit + self-review. Dispatched per-phase from `up:execute`. Fresh context, no session history.
+- `up:implementer` (Sonnet 4.6) — One phase of a plan: code + tests + commit + self-review. Dispatched per-phase from `up:uexecute`. Fresh context, no session history.
 - `up:reviewer` (Sonnet 4.6) — Single-dispatch, plan-alignment-first, confidence-filtered, severity-tiered.
 - `up:researcher` (Sonnet 4.6) — General-purpose: decompose query and systematically investigate.
 

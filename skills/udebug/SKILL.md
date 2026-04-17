@@ -1,5 +1,5 @@
 ---
-name: debug
+name: udebug
 description: Use on any bug, test failure, or unexpected behavior before proposing a fix. Enforces four-phase root-cause investigation — reproduce, pattern-match, hypothesize, fix — with a hard rule against symptom patches.
 ---
 
@@ -106,4 +106,4 @@ But 95% of "no root cause" verdicts are incomplete investigations. Double-check 
 
 ## Terminal state
 
-Fix verified with reproduction → return to `up:verify` if in a task workflow, or commit and move on.
+Fix verified with reproduction → return to `up:uverify` if in a task workflow, or commit and move on.

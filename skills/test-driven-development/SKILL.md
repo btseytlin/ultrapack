@@ -27,7 +27,7 @@ Write the test first. Watch it fail. Write minimal code to pass. Refactor. Repea
 - UI changes where the real test is "does it look right"
 </skip-when>
 
-The decision is recorded during `up:design` as `TDD: yes` or `TDD: no (reason)`.
+The decision is recorded during `up:udesign` as `TDD: yes` or `TDD: no (reason)`.
 
 ## Iron law when applicable — no production code without a failing test first
 

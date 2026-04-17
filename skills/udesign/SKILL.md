@@ -1,5 +1,5 @@
 ---
-name: design
+name: udesign
 description: Use before any creative work — features, components, behavior changes. Turns an idea into a validated spec with explicit tradeoffs and unknowns, and splits scope into multiple tasks if it's too large. Output is the `## Design` section of the task file.
 ---
 

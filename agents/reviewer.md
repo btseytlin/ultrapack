@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Independent code review against a task's Plan and Invariants. Single dispatch. Confidence-filtered (≥80), severity-tiered. Dispatched from up:review after verify passes. Never sees the rationale behind the changes.
+description: Independent code review against a task's Plan and Invariants. Single dispatch. Confidence-filtered (≥80), severity-tiered. Dispatched from up:ureview after verify passes. Never sees the rationale behind the changes.
 tools: Glob, Grep, Read, Bash
 model: sonnet-4-6
 ---

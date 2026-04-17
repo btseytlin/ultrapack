@@ -1,5 +1,5 @@
 ---
-name: review
+name: ureview
 description: Use after verify passes to get an independent check on the work. Dispatches up:reviewer (critical, high-confidence filter), processes its findings fairly (no performative agreement, no reflexive acceptance), fills the task file's `## Conclusion`.
 ---
 
@@ -9,7 +9,7 @@ Review is a process, not just a section. Its end product is the `## Conclusion` 
 
 ## When to invoke
 
-- After `up:verify` passes
+- After `up:uverify` passes
 - Before merge to main
 - Before opening a PR
 - Never skipped, regardless of task size
@@ -92,7 +92,7 @@ Applying now."
 Fix Critical and Important issues. Commit each as its own logical unit.
 
 <required>
-For every fix, run the consistency pass (same rule as `up:execute`): if you're tightening a rule or changing a pattern, grep the diff and the wider repo for the same pattern and apply the change everywhere in the same commit. Do not leave siblings in a mixed state — that's how the reviewer's next round finds the same class of issue four more times.
+For every fix, run the consistency pass (same rule as `up:uexecute`): if you're tightening a rule or changing a pattern, grep the diff and the wider repo for the same pattern and apply the change everywhere in the same commit. Do not leave siblings in a mixed state — that's how the reviewer's next round finds the same class of issue four more times.
 </required>
 
 If fixes are substantial, re-dispatch the reviewer on the new diff.

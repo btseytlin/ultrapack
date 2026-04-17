@@ -1,5 +1,5 @@
 ---
-name: document
+name: udocument
 description: Use when writing or editing documentation — project docs, CLAUDE.md, READMEs, SKILL.md, docstrings, inline comments. Auto-triggers on `.md` files and docstring edits. Enforces lead-with-why, kill stale content, lists over tables, no aspirational sentences.
 ---
 

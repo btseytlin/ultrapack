@@ -1,11 +1,11 @@
 ---
-name: verify
+name: uverify
 description: Use after execute to confirm the change actually works end-to-end. Builds a positive + negative + invariant checklist, runs each check freshly, does a manual smoke test, writes a short summary to the task file's Verify section, loops back to execute on any failure.
 ---
 
 # Verify
 
-Confirm the change actually works — not "looks right", not "tests probably pass", but *verified by running the thing in this message*. Verify's verdict either advances the workflow to `up:review` or bounces it back to `up:execute` with remediation notes. A short summary is persisted to the task file's `## Verify` section so review (and later readers) see what was checked.
+Confirm the change actually works — not "looks right", not "tests probably pass", but *verified by running the thing in this message*. Verify's verdict either advances the workflow to `up:ureview` or bounces it back to `up:uexecute` with remediation notes. A short summary is persisted to the task file's `## Verify` section so review (and later readers) see what was checked.
 
 ## Phase 1 — Build the checklist (positive, negative, invariant)
 
@@ -90,8 +90,8 @@ Write this whether verify passed or failed. On failure, the Notes section names 
 
 ## Phase 5 — Consolidate: pass loops to review, fail loops to execute
 
-- All checks passed → declare verify passed. Invoke `up:review`.
-- Any check failed → for each failure, describe how it *should have* worked conceptually (not "add the missing line" — the behavior it was supposed to exhibit). Loop back to `up:execute` with these notes. Do not move forward.
+- All checks passed → declare verify passed. Invoke `up:ureview`.
+- Any check failed → for each failure, describe how it *should have* worked conceptually (not "add the missing line" — the behavior it was supposed to exhibit). Loop back to `up:uexecute` with these notes. Do not move forward.
 
 <good-example>
 Failure note: "POST /items returned 500 instead of 400 for a missing `name`. The validation layer should reject the payload with a 400 and a 'name is required' message before the handler runs."
@@ -134,4 +134,4 @@ If you used any of those as the basis of a pass verdict: back to Phase 1.
 
 ## Terminal state
 
-Verify summary written to task file. Pass → invoke `up:review`. Fail → invoke `up:execute` with failure notes describing intended behavior.
+Verify summary written to task file. Pass → invoke `up:ureview`. Fail → invoke `up:uexecute` with failure notes describing intended behavior.
