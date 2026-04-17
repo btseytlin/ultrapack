@@ -1,25 +1,32 @@
 # ultrapack
 
-Opinionated Claude Code skill pack for spec-driven, git-centered development.
+Ultrapack or `/up:` is an opinionated Claude Code skill pack for developers: plan-driven, git-centered, minimalistic. Built around frequently clearing context and using one conversation for one feature. 
 
 ## TL;DR
-
-One command:
 
 ```
 /up:make fix the flaky login test
 ```
 
-Claude drives it through design → plan → execute → verify → review, writing every stage into `docs/tasks/<slug>.md`. The task file is the source of truth — any fresh agent can read it and resume from wherever the last one stopped.
+Will take you through the process: design → plan → execute → verify → review → update docs.
+
+Each stage populates `docs/tasks/<slug>.md`. The task file is the source of truth — any fresh agent can read it and resume from wherever the last one stopped.
+
+
+```
+/up:make handsoff fix the flaky login test
+```
+
+Same, but ask you as few questions as possible. 
+
+While you are not looking, the agent will pick the safest and most conservative choices: don't delete things (copy and rename instead), work in a git branch, don't introduce silent defaults and fallbacks, fix only critical and important issues. 
 
 Core ideas:
-- **One task, one file.** `docs/tasks/<slug>.md` evolves through Design → Plan → Verify → Conclusion.
-- **Invariants-first.** Discovered in design, obeyed in plan, verified during review.
-- **Subagent independence.** Reviewers run in fresh contexts, never see change rationale.
-- **Per-phase implementation.** Each plan phase dispatched to a fresh `up:implementer`.
-- **Manual testing mandatory.** Agent must run what it built before claiming done.
-- **Review is never skipped**, regardless of task size.
-- **Fail fast, fail loud.** No silent fallbacks.
+- One file per task. `docs/tasks/<slug>.md` evolves through Design → Plan → Verify → Conclusion.
+- Invariants-first. Discovered in design, obeyed in plan, verified during review.
+- Per-phase subagent implementation. Each plan phase dispatched to a fresh `up:implementer`.
+- Mandatory manual testing. Agent must run what it built before claiming done.
+- As short as I could make it, doesn't waste tokens.
 
 ## Install
 
@@ -34,35 +41,47 @@ Then `/reload-plugins`. Verify with `/up:make` or by listing skills.
 
 ## Design
 
-Ultrapack is opinionated scaffolding for how Claude Code should handle non-trivial work. It merges the load-bearing parts of [obra/superpowers](https://github.com/obra/superpowers) and Anthropic's [feature-dev](https://github.com/anthropics/claude-code/tree/main/plugins/feature-dev), drops the rest, freezes the behavior. The result is a small set of skills, commands, and agents that implement one workflow — not a menu of options.
+Ultrapack is a small set of skills, commands, and agents to help Claude Code handle non-trivial work. 
 
-Every task produces exactly one markdown file at `docs/tasks/<slug>.md` with sections Design, Plan, Verify, Conclusion. Each stage is a skill; `/up:make` orchestrates them. If `/up:make` is invoked on a slug whose file already exists, it reads the `Status` header and resumes from the next stage — so a session can crash, be replaced, or be handed off without losing state.
+Inspired by [feature-dev](https://github.com/anthropics/claude-code/tree/main/plugins/feature-dev) and [obra/superpowers](https://github.com/obra/superpowers). [feature-dev](https://github.com/anthropics/claude-code/tree/main/plugins/feature-dev) is too barebones. [obra/superpowers](https://github.com/obra/superpowers) is great, but creates huge plans with a lot of work duplication, changes too frequently and is geared to a specific type of dev work. Also it's a chore to type "superpowers" every time.
 
-Execution is per-phase subagent dispatch. `up:implementer` gets one phase of the plan, writes code + tests + commit, then returns. `up:uexecute` runs a plan-diff check and consistency sweep between phases. Verification builds a positive + negative + invariant checklist and loops back to execute on any failure. Review is never skipped: `up:reviewer` runs fresh, without session history or change rationale, so its verdict stays independent. The `up:` prefix on everything (`/up:make`, `up:udesign`, `up:reviewer`) keeps the whole surface discoverable at a glance.
+Ultrapack is the best of both, shortened and simplified. The whole workflow is built around updating one markdown file per task `docs/tasks/<slug>.md` with sections Design, Plan, Verify, Conclusion. It's also git centered: use worktrees by default for easier parallel work, incremental commits for easier rollback and review.
+
+Each stage of task planning and execution is a skill. `/up:make` is a helper command that orchestrates the whole flow. 
+
+`up:udesign` is the first stage: discuss trade-offs with the user, discover invariants (specific things that must hold, e.g. "class Player must not access internals of class Enemy") and principles (softer guidance, like "prefer composition over inheritance"), prepare initial spec in the task file.
+
+`up:uplan` populate the task file with a specific plan. Define what files to change, what classes and methods to update or create, what interfaces they will have, what is the test strategy, break down into phases, define order of execution. No code blocks here unless they are especially tricky. 
+
+`up:uexecute` create git branch and worktree, dispatch independent `up:implementer` agents per plan phase, make incremental commits, check against plan and design between phases. Uses TDD for tasks where it's helpful.
+
+`up:uverify` performs manual smoke testing, defining a checklist of fast positive (what should work) and negative (what should not work) checks based on invariants. Writes summary to task file. Loops back to execute on failure. 
+
+`up:ureview` dispatches an independent `up:reviewer` subagent that knows the design, plan, and changes. It doesn't know the implementer's rationale. In the end it's an independent review: check that all invariants from design and plan still hold and find bugs. 
+
+Finally, the conclusion section of the task markdown file is populated. Then all documentation of the project is updated.
 
 ## Details
 
 ### Skills
 
 Process skills (u-prefixed to dodge Claude Code built-ins):
-- `up:udesign` — Brainstorm requirements, populate Design + Invariants + Principles. Record TDD yes/no with reason.
-- `up:uplan` — Concrete plan: files, line numbers, class/method names, invariants, test strategy, order. Ends with a scope/simpler-way check.
+- `up:udesign` — Brainstorm requirements, populate Design + Invariants + Principles, decide whether to use TDD.
+- `up:uplan` — Plan: what files to change, what class/methods and with what interfaces, test strategy, order. Only non-trivial code blocks.
 - `up:uexecute` — Dispatch `up:implementer` per phase, incremental commits, plan-diff + consistency sweep between phases.
 - `up:uverify` — Positive + negative + invariant checklist, manual smoke test, writes summary to task file, loops back to execute on failure.
-- `up:ureview` — Dispatch `up:reviewer`, process findings fairly, fill Conclusion.
-- `up:udebug` — Four-phase root-cause investigation; no fixes without reproduction.
-- `up:udocument` — Guidance for docs, CLAUDE.md, READMEs, in-code comments.
+- `up:ureview` — Dispatch `up:reviewer` subagent: independent review, check that all invariants from design and plan still hold.
+- `up:udebug` — Four-phase root-cause investigation.
+- `up:udocument` — Guidance for updating docs, CLAUDE.md, READMEs, in-code comments.
 
 Discipline skills:
-- `up:test-driven-development` — RED → GREEN → REFACTOR, only when the task qualifies.
-- `up:git-worktrees` — Smart directory selection, safety verification.
+- `up:test-driven-development` — write failing test → make change → test passes.
+- `up:git-worktrees` — guidance for using git worktrees.
 - `up:handsoff` — Shared contract for hands-off mode (activated via `/up:make handsoff <description>`): safety principles, decision log, no-default rule, end-of-task summary. Referenced by `/up:make` and every process skill.
-
-Removed in this release: `up:data-engineering`, `up:ml-experiments` — moved to user-level skills (they weren't spec-driven-dev scoped).
 
 ### Commands
 
-- `/up:make <description>` — Orchestrate the full flow: slug → task file → design → branch → plan → execute → verify → review.
+- `/up:make [handsoff] <description>` — Orchestrate the full flow: task file → design → branch → plan → execute → verify → review → update docs.
 - `/up:try` — Design one positive and one negative test case, run both, report.
 - `/up:step-back` — Circuit breaker: stop, diagnose why approaches failed, propose new direction.
 - `/up:summary` — Produce a summary so another session can continue with zero context.
