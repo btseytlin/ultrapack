@@ -1,6 +1,6 @@
 # Shorthand IDs for task-file entities
 
-**Status:** reviewing
+**Status:** done
 **Branch:** main
 **Worktree:** none
 **Mode:** interactive
@@ -129,4 +129,16 @@ Invariants / assumptions:
 - CK8 (AS1) — no edits to old task files (`ultrapack-v1.md`, `skill-output-brevity.md`)
 
 ## Conclusion
-<empty — filled by up:ureview>
+
+Outcome: shorthand ID vocabulary (IV/PC/AS/UK/PH/RK/CK) added across udesign, uplan, uverify, ureview, uexecute, reviewer, implementer, and the make.md template — 3454ea1.
+
+Invariants:
+- IV1 — verified by grep across udesign / uplan / uverify; all 7 prefixes documented in their owning skills
+- IV2 — udesign ID-conventions block states the define-once rule; examples follow it
+- IV3 — udesign ID-conventions block states the per-task scoping rule
+- IV4 — ureview Conclusion format now includes `### Assumptions check` and `### Unknowns outcome` subsections
+
+### Assumptions check
+- AS1 — held — old task files (`ultrapack-v1.md`, `skill-output-brevity.md`) unchanged in the commit
+- AS2 — unverifiable at this stage — will be exercised only when future task files are read under the new convention
+- AS3 — unverifiable at this stage — future tasks may surface a missing entity type

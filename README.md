@@ -23,7 +23,7 @@ While you are not looking, the agent will pick the safest and most conservative 
 
 Core ideas:
 - One file per task. `docs/tasks/<slug>.md` evolves through Design → Plan → Verify → Conclusion.
-- Invariants-first. Discovered in design, obeyed in plan, verified during review.
+- Invariants-, principles-, and assumptions-first. Discovered in design, obeyed in plan, checked at review. Short IDs (IV, PC, AS, UK, PH, RK, CK) let later sections reference them without re-quoting.
 - Per-phase subagent implementation. Each plan phase dispatched to a fresh `up:implementer`.
 - Mandatory manual testing. Agent must run what it built before claiming done.
 - As short as I could make it, doesn't waste tokens.
@@ -49,7 +49,7 @@ Ultrapack is the best of both, shortened and simplified. The whole workflow is b
 
 Each stage of task planning and execution is a skill. `/up:make` is a helper command that orchestrates the whole flow. 
 
-`up:udesign` is the first stage: discuss trade-offs with the user, discover invariants (specific things that must hold, e.g. "class Player must not access internals of class Enemy") and principles (softer guidance, like "prefer composition over inheritance"), prepare initial spec in the task file.
+`up:udesign` is the first stage: discuss trade-offs with the user, discover invariants (specific things that must hold, e.g. "class Player must not access internals of class Enemy"), principles (softer guidance, like "prefer composition over inheritance"), assumptions (unverified premises the design rests on — the Conclusion reports whether each held), and unknowns (open questions to resolve during plan/execute). Prepare initial spec in the task file.
 
 `up:uplan` populate the task file with a specific plan. Define what files to change, what classes and methods to update or create, what interfaces they will have, what is the test strategy, break down into phases, define order of execution. No code blocks here unless they are especially tricky. 
 
@@ -66,7 +66,7 @@ Finally, the conclusion section of the task markdown file is populated. Then all
 ### Skills
 
 Process skills (u-prefixed to dodge Claude Code built-ins):
-- `up:udesign` — Brainstorm requirements, populate Design + Invariants + Principles, decide whether to use TDD.
+- `up:udesign` — Brainstorm requirements, populate Design + Invariants + Principles + Assumptions + Unknowns, decide whether to use TDD.
 - `up:uplan` — Plan: what files to change, what class/methods and with what interfaces, test strategy, order. Only non-trivial code blocks.
 - `up:uexecute` — Dispatch `up:implementer` per phase, incremental commits, plan-diff + consistency sweep between phases.
 - `up:uverify` — Positive + negative + invariant checklist, manual smoke test, writes summary to task file, loops back to execute on failure.
@@ -91,7 +91,7 @@ Discipline skills:
 
 - `up:explorer` (Haiku 4.5) — Codebase tracing, file:line refs, 3–5 essential files.
 - `up:implementer` (Sonnet 4.6) — One phase: code + tests + commit + self-review. Fresh context per phase.
-- `up:reviewer` (Sonnet 4.6) — Independent review against Plan + Invariants. Confidence-filtered (≥80), severity-tiered.
+- `up:reviewer` (Sonnet 4.6) — Independent review against Plan + Invariants + Assumptions. Confidence-filtered (≥80), severity-tiered.
 - `up:researcher` (Sonnet 4.6) — General-purpose investigation: decompose + systematically answer.
 
 ## License
