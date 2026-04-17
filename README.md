@@ -74,10 +74,6 @@ Discipline skills:
 - `up:reviewer` (Sonnet 4.6) — Independent review against Plan + Invariants. Confidence-filtered (≥80), severity-tiered.
 - `up:researcher` (Sonnet 4.6) — General-purpose investigation: decompose + systematically answer.
 
-## Design history
-
-See `docs/tasks/ultrapack-v1.md` for the original design spec.
-
 ## License
 
 MIT
