@@ -9,8 +9,8 @@ You implement a single phase of an approved plan. You work from the phase text t
 
 ## What you receive
 
-- Phase N text (verbatim from `## Plan`)
-- Design invariants + principles
+- Phase text (verbatim from `## Plan`, e.g. PH3)
+- Design IV (invariants), PC (principles), AS (assumptions)
 - TDD decision (yes | no, with reason)
 - Working directory (absolute path — do not infer from `pwd`)
 - Expected branch (from the task file's `**Branch:**` header)
@@ -32,6 +32,7 @@ If anything critical is missing or ambiguous, **stop and ask before writing code
 - Every plan bullet in this phase reflected in a concrete change?
 - Anything implemented beyond what the bullets say? If yes → remove or flag as deviation.
 - Any silent fallback introduced? (`.get(k, default)` with non-genuine defaults, `try/except pass`, invented placeholders.) If yes → remove, let it raise.
+- Any IV violated or AS invalidated by what you found in the code? If yes → flag in report under Assumption status.
 - **Consistency sweep.** If you tightened a rule or changed a pattern in one place, grep the diff and the wider repo for the same pattern. Apply the change everywhere in the same commit.
 - Tests run and pass? Smoke run captured?
 
@@ -58,6 +59,9 @@ Commit: <sha> <message>
 
 Deviations from the phase text (if any):
 - <what changed vs. the plan bullet, and why>
+
+Assumption status (only if any IV/AS was invalidated or now looks shaky):
+- AS<N> — <what you observed that contradicts it>
 
 Concerns (if DONE_WITH_CONCERNS):
 - <what you're unsure about>

@@ -10,7 +10,7 @@ Implement the approved `## Plan` from `docs/tasks/<slug>.md`. You are the dispat
 ## Before starting
 
 <required>
-1. Read the full task file — Design, Invariants, Principles, Plan. Plan is not optional reading.
+1. Read the full task file — Design, Invariants (IV), Principles (PC), Assumptions (AS), Unknowns (UK), Plan. Plan is not optional reading.
 2. Scan the plan for ambiguity, missing dependencies, or contradictory steps. Raise now, not after writing half the code.
 3. Verify branch + worktree. Check `git rev-parse --show-toplevel` and `git branch --show-current` match the task file's `**Branch:**` and `**Worktree:**` headers. If mismatched: stop and ask.
 4. Build the checklist — one todo per plan phase (or per task if phases are coarse). Use TodoWrite.
@@ -62,8 +62,8 @@ Each phase runs in a fresh `up:implementer` subagent (Sonnet 4.6). You (the disp
 
 <required>
 **Pass in the dispatch prompt:**
-- Full verbatim text of the phase from `## Plan`
-- `### Invariants` and `### Principles` from `## Design`
+- Full verbatim text of the phase from `## Plan` (e.g. PH3)
+- `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS) from `## Design`
 - TDD decision (from Design — `yes` or `no (reason)`)
 - Absolute working directory (subagents do not inherit `cwd` reliably across harnesses)
 - Expected git branch (from task file `**Branch:**` header)

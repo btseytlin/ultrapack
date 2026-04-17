@@ -17,7 +17,7 @@ Review is a process, not just a section. Its end product is the `## Conclusion` 
 ## Brevity
 
 <required>
-Before writing the `## Conclusion`, read `plugins/up/skills/_brevity.md`. Apply its five principles. `Outcome:` is ≤1 sentence + the commit SHA — never re-narrate the diff. Omit subsections whose content would be "none" / "clean" / "no deviations" / "no findings" / the default: `Plan adherence`, `Review findings`, `Future work`, `Verified by`, `Deviations from plan`, `Known risks`. `Invariants:` stays — it carries audit value even on pass. The Exception clause still holds: findings, deviations, risks, and deferrals always carry evidence and "why".
+Before writing the `## Conclusion`, read `plugins/up/skills/_brevity.md`. Apply its five principles. `Outcome:` is ≤1 sentence + the commit SHA — never re-narrate the diff. Omit subsections whose content would be "none" / "clean" / "no deviations" / "no findings" / the default: `Plan adherence`, `Review findings`, `Future work`, `Verified by`, `Deviations from plan`, `Known risks`. `Invariants:`, `Assumptions check:`, and `Unknowns outcome:` stay when the task had any IV / AS / UK — they carry audit value even on pass. The Exception clause still holds: findings, deviations, risks, violated assumptions, and deferrals always carry evidence and "why".
 </required>
 
 ## Two roles, two attitudes
@@ -113,7 +113,16 @@ If fixes are substantial, re-dispatch the reviewer on the new diff.
 Outcome: <≤1 sentence + commit SHA. Don't re-narrate the diff.>
 
 Invariants:
-- <each invariant> — <how it was verified>
+- IV1 — <how it was verified>
+- IV2 — <...>
+
+### Assumptions check   (omit entire subsection if the task had no AS)
+- AS1 — held | violated | unverifiable — <one-line evidence or "why unverifiable">
+- AS2 — ...
+
+### Unknowns outcome   (omit entire subsection if the task had no UK)
+- UK1 — resolved | still-open — <one-line resolution, or why it's still open>
+- UK2 — ...
 
 Plan adherence: <deviations>   (omit entire subsection if no deviations)
 
@@ -126,6 +135,8 @@ Future work:   (omit entire subsection if none — do not write "none")
 
 Verified by: <only non-default items: deferred smokes, manual checks the next reader needs to know about>   (omit if only the routine reviewer+verify ran)
 ```
+
+A violated AS is always material — it means the design rested on a premise that turned out false. Record evidence and, if it invalidates the outcome, either redo the affected phase or surface it to the user.
 
 ## Receiving feedback — rules
 

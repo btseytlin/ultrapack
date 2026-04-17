@@ -49,10 +49,16 @@ Template:
 <empty — filled by up:udesign>
 
 ### Invariants
-<empty>
+<empty — IV1, IV2, … : hard constraints that must hold>
 
 ### Principles
-<empty>
+<empty — PC1, PC2, … : softer guidance>
+
+### Assumptions
+<empty — AS1, AS2, … : unverified premises the design rests on; conclusion must report whether each held>
+
+### Unknowns
+<empty — UK1, UK2, … : open questions left to plan / execute; conclusion must report whether each resolved>
 
 ## Plan
 <empty — filled by up:uplan>
@@ -84,7 +90,7 @@ Hands-off mode: do not confirm. Default to Medium (full flow) unless the scope i
 
 ### 5. Design stage (unless skipped)
 
-Invoke `up:udesign`. It populates `## Design`, `### Invariants`, `### Principles`, and records `TDD: yes / no (reason)`. Status → `planning`.
+Invoke `up:udesign`. It populates `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK), and records `TDD: yes / no (reason)`. Status → `planning`.
 
 ### 6. Branch & worktree decision
 

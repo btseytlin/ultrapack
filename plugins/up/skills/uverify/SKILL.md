@@ -15,27 +15,30 @@ Before writing the Verify section, read `plugins/up/skills/_brevity.md`. Apply i
 
 ## Phase 1 — Build the checklist (positive, negative, invariant)
 
-The checklist enumerates every behavior you'll actually run. Built from the Plan, Invariants, and Design, not imagined.
+The checklist enumerates every behavior you'll actually run. Built from the Plan, IV / PC / AS from Design, not imagined.
 
-- Positive checks: "POST /items returns 201 for a valid payload." "`Dataset.load()` reads the file and returns the expected schema." Specific inputs → specific expected outputs.
-- Negative checks: "POST /items returns 400 for missing fields." "`Dataset.load()` raises on a missing file." Things that must still fail correctly.
-- Invariant checks: one check per Design invariant. "`Dataset` does not import from `training/`" → a grep that must return nothing.
+Checks are numbered CK1..CKN within the task file. Each one covers exactly one behavior or guard.
+
+- Positive (CK): "POST /items returns 201 for a valid payload." "`Dataset.load()` reads the file and returns the expected schema." Specific inputs → specific expected outputs.
+- Negative (CK): "POST /items returns 400 for missing fields." "`Dataset.load()` raises on a missing file." Things that must still fail correctly.
+- Invariant / assumption (CK): one check per IV that can be mechanically verified, plus any AS the verifier can confirm. Reference the source by ID. "IV1: `Dataset` does not import from `training/`" → a grep that must return nothing.
 
 The checklist lives in-session. It is not written to the task file.
 
 <good-example>
 ```
 Positive:
-- POST /items {valid} → 201, body contains new id
-- Dataset.load("good.csv") → DataFrame with 3 columns
+- CK1 — POST /items {valid} → 201, body contains new id
+- CK2 — Dataset.load("good.csv") → DataFrame with 3 columns
 
 Negative:
-- POST /items {missing name} → 400, "name is required"
-- Dataset.load("nope.csv") → FileNotFoundError
+- CK3 — POST /items {missing name} → 400, "name is required"
+- CK4 — Dataset.load("nope.csv") → FileNotFoundError
 
-Invariants:
-- grep "from training" src/dataset/ → empty
-- all DB writes go through transaction() helper → manual trace
+Invariants / assumptions:
+- CK5 (IV1) — grep "from training" src/dataset/ → empty
+- CK6 (IV2) — all DB writes go through transaction() helper → manual trace
+- CK7 (AS1) — upstream /users response sampled — `email` is UTF-8
 ```
 </good-example>
 
@@ -78,14 +81,15 @@ Format:
 **Result:** passed | failed
 
 Positive:
-- <check>                         (evidence only on fail or surprise)
-- <check> → <evidence>            (failure: required)
+- CK1 — <check>                   (evidence only on fail or surprise)
+- CK2 — <check> → <evidence>      (failure: required)
 
 Negative:
-- <check>
+- CK3 — <check>
 
-Invariants:
-- <invariant>
+Invariants / assumptions:
+- CK4 (IV1) — <how verified>
+- CK5 (AS1) — <how verified or "unverifiable at this layer">
 
 Smoke: `<command>` → <one-line result>   (omit if no smoke test run or nothing to report)
 
@@ -103,16 +107,16 @@ Fully-passing terse form:
 **Result:** passed
 
 Positive:
-- POST /items {valid} → 201 with new id
-- Dataset.load("good.csv") → 3-column DataFrame
+- CK1 — POST /items {valid} → 201 with new id
+- CK2 — Dataset.load("good.csv") → 3-column DataFrame
 
 Negative:
-- POST /items {missing name} → 400
-- Dataset.load("nope.csv") → FileNotFoundError
+- CK3 — POST /items {missing name} → 400
+- CK4 — Dataset.load("nope.csv") → FileNotFoundError
 
-Invariants:
-- `Dataset` does not import from `training/`
-- all DB writes go through `transaction()`
+Invariants / assumptions:
+- CK5 (IV1) — `Dataset` does not import from `training/`
+- CK6 (IV2) — all DB writes go through `transaction()`
 
 Smoke: `curl -X POST /items ... → 201` — end-to-end OK
 ```

@@ -39,7 +39,7 @@ Before writing the Plan, read `plugins/up/skills/_brevity.md`. Apply its five pr
 ## Process
 
 <required>
-1. Read the task file's `## Design`, `### Invariants`, `### Principles`. Know what you're planning for.
+1. Read the task file's `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK). Know what you're planning for.
 2. Sketch the file structure — which files change, which are new, which classes/methods.
 3. Break into phases. Each phase is a coherent commit.
 4. Write phase-by-phase plan entries. Concrete locations, per-file bullets, interfaces.
@@ -59,7 +59,16 @@ Required always:
 - File structure: for each file, `path/to/file.ext:lineA-lineB` (create|modify) + affected class/method names
 - Per-file bullets: what changes, by name
 - New/changed interfaces: signatures only
-- Invariants referenced: which Design invariants each phase preserves
+- IV/PC/AS referenced by ID: which Design entities each phase preserves or relies on
+
+## ID conventions in Plan
+
+Plan introduces two entity types, numbered within the task file:
+
+- PH1, PH2, … — Phases. Each phase heading is `### PH<N> — <name>`.
+- RK1, RK2, … — Risks. Each is one sentence.
+
+References to Design entities use IDs (IV3, AS1, UK2) — never re-quote the full sentence.
 
 Required when relevant (omit the subsection when it would say "single phase, no deps", "none", or similar):
 - Test strategy: behaviors to cover. If `TDD: yes`, list the failing tests to write first.
@@ -76,15 +85,15 @@ Optional:
 
 Approach: <1-2 sentences>
 
-### Phase 1 — <name>
+### PH1 — <name>
 
 - **1.1** `path/to/file.ext:lineA-lineB` (create|modify)
   - `ClassName.method_name(arg: Type) -> Ret` — <what changes, by name>
-  - Invariant: <which Design invariant this respects>
+  - Respects: IV2, AS1
 - **1.2** ...
 - Commit: `<message>`
 
-### Phase 2 — <name>
+### PH2 — <name>
 ...
 
 ### Test strategy   (optional — omit if no tests / doc-only)
@@ -93,18 +102,19 @@ Approach: <1-2 sentences>
 ### Order & dependencies   (optional — omit for single-phase or obviously-sequential plans)
 <what blocks what, parallelizable phases>
 
-### Open questions / risks / rollback   (optional — omit if none non-trivial)
-- <item>
+### Risks / rollback   (optional — omit if none non-trivial)
+- RK1 — <one-sentence risk and mitigation>
+- RK2 — <...>
 ```
 
 ## Self-review (inline, no subagent)
 
 <required>
-1. Spec coverage — every Design / Invariant / Principle item maps to at least one plan bullet.
+1. Spec coverage — every IV / PC / AS / UK item maps to at least one plan bullet, or is explicitly deferred to execute / verify.
 2. Placeholder scan — no "TBD", "handle edge cases", "add validation", "similar to task N", "write tests for the above".
 3. Consistency — method/class names match across bullets; later phases' interfaces reference what earlier phases define.
 4. Leanness — plan size should fit the task. If it exceeds ~1 screen per day of expected work, trim.
-5. Invariants — each invariant has a referencing bullet somewhere.
+5. IV / AS coverage — each IV and AS has a referencing bullet somewhere (by ID).
 </required>
 
 Fix issues inline. No re-review loop.
