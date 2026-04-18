@@ -121,7 +121,7 @@ Fix one spot, commit, reviewer finds four more siblings, two rounds of fixups, n
 ## Don't modify upstream specs or external design docs
 
 <required>
-The plan is the contract. External spec files (e.g. `docs/superpowers/specs/*.md`) are inputs — read-only during execute. If the implementer finds the spec is wrong, they report it and stop. You (the dispatcher) surface it to the user. The user decides whether to update the spec, revise the plan, or continue with a deviation.
+The plan is the contract. External spec files (e.g. anything under `docs/specs/`) are inputs — read-only during execute. If the implementer finds the spec is wrong, they report it and stop. You (the dispatcher) surface it to the user. The user decides whether to update the spec, revise the plan, or continue with a deviation.
 
 Never edit the plan inline to hide a deviation. Never silently edit an external spec. Deviations live in the task file's `## Conclusion → Deviations from plan` section.
 </required>

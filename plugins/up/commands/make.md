@@ -172,7 +172,7 @@ Stop and ask the user when:
 - Never create a worktree without confirming in interactive mode
 - Never edit `main` / `master` directly in hands-off (see `up:handsoff` safety principles)
 - Keep the task file as the single source of truth — each stage reads it, each stage writes to it
-- External spec / design docs (e.g. `docs/superpowers/specs/*.md`) are read-only during execute. If a stage finds the spec is wrong, surface it to the user — don't mutate it silently
+- External spec / design docs (e.g. anything under `docs/specs/`) are read-only during execute. If a stage finds the spec is wrong, surface it to the user — don't mutate it silently
 - Don't assume prior session memory — the next agent may be a fresh context reading only the task file
 - In hands-off, never invent a default for an ambiguous argument — see `up:handsoff` no-default rule
 
