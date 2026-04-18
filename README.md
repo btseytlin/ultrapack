@@ -93,6 +93,7 @@ Discipline skills:
 - `up:implementer` (Sonnet 4.6) — One phase: code + tests + commit + self-review. Fresh context per phase.
 - `up:reviewer` (Sonnet 4.6) — Independent review against Plan + Invariants + Assumptions. Confidence-filtered (≥80), severity-tiered.
 - `up:researcher` (Sonnet 4.6) — General-purpose investigation: decompose + systematically answer.
+- `up:summarizer` (Sonnet 4.6) — Drafts the handoff prose for `/up:summary`; gathers repo state, never writes to disk.
 
 ## License
 
