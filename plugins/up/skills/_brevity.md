@@ -14,7 +14,7 @@ Applies to anything that outlives the conversation: code, comments, docstrings, 
 
 5. **Soft caps, hard judgment.** No word limits. Lean toward ≤1 screen for a Small task's full task file; ≤3 screens for Medium. Over? Cut.
 
-6. **No orphan text (a.k.a. conversation bleed).** Cut any sentence that no longer helps a reader understand the artifact's current content. The usual cause is scaffolding the skill used while writing — framing a decision, acknowledging a rejected alternative, narrating the task, naming the user's last critique — that was useful *during* the writing but isn't tied to the content now. Scaffolding belongs in the chat; the artifact keeps only what informs its reader. "Conversation bleed" is the common shape (text that only makes sense if you were in the chat); orphan-from-content is the disease. Test: would this line *help* a stranger in six months, or is it just coherent? If it isn't earning its place, cut it.
+6. **No orphan text (a.k.a. conversation bleed).** Cut anything that doesn't help the reader understand the artifact now. Usual cause: scaffolding Claude used while writing — framing, rejected alternatives, references to the task or the user's last critique. Scaffolding stays in the chat. Conversation bleed is the visible symptom; orphaning is the rule. Test: does the line earn its place by informing?
 
    - Negative: `// do X (NOT Y)` — `Y` was the user's last critique, already removed from the code; the comment now refers to nothing.
    - Negative: agent description "…Fresh context, never sees session history or later phases. Sonnet 4.6." — session semantics and an inlined model string are bleed; the description should say what the agent *does*.
