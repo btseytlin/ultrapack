@@ -4,20 +4,21 @@ description: Produce a summary so another session can continue with zero context
 
 # /up:summary
 
-Prepare a handoff summary so another agent session can continue this work without the current conversation. Drafting is delegated to the `up:summarizer` subagent (pinned to Sonnet) so the expensive main-session model doesn't write the long structured prose. The subagent reads the live session JSONL directly — that's how it sees what happened.
+Prepare a handoff summary so another agent session can continue this work without the current conversation. Drafting is delegated to the `up:summarizer` subagent (pinned to Sonnet) so the expensive main-session model doesn't write the long structured prose. The subagent locates this session's JSONL transcript on disk using a distinctive phrase you pass to it, then reads it directly.
 
 ## Process
 
-### 1. Locate the current session JSONL
+### 1. Pick a distinctive phrase from the current conversation
 
-The live transcript is on disk. Find it by encoding the cwd and picking the newest `.jsonl` across both possible projects dirs (`~/.claude/projects/` and `~/.claude-work/projects/` — some users run a work instance):
+Choose a verbatim string that uniquely identifies this session — something unusual enough not to match any other session's JSONL:
+- A recent user quote with unusual wording.
+- An error message or stack-trace line.
+- A commit hash or file path that's specific to this session.
+- A made-up term, slug, or identifier coined this session.
 
-```bash
-CWD_ENC="$(pwd | sed 's|^/|-|; s|/|-|g')"
-ls -t ~/.claude/projects/"$CWD_ENC"/*.jsonl ~/.claude-work/projects/"$CWD_ENC"/*.jsonl 2>/dev/null | head -1
-```
+Avoid generic phrases ("fix the bug", "run tests") — they'll match many sessions.
 
-Store the absolute path. If nothing returns, stop and tell the user — the command can't run without it.
+Pick 1–2 phrases. The subagent tries the first; if it matches 0 or >1 file, it falls back to the second.
 
 ### 2. Detect the active task file
 
@@ -35,16 +36,18 @@ Drafting runs in the subagent, not in the main session. Dispatching is not optio
 
 Dispatch via the Task tool with `subagent_type: up:summarizer` and a prompt containing:
 - Working directory (absolute).
-- Session JSONL path (absolute) from step 1.
+- One or two distinctive phrases from step 1 — verbatim, exactly as they appear in the conversation.
 - Active task file path, or `null`.
 
-The subagent reads the JSONL itself to reconstruct session context. Do not paste the transcript into the prompt.
+The subagent greps JSONL files under the encoded-cwd projects dirs to locate this session's transcript, then reads it. Do not paste the transcript into the prompt.
 
 ### 4. Receive the draft
 
 The subagent returns prose beginning with `Draft summary below — main session decides destination.` followed by the eight-section summary (Goal / Problem / Infrastructure / Current state / Active blocker / Key files / What to do next / Gotchas).
 
 Quote the draft verbatim back to the user. Do not rewrite — if something is missing, ask the subagent to revise rather than silently patching on the main model.
+
+If the subagent reports it couldn't uniquely locate the JSONL (zero matches or multiple matches on both phrases), pick a different phrase and re-dispatch.
 
 ### 5. Ask the user where to put it
 
@@ -65,7 +68,7 @@ Perform the write in the main session using Edit (append) or Write (new file). T
 
 ## Rules
 
-- Subagent drafts; main session locates the JSONL, asks, and writes.
+- Subagent locates the JSONL, drafts the summary; main session picks the phrase, asks, and writes.
 - Concrete: exact commands, exact paths, exact error messages.
 - Terse: bullets over prose. No filler.
 - Include only info that can't be derived from code or git history. Don't restate `CLAUDE.md`.
