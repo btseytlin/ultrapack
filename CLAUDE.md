@@ -20,3 +20,7 @@ Internal plugin name: `up`. Slash/skill invocations use the `up:` prefix: `/up:m
 
 - **Minimal** — only skills we actually use; no speculative additions
 - **Doc-only** — no runtime code, no unit tests; verification is install-and-invoke
+
+## Versioning
+
+Plugin version lives in `plugins/up/.claude-plugin/plugin.json`. Default to bumping the patch digit (`x.y.Z`). Ask before bumping minor (`x.Y.z`) or major (`X.y.z`).
