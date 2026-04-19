@@ -1,8 +1,8 @@
 # Parallel Phase Execution
 
 **Status:** planning
-**Branch:** main
-**Worktree:** none
+**Branch:** parallel-phase-exec
+**Worktree:** .worktrees/parallel-phase-exec
 **Mode:** hands-off
 
 ## Design
@@ -73,5 +73,7 @@ TDD: no (reason: doc-only plugin change — SKILL.md and agent markdown; no runt
 
 ### Hands-off decisions
 - size: Medium — default in hands-off; touches up:uexecute skill and possibly up:implementer agent, needs full design + plan
+- make: dedicated branch + worktree at .worktrees/parallel-phase-exec — hands-off safest-reversible default
+- udesign: UK3 resolved by user (only emit subsection when parallelism exists); UK1/UK2 left for planner
 
 ### Deferred (needs user input)
