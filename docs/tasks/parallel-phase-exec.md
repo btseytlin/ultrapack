@@ -1,6 +1,6 @@
 # Parallel Phase Execution
 
-**Status:** executing
+**Status:** done
 **Branch:** parallel-phase-exec
 **Worktree:** .worktrees/parallel-phase-exec
 **Mode:** hands-off
@@ -153,12 +153,37 @@ Cross-references:
 Dogfood smoke: this task's own plan used `### Execution batches: B1: [PH1] || [PH2]; B2: [PH3]`; B1 ran as two concurrent `up:implementer` dispatches with stage-only commits, dispatcher then committed serially (b0cccf7, 7fc538b); B2 ran serially (3983b59). Full batched-dispatch flow exercised end-to-end on the task itself.
 
 ## Conclusion
-<empty — filled by up:ureview>
+
+Outcome: `up:uexecute` now dispatches implementers in parallel batches declared by `up:uplan` in `### Execution batches`, with serialized commits honoring IV1; reviewer fixes in 662cf48.
+
+Invariants:
+- IV1 — one commit per phase: enforced in `implementer.md:29` and explicitly extended to multi-phase bundles at line 8 after reviewer finding; dispatcher commits per phase in parallel mode per `uexecute/SKILL.md:113-119`.
+- IV2 — disjointness verified pre-dispatch at `uexecute/SKILL.md:52`.
+- IV3 — plan-diff + consistency pass run per phase in both modes (`uexecute/SKILL.md:65`, :116-119).
+- IV4 — no runtime batch inference: `uexecute/SKILL.md:70`, :98.
+- IV5 — serial fallback preserved: `uexecute/SKILL.md:42-44`.
+
+### Assumptions check
+- AS1 — held: multiple `Agent` tool calls in one response fire concurrently (confirmed by PH1/PH2 running in parallel during this task's own execution).
+- AS2 — held: PH1 and PH2 implementers edited disjoint files in the same cwd without filesystem races.
+- AS3 — held: dispatcher-only git writes in defer mode worked; no merge conflicts during serialized commit of b0cccf7 / 7fc538b.
+- AS4 — unverifiable at this layer — the Plan's File structure reliability is a behavioral property of future uplan runs; revisit if a real task hits an overlap miss.
+
+### Unknowns outcome
+- UK1 — resolved: inline `[PH…] || [PH… → PH…]` grammar chosen and landed in `uplan/SKILL.md:110`; readable at batch sizes seen so far.
+- UK2 — resolved: consistency pass runs per phase (matching today's behavior); documented in `uexecute/SKILL.md:116-119`.
+- UK3 — resolved by user: `### Execution batches` emitted only when real parallelism exists.
+
+Review findings:
+- Important: Report Format ambiguity in `implementer.md` (both commit-mode lines in one block) → split into Variant A / Variant B in 662cf48.
+- Important: multi-phase bundle commit rule unspecified → implementer.md:8 now accepts bundles; implementer.md:29 requires one commit per phase always, including in bundles (662cf48).
 
 ### Hands-off decisions
 - size: Medium — default in hands-off; touches up:uexecute skill and possibly up:implementer agent, needs full design + plan
 - make: dedicated branch + worktree at .worktrees/parallel-phase-exec — hands-off safest-reversible default
 - udesign: UK3 resolved by user (only emit subsection when parallelism exists); UK1/UK2 left for planner
 - uplan: plan auto-approved (hands-off)
+- uexecute: PH1 and PH2 dispatched in parallel with stage-only (dogfooding the feature being added, since `commit: defer` didn't yet exist in implementer.md); dispatcher committed serially.
+- ureview: fixed Report Format ambiguity and multi-phase bundle commit rule — split into Variant A/B and added bundle-aware one-commit-per-phase guidance (662cf48).
 
 ### Deferred (needs user input)
