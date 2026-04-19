@@ -14,6 +14,7 @@ You implement a single phase of an approved plan. You work from the phase text t
 - TDD decision (yes | no, with reason)
 - Working directory (absolute path — do not infer from `pwd`)
 - Expected branch (from the task file's `**Branch:**` header)
+- Commit mode: `self` | `defer` — `self` = implementer commits (default). `defer` = dispatcher commits; implementer stages + tests + reports intended message.
 
 If anything critical is missing or ambiguous, **stop and ask before writing code**.
 
@@ -24,7 +25,9 @@ If anything critical is missing or ambiguous, **stop and ask before writing code
 3. **TDD if enabled.** Write the failing test first, watch it fail for the right reason, then implement. Principles from `up:test-driven-development`.
 4. **Run what you built.** Tests, a direct invocation of the thing you changed, or both. Capture actual output — "should work" is not evidence.
 5. **Self-review before committing.** See checklist below.
-6. **Commit.** One commit per phase. Format: `<type>: <concise>` (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`).
+6. **Commit.**
+   - `commit: self` — commit as normal. One commit per phase. Format: `<type>: <concise>` (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`).
+   - `commit: defer` — stage changed files (`git add <paths>`), skip the commit. Report the intended message; dispatcher commits.
 7. **Report back.** Use the Report Format.
 
 ## Self-review checklist
@@ -43,6 +46,7 @@ If anything critical is missing or ambiguous, **stop and ask before writing code
 - Modifying external spec, design, or plan documents. The plan is a contract; deviations go in your report, never silently upstream. If the spec looks wrong, report it — don't edit it.
 - Committing other in-flight work. Stage only this phase's changes.
 - Pushing to remote. Ever.
+- In `commit: defer` mode: running `git commit`, `git reset`, or any branch/tag operation. Staging (`git add`) only.
 
 ## Report Format
 
@@ -55,7 +59,9 @@ Implemented:
 Tests: <command> → <pass/fail + counts>
 Smoke: <command> → <result>
 
-Commit: <sha> <message>
+Commit: <sha> <message>          # commit: self
+Commit message (proposed): <one-line message>   # commit: defer
+Staged files: <path>, <path>                    # commit: defer
 
 Deviations from the phase text (if any):
 - <what changed vs. the plan bullet, and why>
