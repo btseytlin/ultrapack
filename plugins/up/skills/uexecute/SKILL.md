@@ -37,13 +37,26 @@ Editing the wrong repository is one of the most common bugs. Before any write, c
 When you dispatch a subagent (`up:explorer`, `up:researcher`), pass the intended working directory explicitly in the prompt. Subagents do not inherit your `cwd` reliably across harnesses.
 </system-reminder>
 
-## Per-phase loop
+## Per-batch loop
 
-For each phase in the plan:
+If the plan contains a `### Execution batches` subsection (declared by `up:uplan` — see the uplan skill), iterate by batch. Otherwise fall back to the serial one-phase-at-a-time loop below (IV5).
+
+**Serial fallback (no `### Execution batches`):** execute phases in order, one at a time.
+
+**Batch iteration:**
 
 <required>
-1. Mark the phase `in_progress` in TodoWrite.
-2. Dispatch the `up:implementer` agent with the phase text + invariants + principles + working directory + TDD decision (see "Dispatch per phase" below).
+Before dispatching a batch:
+1. Read every bundle in the batch from the Plan's `### Execution batches`.
+2. Collect the file paths each bundle touches (from the Plan's File structure / per-phase scope).
+3. Verify disjointness: no file may appear in more than one bundle in the same batch. On overlap, stop execution and log under `### Deferred (needs user input)` with the conflicting paths and bundle names. Do not dispatch the batch (PC4, IV2).
+</required>
+
+For each phase (serial) or batch (parallel):
+
+<required>
+1. Mark the phase(s) `in_progress` in TodoWrite.
+2. Dispatch implementer(s) — see "Batched dispatch" below for parallel bundles; see "Dispatch per phase" for serial.
 3. On implementer return, handle status:
    - `DONE` → continue to step 4.
    - `DONE_WITH_CONCERNS` → read the concerns. Resolve or record them, then continue.
@@ -54,7 +67,7 @@ For each phase in the plan:
 6. Mark the phase `completed`.
 </required>
 
-Do not batch phases. One at a time. Commits give you a rollback surface and a legible history.
+Batch only per `### Execution batches` in the Plan; never infer batches at runtime (IV4).
 
 ## Dispatch per phase
 
@@ -67,6 +80,7 @@ Each phase runs in a fresh `up:implementer` subagent (Sonnet 4.6). You (the disp
 - TDD decision (from Design — `yes` or `no (reason)`)
 - Absolute working directory (subagents do not inherit `cwd` reliably across harnesses)
 - Expected git branch (from task file `**Branch:**` header)
+- `Commit mode: self | defer` — default `self`; set `defer` only when this phase is in a parallel bundle per `### Execution batches`
 
 **Do not pass:**
 - Session history or prior-phase chatter
@@ -81,7 +95,31 @@ Each phase runs in a fresh `up:implementer` subagent (Sonnet 4.6). You (the disp
 - A phase-N-and-N+1 fix follows from review findings, small enough to just edit
 
 **Parallel dispatch:**
-Phases are normally sequential (phase 2 imports what phase 1 created). Only dispatch two implementers in parallel when the phases touch disjoint files and have no import/data dependencies. When in doubt, sequential.
+See "Batched dispatch" below. Parallelism is declared in the Plan's `### Execution batches`; it is not inferred at runtime (IV4).
+
+## Batched dispatch
+
+Used when the Plan declares `### Execution batches` (written by `up:uplan`). Each batch lists one or more bundles; each bundle is one phase or a set of sequential phases given to a single implementer.
+
+**Reading the batch declaration:**
+Each bundle names its phase(s) and the files it touches. The dispatcher reads these before dispatching any implementer in the batch.
+
+**Mapping bundles to dispatches:**
+- Single-phase bundle or multi-phase bundle → one `up:implementer` dispatch, `commit: self` (implementer commits each phase in sequence).
+- Multiple bundles in the same batch → one `up:implementer` dispatch per bundle, all fired as concurrent `Agent` tool calls in a single response (AS1). Pass `commit: defer` to each (AS3 — only the dispatcher touches git in defer mode).
+
+**Serialized commit protocol (parallel bundles only):**
+After all `Agent` calls in the response return:
+1. For each bundle whose implementer returned `DONE` or `DONE_WITH_CONCERNS`, process in ascending PH number order:
+   a. `git add <paths staged by the implementer>` (if not already staged).
+   b. `git commit -m "<proposed message from implementer report>"`.
+   c. Plan-diff check (IV3): `git show <sha>` — every plan bullet reflected? every diff change covered?
+   d. Consistency pass (IV3): grep for sibling patterns; apply missing changes if any.
+2. Only after all successful bundles are committed, handle any failures (see below).
+
+**Failure handling:**
+- On `BLOCKED` or `NEEDS_CONTEXT` from one bundle: do not abort sibling bundles mid-work. Wait for all siblings to return, commit their successful results per the protocol above, then diagnose the failure — re-dispatch with corrected context, invoke `up:uplan` if the plan is wrong, or stop and log under `### Deferred (needs user input)` (PC4).
+- A failure in one bundle never rolls back a sibling's already-committed work.
 
 ## TDD
 
