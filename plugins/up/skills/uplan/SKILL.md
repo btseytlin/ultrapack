@@ -5,7 +5,7 @@ description: Use after design to turn a validated spec into a lean implementatio
 
 # Plan
 
-Convert the approved Design into a lean, concrete implementation plan. Output fills the `## Plan` section of `docs/tasks/<slug>.md`. The plan is the contract that `up:uexecute` will follow.
+Convert the approved Design into a lean, concrete implementation plan. Output fills the `## Plan` section of `/Users/eric/Projects/work/tasks/<slug>.md`. The plan is the contract that `up:uexecute` will follow.
 
 ## What a plan is
 
@@ -28,7 +28,7 @@ Do **not** silently split the task here. Do not silently expand it either.
 
 ## Output
 
-Fill `## Plan` in `docs/tasks/<slug>.md`. Do not create a separate plan file.
+Fill `## Plan` in `/Users/eric/Projects/work/tasks/<slug>.md`. Do not create a separate plan file.
 
 ## Brevity
 

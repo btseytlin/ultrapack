@@ -43,7 +43,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 ```
 
 Dispatch the `up:reviewer` agent with:
-- Task file path (`docs/tasks/<slug>.md`)
+- Task file path (`/Users/eric/Projects/work/tasks/<slug>.md`)
 - `BASE_SHA` and `HEAD_SHA`
 - Working directory (explicitly — the agent does not inherit `cwd` reliably)
 

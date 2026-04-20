@@ -5,7 +5,7 @@ description: Use to implement an approved plan. Dispatches the up:implementer ag
 
 # Execute
 
-Implement the approved `## Plan` from `docs/tasks/<slug>.md`. You are the dispatcher — each phase is handed to a fresh `up:implementer` subagent. After each phase returns, you run the plan-diff check and consistency pass before moving on. The goal is a working change that honors Design and Plan.
+Implement the approved `## Plan` from `/Users/eric/Projects/work/tasks/<slug>.md`. You are the dispatcher — each phase is handed to a fresh `up:implementer` subagent. After each phase returns, you run the plan-diff check and consistency pass before moving on. The goal is a working change that honors Design and Plan.
 
 ## Before starting
 

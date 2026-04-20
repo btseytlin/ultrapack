@@ -23,7 +23,7 @@ Pick 1–2 phrases. The subagent tries the first; if it matches 0 or >1 file, it
 ### 2. Detect the active task file
 
 ```bash
-ls -t docs/tasks/*.md 2>/dev/null | head
+ls -t /Users/eric/Projects/work/tasks/*.md 2>/dev/null | head
 ```
 
 The active task file is the most-recently-modified entry whose `**Status:**` header is not `done`. If none qualify, pass `null`.
@@ -54,8 +54,8 @@ If the subagent reports it couldn't uniquely locate the JSONL (zero matches or m
 <required>
 After showing the draft, ask:
 
-1. Append to the current task file's `## Conclusion` as a `### Summary — YYYY-MM-DD` subsection (provide the detected `docs/tasks/<slug>.md` path).
-2. Create a new file at `docs/tasks/summary-<new-slug>.md` (propose a slug based on the current work).
+1. Append to the current task file's `## Conclusion` as a `### Summary — YYYY-MM-DD` subsection (provide the detected `/Users/eric/Projects/work/tasks/<slug>.md` path).
+2. Create a new file at `/Users/eric/Projects/work/tasks/summary-<new-slug>.md` (propose a slug based on the current work).
 
 Pick the destination based on the user's answer. Do not write anywhere without confirmation.
 </required>

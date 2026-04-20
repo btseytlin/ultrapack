@@ -4,7 +4,7 @@ description: Orchestrate the full ultrapack workflow — slug, task file, design
 
 # /up:make
 
-Drives a task through the full ultrapack workflow: one task file at `docs/tasks/<slug>.md`, evolving through Design → Plan → Conclusion. Each stage is a separate skill. You orchestrate; the skills do the work.
+Drives a task through the full ultrapack workflow: one task file at `/Users/eric/Projects/work/tasks/<slug>.md`, evolving through Design → Plan → Conclusion. Each stage is a separate skill. You orchestrate; the skills do the work.
 
 ## Arguments
 
@@ -16,11 +16,21 @@ Hands-off activation: if the first whitespace-delimited token of the arguments i
 
 ### 1. Slug
 
-Derive a kebab-case slug from the description, 3 words max (e.g. "flaky-login-test"), and proceed.
+Derive a slug from the description.
+
+**Linear-ID-first rule (default path):** if the description contains a Linear issue ID matching the regex `(?i)\bsca-(\d+)\b`, the slug is `sca-<number>` optionally followed by a 1–2 word descriptor drawn from the remaining non-trivial words (strip "fix", "add", "update", articles, punctuation). Lowercase, kebab-case. Examples:
+
+- "SCA-412: fix flaky test" → `sca-412`
+- "SCA-412 domain gating" → `sca-412-gating`
+- "fix sca-603 upload slowness" → `sca-603-upload`
+
+If the description has NO Linear ID, fall back to a 3-words-max kebab-case slug from the description itself (e.g. "flaky login test" → `flaky-login-test`).
+
+The slug becomes the task file name: `/Users/eric/Projects/work/tasks/<slug>.md`.
 
 ### 2. Resume check
 
-Before creating a new task file, check if `docs/tasks/<slug>.md` already exists.
+Before creating a new task file, check if `/Users/eric/Projects/work/tasks/<slug>.md` already exists.
 
 - Exists: read `**Status:**` from the header. Resume from the next stage:
   - `design` → continue design
@@ -29,11 +39,11 @@ Before creating a new task file, check if `docs/tasks/<slug>.md` already exists.
   - `reviewing` → run `up:ureview`
   - `done` → ask the user what they want to do (start a follow-up, re-open, view conclusion)
 - Doesn't exist: proceed to step 3.
-- Multiple in-flight tasks: if more than one `docs/tasks/*.md` has Status ≠ `done`, list them and ask which one the user means (or whether this is a new task).
+- Multiple in-flight tasks: if more than one `/Users/eric/Projects/work/tasks/*.md` has Status ≠ `done`, list them and ask which one the user means (or whether this is a new task).
 
 ### 3. Create task file
 
-Create `docs/tasks/<slug>.md` from the template. Status = `design`. Branch = `main` (placeholder until step 5). No worktree. Mode = `hands-off` if the keyword was present, else `interactive`.
+Create `/Users/eric/Projects/work/tasks/<slug>.md` from the template. Status = `design`. Branch = `main` (placeholder until step 5). No worktree. Mode = `hands-off` if the keyword was present, else `interactive`.
 
 Template:
 

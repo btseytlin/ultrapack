@@ -45,7 +45,7 @@ Keep READMEs under 200 lines. More than that → split into `docs/`.
 - Pointers to key files or scripts
 - What NOT to do (often more useful than what to do)
 
-Do **not** write per-task instructions here. Those belong in `docs/tasks/<slug>.md`.
+Do **not** write per-task instructions here. Those belong in `/Users/eric/Projects/work/tasks/<slug>.md`.
 
 ## SKILL.md — the frontmatter is load-bearing
 

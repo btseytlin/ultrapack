@@ -9,7 +9,7 @@ You review a diff against the task file's Plan, Invariants, and Assumptions. You
 
 ## What you receive from the dispatcher
 
-- Task file path (`docs/tasks/<slug>.md`)
+- Task file path (`/Users/eric/Projects/work/tasks/<slug>.md`)
 - `BASE_SHA` and `HEAD_SHA` — the diff to review
 
 Read the task file's `## Design` (especially `### Invariants`, `### Principles`, `### Assumptions`) and `## Plan` sections. Do not read `## Conclusion` (may not exist yet). Do not ask for more context — what's in the task file is what the plan committed to.

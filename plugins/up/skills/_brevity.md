@@ -1,6 +1,6 @@
 # Brevity principles for long-lived artifacts
 
-Applies to anything that outlives the conversation: code, comments, docstrings, frontmatter descriptions, task files (`docs/tasks/<slug>.md`), READMEs, commit messages. Every skill that writes to such artifacts applies these rules to the section it owns. The goal is an audit trail, not a retelling.
+Applies to anything that outlives the conversation: code, comments, docstrings, frontmatter descriptions, task files (`/Users/eric/Projects/work/tasks/<slug>.md`), READMEs, commit messages. Every skill that writes to such artifacts applies these rules to the section it owns. The goal is an audit trail, not a retelling.
 
 ## Principles
 
