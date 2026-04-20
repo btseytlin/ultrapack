@@ -16,15 +16,23 @@ Hands-off activation: if the first whitespace-delimited token of the arguments i
 
 ### 1. Slug
 
-Derive a slug from the description.
+Derive a slug from the description. Try the rules in order; first match wins.
 
-**Linear-ID-first rule (default path):** if the description contains a Linear issue ID matching the regex `(?i)\bsca-(\d+)\b`, the slug is `sca-<number>` optionally followed by a 1–2 word descriptor drawn from the remaining non-trivial words (strip "fix", "add", "update", articles, punctuation). Lowercase, kebab-case. Examples:
+**A. Linear-ID-first.** If the description contains a Linear issue ID matching `(?i)\bsca-(\d+)\b`, the slug is `sca-<number>` optionally followed by a 1–2 word descriptor drawn from remaining non-trivial words (strip "fix", "add", "update", articles, punctuation). Lowercase, kebab-case.
 
 - "SCA-412: fix flaky test" → `sca-412`
 - "SCA-412 domain gating" → `sca-412-gating`
 - "fix sca-603 upload slowness" → `sca-603-upload`
 
-If the description has NO Linear ID, fall back to a 3-words-max kebab-case slug from the description itself (e.g. "flaky login test" → `flaky-login-test`).
+**B. PR-first.** If the description references a pull request — a GitHub PR URL (`github.com/*/pull/<N>`), a bare `#<N>`, or `pr-<N>` / `PR <N>` — the slug is `pr-<number>`. No descriptor by default (PR number alone is unique). Add a descriptor only if the task file for that PR already exists and you need to disambiguate (e.g. a re-review round).
+
+- "Review https://github.com/scalable-so/scalablev2/pull/738" → `pr-738`
+- "look at PR 821" → `pr-821`
+- "pr-903 re-review after fixes" → `pr-903-round2` (only if `pr-903.md` already exists)
+
+**C. Freeform fallback.** If neither rule matches, derive a 3-words-max kebab-case slug from the description itself.
+
+- "fix flaky login test" → `fix-flaky-login` (or `flaky-login-test`)
 
 The slug becomes the task file name: `/Users/eric/Projects/work/tasks/<slug>.md`.
 
