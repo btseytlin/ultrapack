@@ -86,3 +86,6 @@ Approach: insert a labeled-field fenced code block (skeleton) immediately after 
 
 ## Conclusion
 <empty — filled by up:ureview>
+
+### Deviations from plan
+- Skeleton heading style: used bold `**Dispatch prompt skeleton**` instead of plan's `### Dispatch prompt skeleton`. Reason: ureview and summary command use numbered `### N. Step name` subheadings; inserting a new `###` would break their numeric flow. Bold label fits all three files uniformly.
