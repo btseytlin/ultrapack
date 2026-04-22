@@ -39,6 +39,14 @@ Dispatch via the Task tool with `subagent_type: up:summarizer` and a prompt cont
 - One or two distinctive phrases from step 1 — verbatim, exactly as they appear in the conversation.
 - Active task file path, or `null`.
 
+**Dispatch prompt skeleton** (guidance):
+
+```
+Working directory: <absolute path>
+Distinctive phrases: <phrase 1> | <phrase 2, optional>
+Active task file: <docs/tasks/<slug>.md | null>
+```
+
 The subagent greps JSONL files under the encoded-cwd projects dirs to locate this session's transcript, then reads it. Do not paste the transcript into the prompt.
 
 ### 4. Receive the draft
