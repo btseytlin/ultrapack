@@ -100,6 +100,9 @@ TDD: <yes | no (reason)>
 Working directory: <absolute path>
 Branch: <expected branch from task file header>
 Commit mode: <self | defer>
+Owns: <comma-separated paths from the graph's @>           (wave dispatch only)
+Implements: <IF<n>, ...>                                    (wave dispatch only, if this phase produces any)
+Consumes: <IF<n>, ...>                                      (wave dispatch only, if this phase consumes any)
 ```
 
 **When to skip dispatch and do it inline:**
