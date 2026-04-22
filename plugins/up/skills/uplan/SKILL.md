@@ -113,9 +113,9 @@ Approach: <1-2 sentences>
 - IF2 — `<signature>` — <contract sentence>
 
 ### Interface graph   (optional — omit for single-phase plans)
-- PH1  (source)            -> IF1, IF2   @ plugins/up/skills/foo/SKILL.md
-- PH2  IF1 ->              -> IF3        @ plugins/up/skills/bar/SKILL.md
-- PH3  IF2, IF3 ->                       @ plugins/up/agents/baz/AGENT.md
+- PH1              -> IF1, IF2   @ plugins/up/skills/foo/SKILL.md
+- PH2  IF1         -> IF3        @ plugins/up/skills/bar/SKILL.md
+- PH3  IF2, IF3 ->               @ plugins/up/agents/baz/AGENT.md
 ```
 
 ## When to declare interfaces
