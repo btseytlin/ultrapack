@@ -13,7 +13,7 @@ Confirm the change actually works — not "looks right", not "tests probably pas
 Before writing the Verify section, read `plugins/up/skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Passed checks are one line; evidence citations attach to failures, deferrals, or genuinely surprising passes. Omit `Smoke:` and `Notes:` when there's nothing to report. The Exception clause still holds: failures always carry evidence and a clear "how it should have worked" note.
 </required>
 
-## Phase 1 — Build the checklist (positive, negative, invariant)
+## Phase 1 — Build the checklist (positive, negative, invariant, interfaces)
 
 The checklist enumerates every behavior you'll actually run. Built from the Plan, IV / PC / AS from Design, not imagined.
 
@@ -22,6 +22,7 @@ Checks are numbered CK1..CKN within the task file. Each one covers exactly one b
 - Positive (CK): "POST /items returns 201 for a valid payload." "`Dataset.load()` reads the file and returns the expected schema." Specific inputs → specific expected outputs.
 - Negative (CK): "POST /items returns 400 for missing fields." "`Dataset.load()` raises on a missing file." Things that must still fail correctly.
 - Invariant / assumption (CK): one check per IV that can be mechanically verified, plus any AS the verifier can confirm. Reference the source by ID. "IV1: `Dataset` does not import from `training/`" → a grep that must return nothing.
+- Interfaces (CK): one check per IF declared in the Plan's `### Interfaces`. Each asserts the contract end-to-end — a real call that exercises the declared signature (for code IFs), or a structural grep / anchor lookup that the declared contract is present and callable (for doc IFs). Reference the source as `IF<n>`.
 
 The checklist lives in-session. It is not written to the task file.
 
@@ -39,6 +40,10 @@ Invariants / assumptions:
 - CK5 (IV1) — grep "from training" src/dataset/ → empty
 - CK6 (IV2) — all DB writes go through transaction() helper → manual trace
 - CK7 (AS1) — upstream /users response sampled — `email` is UTF-8
+
+Interfaces:
+- CK8 (IF1) — grep 'Parser.parse' callers → all match (arg: str) -> AST
+- CK9 (IF2) — invoke Formatter.render(ast) with sample AST → returns str, no exception
 ```
 </good-example>
 
@@ -91,6 +96,10 @@ Invariants / assumptions:
 - CK4 (IV1) — <how verified>
 - CK5 (AS1) — <how verified or "unverifiable at this layer">
 
+Interfaces:
+- CK6 (IF1) — <how verified>
+- CK7 (IF2) — <how verified>
+
 Smoke: `<command>` → <one-line result>   (omit if no smoke test run or nothing to report)
 
 Notes: <anomalies, re-runs, deferrals>   (omit if none)
@@ -117,6 +126,10 @@ Negative:
 Invariants / assumptions:
 - CK5 (IV1) — `Dataset` does not import from `training/`
 - CK6 (IV2) — all DB writes go through `transaction()`
+
+Interfaces:
+- CK7 (IF1) — `Dataset.load(path: str) -> DataFrame` called with real file → matches declared signature
+- CK8 (IF2) — grep `transaction(` call sites → all DB writes routed correctly
 
 Smoke: `curl -X POST /items ... → 201` — end-to-end OK
 ```

@@ -74,7 +74,8 @@ Required when relevant (omit the subsection when it would say "single phase, no 
 - Test strategy: behaviors to cover. If `TDD: yes`, list the failing tests to write first.
 - Order + dependencies: phases, what blocks what
 - Open questions / risks / rollback: what could go wrong, how to back out
-- Execution batches: declare parallel groups and multi-phase bundles when real parallelism exists. Omit otherwise.
+- Interfaces: declare cross-phase contracts when ≥2 phases share a signature / anchor / API shape. Omit for single-phase plans.
+- Interface graph: declare phase shape when ≥2 phases exist. Omit for single-phase plans.
 
 Optional:
 - Code snippets: only for the most critical component per phase. If tempted to include full code, you're over-planning.
@@ -107,15 +108,23 @@ Approach: <1-2 sentences>
 - RK1 — <one-sentence risk and mitigation>
 - RK2 — <...>
 
-### Execution batches (optional — omit when all phases run sequentially and alone)
-- B1: [PH1] || [PH2 → PH3]
+### Interfaces   (optional — omit for single-phase plans)
+- IF1 — `<signature>` — <contract sentence>
+- IF2 — `<signature>` — <contract sentence>
+
+### Interface graph   (optional — omit for single-phase plans)
+- PH1              -> IF1, IF2   @ plugins/up/skills/foo/SKILL.md
+- PH2  IF1         -> IF3        @ plugins/up/skills/bar/SKILL.md
+- PH3  IF2, IF3 ->               @ plugins/up/agents/baz/AGENT.md
 ```
 
-## When to declare batches
+## When to declare interfaces
 
-- Parallelize phases only when their File structure bullets declare disjoint file paths.
-- Bundle PH N+1 with PH N when they have a tight dependency AND the pair is small (few files, low risk).
-- Omit the subsection when no real parallelism or bundling exists. Do not invent batches to fill space.
+- An interface is a cross-phase contract: a function/method signature, a shared SKILL.md section anchor, or any API shape that one phase produces and another phase consumes.
+- The consume arrow (`IF<N> ->`) means runtime coupling — one phase's output is the other phase's input. Doc-only phases that merely reference a prior phase's plan text are sources, not consumers; leave the consume side empty (the line starts with `PH<N>  -> <produces>`).
+- `@ <paths>` marks the filesystem boundary for each phase. Paths declared by phases in the same wave must be disjoint; `up:uexecute` uses this to detect boundary violations after each commit.
+- Waves are derived from the graph — phases with no unconsumed dependencies can run in parallel. Do not hand-declare waves; declare the graph and let the executor derive them.
+- Omit both `### Interfaces` and `### Interface graph` for single-phase plans.
 
 ## Self-review (inline, no subagent)
 
@@ -125,7 +134,7 @@ Approach: <1-2 sentences>
 3. Consistency — method/class names match across bullets; later phases' interfaces reference what earlier phases define.
 4. Leanness — plan size should fit the task. If it exceeds ~1 screen per day of expected work, trim.
 5. IV / AS coverage — each IV and AS has a referencing bullet somewhere (by ID).
-6. If `### Execution batches` is present, every bundle's phases have disjoint file paths from every other bundle in the same batch; bundled phases have a declared dependency.
+6. If `### Interface graph` is present: every phase declares `@ <paths>`; paths declared by phases in the same wave are disjoint; every IF consumed by any phase is defined in `### Interfaces`; every IF defined is produced by exactly one phase.
 </required>
 
 Fix issues inline. No re-review loop.

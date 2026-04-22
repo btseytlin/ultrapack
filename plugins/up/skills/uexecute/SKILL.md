@@ -37,26 +37,25 @@ Editing the wrong repository is one of the most common bugs. Before any write, c
 When you dispatch a subagent (`up:explorer`, `up:researcher`), pass the intended working directory explicitly in the prompt. Subagents do not inherit your `cwd` reliably across harnesses.
 </system-reminder>
 
-## Per-batch loop
+## Per-wave loop
 
-If the plan contains a `### Execution batches` subsection (declared by `up:uplan` — see the uplan skill), iterate by batch. Otherwise fall back to the serial one-phase-at-a-time loop below (IV5).
+If the plan contains a `### Interface graph` subsection (declared by `up:uplan`), derive execution waves via topo-sort over `->` arrows: source phases (no `Consumes` side) form wave 1; wave N+1 is the set of phases whose every consumed IF is produced by phases in waves 1..N. Otherwise fall back to the serial one-phase-at-a-time loop (IV6).
 
-**Serial fallback (no `### Execution batches`):** execute phases in order, one at a time.
+**Serial fallback (no `### Interface graph`):** execute phases in order, one at a time.
 
-**Batch iteration:**
+**Wave iteration:**
 
 <required>
-Before dispatching a batch:
-1. Read every bundle in the batch from the Plan's `### Execution batches`.
-2. Collect the file paths each bundle touches (from the Plan's File structure / per-phase scope).
-3. Verify disjointness: no file may appear in more than one bundle in the same batch. On overlap, stop execution and log under `### Deferred (needs user input)` with the conflicting paths and bundle names. Do not dispatch the batch (PC4, IV2).
+Before dispatching a wave:
+1. Collect the `@` paths declared by every phase in the wave.
+2. Verify pairwise disjointness: no path may appear in more than one phase of the same wave. On overlap, stop execution and log under `### Deferred (needs user input)` with the conflicting paths and phase names. Do not dispatch the wave (PC4, IV2).
 </required>
 
-For each phase (serial) or batch (parallel):
+For each phase (serial fallback) or wave (parallel):
 
 <required>
 1. Mark the phase(s) `in_progress` in TodoWrite.
-2. Dispatch implementer(s) — see "Batched dispatch" below for parallel bundles; see "Dispatch per phase" for serial.
+2. Dispatch implementer(s) — see "Wave dispatch" below for waves; see "Dispatch per phase" for serial fallback.
 3. On implementer return, handle status:
    - `DONE` → continue to step 4.
    - `DONE_WITH_CONCERNS` → read the concerns. Resolve or record them, then continue.
@@ -67,7 +66,7 @@ For each phase (serial) or batch (parallel):
 6. Mark the phase `completed`.
 </required>
 
-Batch only per `### Execution batches` in the Plan; never infer batches at runtime (IV4).
+Parallelism comes only from the Plan's `### Interface graph` via the wave scheduler; never infer waves at runtime (IV4, PC5).
 
 ## Dispatch per phase
 
@@ -80,7 +79,8 @@ Each phase runs in a fresh `up:implementer` subagent (Sonnet 4.6). You (the disp
 - TDD decision (from Design — `yes` or `no (reason)`)
 - Absolute working directory (subagents do not inherit `cwd` reliably across harnesses)
 - Expected git branch (from task file `**Branch:**` header)
-- `Commit mode: self | defer` — default `self`; set `defer` only when this phase is in a parallel bundle per `### Execution batches`
+- `Commit mode: self | defer` — `self` for solo-phase or serial-fallback dispatch; `defer` when the phase is in a multi-phase wave per `### Interface graph`
+- `Owns`, `Implements`, `Consumes` — only when the plan has `### Interface graph`; see "Wave dispatch" below for how they're sourced and passed
 
 **Do not pass:**
 - Session history or prior-phase chatter
@@ -107,32 +107,54 @@ Commit mode: <self | defer>
 - Phase needs mid-work interactive user input
 - A phase-N-and-N+1 fix follows from review findings, small enough to just edit
 
-**Parallel dispatch:**
-See "Batched dispatch" below. Parallelism is declared in the Plan's `### Execution batches`; it is not inferred at runtime (IV4).
+## Wave dispatch
 
-## Batched dispatch
+Used when the Plan declares `### Interface graph` (written by `up:uplan`). Waves are derived by topo-sort — never hand-declared (PC5).
 
-Used when the Plan declares `### Execution batches` (written by `up:uplan`). Each batch lists one or more bundles; each bundle is one phase or a set of sequential phases given to a single implementer.
+**Reading the graph:**
+Parse each line of the form `PH<N>  <consumes-CSV> -> <produces-CSV>   @ <paths-CSV>`. Empty left of `->` = source (no consumed IFs). Empty right = sink. Collect Owns (`@`), Consumes (left), Produces (right) per phase.
 
-**Reading the batch declaration:**
-Each bundle names its phase(s) and the files it touches. The dispatcher reads these before dispatching any implementer in the batch.
+**Wave derivation:**
+- Wave 1: all phases with no Consumes.
+- Wave N+1: all phases whose every Consumes IF is produced by phases in waves 1..N.
+- Repeat until all phases are assigned.
 
-**Mapping bundles to dispatches:**
-- Single-phase bundle or multi-phase bundle → one `up:implementer` dispatch, `commit: self` (implementer commits each phase in sequence).
-- Multiple bundles in the same batch → one `up:implementer` dispatch per bundle, all fired as concurrent `Agent` tool calls in a single response (AS1). Pass `commit: defer` to each (AS3 — only the dispatcher touches git in defer mode).
+**Disjointness check:**
+Before dispatching a wave, verify that the `@` sets of all phases in that wave are pairwise disjoint. On overlap: halt, log the conflicting paths under `### Deferred (needs user input)`, do not dispatch.
 
-**Serialized commit protocol (parallel bundles only):**
-After all `Agent` calls in the response return:
-1. For each bundle whose implementer returned `DONE` or `DONE_WITH_CONCERNS`, process in ascending PH number order:
-   a. `git add <paths staged by the implementer>` (if not already staged).
-   b. `git commit -m "<proposed message from implementer report>"`.
-   c. Plan-diff check (IV3): `git show <sha>` — every plan bullet reflected? every diff change covered?
-   d. Consistency pass (IV3): grep for sibling patterns; apply missing changes if any.
-2. Only after all successful bundles are committed, handle any failures (see below).
+**Dispatching a wave:**
+Fire one `up:implementer` per phase in the wave as concurrent `Agent` tool calls in a single response (AS1). Pass `commit: defer` to each (AS3 — only the dispatcher touches git in defer mode). Include `Owns`, `Implements`, `Consumes` from the graph line (IF3).
+
+**Serialized commit protocol:**
+After all `Agent` calls in the response return, process successful implementers in ascending PH order:
+
+<required>
+For each phase whose implementer returned `DONE` or `DONE_WITH_CONCERNS`:
+1. `git add <paths staged by the implementer>`.
+2. `git commit -m "<proposed message from implementer report>"`.
+3. **Boundary check (IF5):** run `git show <sha> --name-only`. Every changed path must be a member of the phase's declared `@` set. On trespass: halt the wave, log under `### Deferred (needs user input)` with the trespassed path and phase, then either re-dispatch with tightened scope or escalate to `up:uplan`.
+4. Plan-diff check: every plan bullet reflected in the diff? every diff change covered?
+5. Consistency pass: grep for sibling patterns; apply missing changes if any.
+</required>
+
+Only after all successful phases are committed, handle failures.
 
 **Failure handling:**
-- On `BLOCKED` or `NEEDS_CONTEXT` from one bundle: do not abort sibling bundles mid-work. Wait for all siblings to return, commit their successful results per the protocol above, then diagnose the failure — re-dispatch with corrected context, invoke `up:uplan` if the plan is wrong, or stop and log under `### Deferred (needs user input)` (PC4).
-- A failure in one bundle never rolls back a sibling's already-committed work.
+- On `BLOCKED` or `NEEDS_CONTEXT` from one phase: do not abort sibling phases mid-work. Wait for all siblings to return, commit their successful results per the protocol above, then diagnose the failure — re-dispatch with corrected context, invoke `up:uplan` if the plan is wrong, or stop and log under `### Deferred (needs user input)` (PC4).
+- A failure in one phase never rolls back a sibling's already-committed work.
+
+## Wiring check
+
+Runs once, after the final wave's phases commit (IF6).
+
+<required>
+For each `IF<n>` declared in the Plan's `### Interfaces`:
+1. Identify the IF's named symbol or anchor (the identifier named in the IF's signature bullet).
+2. Grep the repo for callers or references of that symbol.
+3. For code IFs: verify each call site matches the declared signature.
+4. For doc IFs (non-code IFs where the "signature" is a section anchor or declared public contract of a SKILL.md): grep for the declared anchor or reference and verify it resolves.
+5. On mismatch: log under `## Conclusion → ### Deviations from plan` with `IF<n>: <mismatch description>`. Decide whether to re-dispatch the offending phase (implementation error), invoke `up:uplan` (plan declared the wrong signature), or continue with a recorded deviation.
+</required>
 
 ## TDD
 

@@ -24,7 +24,7 @@ While you are not looking, the agent will pick the safest and most conservative 
 Core ideas:
 - One file per task. `docs/tasks/<slug>.md` evolves through Design → Plan → Verify → Conclusion.
 - Invariants-, principles-, and assumptions-first. Discovered in design, obeyed in plan, checked at review. Short IDs (IV, PC, AS, UK, PH, RK, CK) let later sections reference them without re-quoting.
-- Per-phase subagent implementation. Each plan phase dispatched to a fresh `up:implementer`. Independent phases run in parallel batches when the plan declares them.
+- Per-phase subagent implementation. Each plan phase dispatched to a fresh `up:implementer`. Plan declares interfaces (`### Interfaces`) and an execution graph (`### Interface graph`); the executor topo-sorts it into waves and dispatches independent phases in parallel.
 - Mandatory manual testing. Agent must run what it built before claiming done.
 - As short as I could make it, doesn't waste tokens.
 
@@ -53,7 +53,7 @@ Each stage of task planning and execution is a skill. `/up:make` is a helper com
 
 `up:uplan` populate the task file with a specific plan. Define what files to change, what classes and methods to update or create, what interfaces they will have, what is the test strategy, break down into phases, define order of execution. No code blocks here unless they are especially tricky. 
 
-`up:uexecute` create git branch and worktree, dispatch independent `up:implementer` agents per plan phase, make incremental commits, check against plan and design between phases. When the plan declares `### Execution batches`, phases in the same batch are dispatched in parallel (implementers stage changes, dispatcher commits serially); phases can also be bundled into one implementer when tightly coupled. Uses TDD for tasks where it's helpful.
+`up:uexecute` create git branch and worktree, dispatch independent `up:implementer` agents per plan phase, make incremental commits, check against plan and design between phases. When the plan declares `### Interface graph`, the executor topo-sorts the graph into waves; phases in the same wave are dispatched in parallel (implementers stage changes, dispatcher commits serially in phase order). After each phase's commit: Boundary check (diff ⊆ declared `@` paths). After the final wave: Wiring check (per-IF caller/anchor match). Uses TDD for tasks where it's helpful.
 
 `up:uverify` performs manual smoke testing, defining a checklist of fast positive (what should work) and negative (what should not work) checks based on invariants. Writes summary to task file. Loops back to execute on failure. 
 
@@ -68,7 +68,7 @@ Finally, the conclusion section of the task markdown file is populated. Then all
 Process skills (u-prefixed to dodge Claude Code built-ins):
 - `up:udesign` — Brainstorm requirements, populate Design + Invariants + Principles + Assumptions + Unknowns, decide whether to use TDD.
 - `up:uplan` — Plan: what files to change, what class/methods and with what interfaces, test strategy, order. Only non-trivial code blocks.
-- `up:uexecute` — Dispatch `up:implementer` per phase (parallel batches when the plan declares them), incremental commits, plan-diff + consistency sweep between phases.
+- `up:uexecute` — Dispatch `up:implementer` per phase (parallel waves derived from `### Interface graph`), incremental commits, Boundary + plan-diff + consistency sweep per phase, Wiring check after the final wave.
 - `up:uverify` — Positive + negative + invariant checklist, manual smoke test, writes summary to task file, loops back to execute on failure.
 - `up:ureview` — Dispatch `up:reviewer` subagent: independent review, check that all invariants from design and plan still hold.
 - `up:udebug` — Four-phase root-cause investigation.
@@ -90,7 +90,7 @@ Discipline skills:
 ### Agents
 
 - `up:explorer` (Haiku 4.5) — Codebase tracing, file:line refs, 3–5 essential files.
-- `up:implementer` (Sonnet 4.6) — One phase (or a small bundle): code + tests + commit + self-review. `commit: self|defer` mode; defer stages only and the dispatcher commits (used in parallel batches). Fresh context per dispatch.
+- `up:implementer` (Sonnet 4.6) — One phase: code + tests + commit + self-review. Receives `Owns` / `Implements` / `Consumes` from the plan's interface graph. `commit: self|defer` mode; defer stages only and the dispatcher commits (used in parallel waves). Fresh context per dispatch.
 - `up:reviewer` (Sonnet 4.6) — Independent review against Plan + Invariants + Assumptions. Confidence-filtered (≥80), severity-tiered.
 - `up:researcher` (Sonnet 4.6) — General-purpose investigation: decompose + systematically answer.
 - `up:summarizer` (Sonnet 4.6) — Drafts the handoff prose for `/up:summary`; gathers repo state, never writes to disk.
