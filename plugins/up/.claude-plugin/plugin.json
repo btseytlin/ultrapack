@@ -1,6 +1,6 @@
 {
   "name": "up",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "ultrapack — lean, opinionated Claude Code skill pack for spec-driven, git-centered development",
   "author": {
     "name": "Boris Tseitlin",
