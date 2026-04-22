@@ -1,6 +1,6 @@
 # Interface-first planning and parallel execution
 
-**Status:** executing
+**Status:** done
 **Branch:** interface-first-parallel
 **Worktree:** .worktrees/interface-first-parallel
 **Mode:** hands-off
@@ -214,12 +214,43 @@ Dogfood smoke: the task's own plan declared `### Interface graph` with 4 source 
 Notes: one inline verify fix — the `### Interface graph` example in `uplan/SKILL.md` had a double `->` typo and a `(source)` literal that wasn't part of the grammar; fixed in c762c10 (see CK11).
 
 ## Conclusion
-<empty — filled by up:ureview>
+
+Outcome: interface-first planning replaces `### Execution batches` across uplan / implementer / uexecute / uverify; new grammar `PH<N>  <consumes> -> <produces>   @ <owns>` drives wave dispatch with Boundary + Wiring checks. Landed in 26465a3 (tip).
+
+Invariants:
+- IV1 — `### Interfaces` grammar defined in `uplan/SKILL.md:111-113`.
+- IV2 — `### Interface graph` grammar + `@ <paths>` requirement in `uplan/SKILL.md:115-118, 125`.
+- IV3 — Boundary check: `uexecute/SKILL.md:124`.
+- IV4 — Wiring check: `uexecute/SKILL.md:135-146`.
+- IV5 — ≥1 CK per IF: `uverify/SKILL.md:25, 99-101`.
+- IV6 — Serial fallback preserved: `uexecute/SKILL.md:42, 44`.
+- IV7 — One commit per phase: `uexecute/SKILL.md:122-123`, `implementer.md:32`.
+
+### Assumptions check
+- AS1 — held — dogfood run produced a 4-way wave-1 (vs. likely ≤2 under file-path batching, given coarse per-skill scope).
+- AS2 — held — IF1-IF7 written up front in plan, implementers matched signatures without re-plan.
+- AS3 — held — all four implementer commits' `--name-only` ⊆ declared `@`.
+- AS4 — held for this doc task — grep of IF symbol names across the repo matched exactly the declared contracts.
+- AS5 — held — SKILL.md section anchors / format blocks functioned as interfaces without grammar strain.
+- AS6 — held — `git grep "Execution batches"` post-change empty; no other task files reference the old grammar.
+
+### Unknowns outcome
+- UK1 — resolved: plan-text only; no PH0 stub phase needed for this restructure.
+- UK2 — resolved for doc targets: structural grep was sufficient; code-target mechanism remains the planner's per-task call.
+- UK3 — resolved: strict file-scope (`git show --name-only` subset check).
+- UK4 — still-open: not triggered in this task; escalation path documented as "re-dispatch or invoke `up:uplan`" in IF6.
+- UK5 — still-open: no cap introduced; 4-way parallel worked cleanly. Revisit if we hit practical limits.
+
+Review findings:
+- Important: 3 resolved in 26465a3 — (1) `uplan:124` `(source)` literal contradicted empty-left grammar → rephrased to empty-left convention; (2) `uexecute:83-85` listed `Owns`/`Implements`/`Consumes` unconditionally in "Dispatch per phase" despite serial fallback not having them → collapsed to one conditional bullet pointing to Wave dispatch; (3) `plugin.json` still at 0.3.0 → bumped to 0.3.1 per CLAUDE.md patch-bump-on-landing rule.
 
 ### Hands-off decisions
 - make: size=Medium — multi-skill restructure (uplan, uexecute, uverify); hands-off default.
 - make: dedicated branch + worktree at .worktrees/interface-first-parallel — hands-off safest-reversible default.
 - uplan: plan auto-approved (hands-off).
+- ureview: fixed `uplan:124` `(source)` literal — rephrased to empty-left convention.
+- ureview: fixed `uexecute:83-85` unconditional dispatch contract — collapsed to one conditional bullet.
+- ureview: fixed `plugin.json` version 0.3.0 → 0.3.1 per CLAUDE.md patch-bump rule.
 
 ### Deferred (needs user input)
 <empty>
