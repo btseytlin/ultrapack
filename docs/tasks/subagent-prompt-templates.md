@@ -82,7 +82,18 @@ Approach: insert a labeled-field fenced code block (skeleton) immediately after 
 - Commit: `docs(summary): add dispatch prompt skeleton for summarizer`
 
 ## Verify
-<empty — filled by up:uverify>
+
+**Result:** passed
+
+Invariants / assumptions:
+- CK1 (IV1) — `grep "Dispatch prompt skeleton" plugins/up/agents/*.md` → empty; skeletons live only in dispatching skills/commands
+- CK2 (IV2) — every field in each skill's "Pass in the dispatch prompt" bullet list maps to a labeled line in its skeleton (implementer 8/8, reviewer 4/3, summarizer 3/3)
+- CK3 (IV3) — all skeletons use `<...>` placeholders inside fenced blocks, no JSON schema
+
+Positive:
+- CK4 — five skeletons present: implementer (uexecute:92), explorer (uexecute:156), researcher (uexecute:170), reviewer (ureview:54), summary (summary.md:42)
+
+Smoke: doc-only change, no runtime to exercise
 
 ## Conclusion
 <empty — filled by up:ureview>
