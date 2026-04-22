@@ -121,7 +121,7 @@ IV — specific things that must hold. Concrete enough to check against the code
 </invariants>
 
 <principles>
-PC — softer abstract guidance. Still concrete enough to audit.
+PC — softer abstract guidance. Still concrete enough to audit. Task-specific only — the Global Principles (GPC1–GPC7) in `plugins/up/skills/_principles.md` apply everywhere and don't need to be restated. List a PC only when the task deviates from a GPC (name which one and why) or when it needs an extra rule the GPCs don't cover.
 - PC1 — Fail fast, no silent fallbacks.
 - PC2 — Prefer composition over inheritance.
 </principles>

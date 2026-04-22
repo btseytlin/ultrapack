@@ -83,6 +83,10 @@ Once the root cause is fixed, add validation at the next layer so the same class
 
 Don't scatter defensive code everywhere. One or two layers past the fix is enough.
 
+## Anti-whack-a-mole — find the pattern before closing
+
+One bug is rarely alone. Before marking the fix done, name the pattern behind it in one sentence and grep the rest of the code for the same shape. Report matches: fix the trivial ones in the same commit, file follow-ups for the rest. Closing without this check is how the same bug ships three more times in three more places.
+
 ## Red flags — STOP, return to Phase 1
 
 <system-reminder>
