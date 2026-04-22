@@ -18,6 +18,7 @@ Applies to anything that outlives the conversation: code, comments, docstrings, 
 
    - DONT: `train_vlm_layers: 10  // train 10, NOT all` — "don't train on all" was a chat critique; once the value is 10, the comment is orphaned.
    - DONT: agent description "…Fresh context, never sees session history or later phases. Sonnet 4.6." — session semantics and an inlined model string are orphan; the description should say what the agent *does*.
+   - DONT: `action_frame_stride: int = field(kw_only=True)  # must be set explicitly (no default — comes from config)` — `kw_only=True` with no default already forces explicit passing; the comment narrates the chat where the default was removed. Redundant with the code and orphaned once the dialogue is gone.
    - DO: agent description "…Dispatched per-phase from `up:uexecute`." — naming the dispatching skill is wiring, not orphan. Claude Code reads the description to decide when to dispatch; the referent is another long-lived file, renamed atomically if it moves. Wiring test: if the referent is a file a stranger can `grep` for, keep; if it's a dialogue, critique, or transient decision, cut.
    - DONT: task file narrating the dialogue to a reader:
 
