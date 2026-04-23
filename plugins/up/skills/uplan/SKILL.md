@@ -158,7 +158,7 @@ If the task is greenfield, skip this check explicitly in one line.
 ## Default principles
 
 <required>
-Read `plugins/up/skills/_principles.md` before sketching phases. Every phase must be consistent with GPC1–GPC7; where a phase deviates, the bullet names the GPC and the reason in one line (e.g. "breaks GPC3 — single call site, split would obscure the flow").
+Read `plugins/up/skills/_principles.md` before sketching phases. Every phase must be consistent with GPC1–GPC8; where a phase deviates, the bullet names the GPC and the reason in one line (e.g. "breaks GPC3 — single call site, split would obscure the flow").
 </required>
 
 ## Final check — scope creep, elegance, simpler way
