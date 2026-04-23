@@ -1,129 +1,92 @@
 ---
-name: test-driven-development
-description: Use when implementing deterministic, reusable code where regressions would warrant a CI red light. Enforces RED-GREEN-REFACTOR. Applicability rule and skip conditions inside.
+name: validation-driven-documentation
+description: Use when writing FR documents to enforce the describe → validate → update → finalize cycle. The SA equivalent of TDD — documentation is not done until the real endpoint confirms it. Auto-triggers alongside up:uexecute and up:uverify.
 ---
 
-# Test-Driven Development
+# Validation-Driven Documentation
 
-Write the test first. Watch it fail. Write minimal code to pass. Refactor. Repeat.
+Write the requirement. Run the curl. If they disagree, update the requirement. Repeat until they agree. Only then is the FR done.
 
-**Core principle:** if you didn't watch the test fail, you don't know whether it tests the right thing.
+**Core principle:** if you didn't run the curl, you don't know whether the FR describes the right thing.
 
-## Applicability — invoke only when all three hold
+This is the SA equivalent of Test-Driven Development:
 
-<applies-when>
-1. The code produces specific outputs for specific inputs (deterministic I/O contract)
-2. It is called from more than one place (library code, API method, utility, validator)
-3. A regression here would warrant a CI red light
-</applies-when>
+| TDD (code) | VDD (documentation) |
+|---|---|
+| Write failing test | Write FR claiming endpoint behavior |
+| Watch it fail | Run curl, see actual response |
+| Write code to pass | Update FR to match reality |
+| Refactor | Clarify and finalize FR |
+| Test suite green | Curl confirms FR |
 
-## Skip conditions — do not invoke when any holds
+## Applicability — always on for FR writing
 
-<skip-when>
-- Training a model, hyperparameter tuning, anything stochastic with no "correct" output
-- Exploratory data analysis (you're figuring out what's in the data)
-- One-off scripts or throwaway prototypes
-- Research / experiment code
-- UI changes where the real test is "does it look right"
-</skip-when>
+VDD applies to every FR document in `up:uexecute` + `up:uverify`. There are no skip conditions. If an endpoint cannot be reached, the validation is **blocked** (not skipped) and logged explicitly.
 
-The decision is recorded during `up:udesign` as `TDD: yes` or `TDD: no (reason)`.
+The only relaxation: read-only reference documents (context.md, DECOMPOSITION.md updates) don't need curl validation — they describe intent, not endpoint behavior.
 
-## Iron law when applicable — no production code without a failing test first
+## Phase 1 — DESCRIBE: write the FR claim
 
-Wrote code before the test? Delete it. Start over from the test. Don't "adapt" what you wrote — the test will be shaped by the code instead of shaping it.
+Write what the endpoint is supposed to do, sourced from:
+- Source code (controller + service)
+- OpenAPI spec
+- DECOMPOSITION.md stakeholder comments
 
-## Phase 1 — RED: write a failing test
+Do not write claims you can't source. Unknown behavior → open question stub.
 
-- One behavior per test
-- Clear name describing the behavior
-- Real code path where possible; mocks only when genuinely unavoidable
-
-```python
-def test_retry_succeeds_after_two_failures():
-    attempts = 0
-    def op():
-        nonlocal attempts
-        attempts += 1
-        if attempts < 3:
-            raise RuntimeError("fail")
-        return "success"
-    assert retry(op, max_attempts=3) == "success"
-    assert attempts == 3
-```
-
-## Phase 2 — Verify RED: run it, confirm it fails for the right reason
+## Phase 2 — VALIDATE: run curl, capture actual response
 
 <required>
-- It fails (not an import/syntax error)
-- The failure reason is "feature missing", not a typo
-- The error message matches what you expected
+Run the exact curl in this session. Capture HTTP status + body. Do not infer from prior sessions or OpenAPI alone.
 </required>
 
-Test passed immediately? You're testing behavior that already exists. Fix the test.
-
-## Phase 3 — GREEN: minimal code to pass
-
-```python
-def retry(op, max_attempts):
-    for i in range(max_attempts):
-        try:
-            return op()
-        except Exception:
-            if i == max_attempts - 1:
-                raise
-    raise RuntimeError("unreachable")
+```bash
+curl -s -X POST https://<base>/api/<path> \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <token>" \
+  -d '{"field": "value"}'
+# Record: HTTP status + full body
 ```
 
-Don't add features, options, or "while I'm here" changes. Just pass the test.
+If infra unavailable: mark as BLOCKED with the environment needed. Never write "PASSED" for a blocked check.
 
-## Phase 4 — Verify GREEN: run it, confirm it passes, nothing else broke
+## Phase 3 — UPDATE: reconcile FR with actual behavior
 
-Run the new test and the existing suite. If either fails: back to GREEN (not RED — don't change the test).
+Three outcomes:
 
-## Phase 5 — REFACTOR: clean up with tests green
+- **Match** — FR was correct. One-line confirmation note.
+- **Mismatch** — FR claim ≠ curl response. Update FR immediately to reflect actual behavior. Invoke `up:udebug` to understand *why* before correcting, if the mismatch is unexpected.
+- **Blocked** — curl not runnable. Log explicit reason. FR stays in draft status.
 
-Names, duplication, helpers. Keep tests green. Don't add behavior in this step. Then loop back to RED for the next test.
+## Phase 4 — FINALIZE: FR is done when curl confirms it
 
-## Good tests
+An FR is finalized only when:
+- All positive checks passed (happy path confirmed)
+- All negative checks passed (error cases confirmed)
+- All mismatches resolved (FR updated to match reality)
+- Blocked items explicitly logged with owner and environment needed
 
-<good-test>
-- Minimal — one behavior per test. If "and" appears in the name, split.
-- Clear — name describes what it checks.
-- Real — exercises actual code, not mocks pretending to be code.
-</good-test>
+"FR looks complete" is not finalized. "All curls ran and confirmed" is finalized.
 
-## Red flags — stop and start over
+## Red flags — FR is not done
 
 <system-reminder>
-- You wrote code before the test
-- A test passes immediately on first run
-- You can't explain why a test failed the way it did
-- You're keeping old code "as reference" while writing tests — delete it
-- You're "adapting" existing code while writing tests — that's tests-after, not TDD
+- "The OpenAPI spec confirms the behavior" — OpenAPI is a spec, not evidence
+- "This endpoint clearly returns 200" — prove it with a curl
+- "The FR matches the code" — code and running system can diverge
+- "We can validate later" — later is blocked, not validated
 </system-reminder>
 
-## Why order matters
+## Cycle record in task file
 
-Tests-after answer: *what does this do?*
-Tests-first answer: *what should this do?*
-
-They are not the same. Tests-after are biased by the implementation you already wrote. Tests-first force edge-case discovery before you commit to a design.
-
-## When stuck
-
-- Don't know how to test: write the wished-for API in the test first; let it drive the implementation shape
-- Test is too complicated: the interface is too complicated; simplify it
-- Must mock everything: the code is too coupled; use dependency injection
-- Huge setup: extract helpers; if it stays huge, the design is wrong
-
-## For bug fixes
-
-Write a failing test that reproduces the bug. Then RED-GREEN-REFACTOR. The test proves the fix and prevents regression.
-
-## Final rule
+Each iteration of the VDD cycle is visible in `## Verify`:
 
 ```
-Production code → a test exists and was written first and failed first
-Otherwise → not TDD
+CK1 — POST /api/auth/login → expected 200, got 200 ✓
+CK2 — missing email → expected 422, got 400 ✗ → FR updated at step 3 → re-verified ✓
+CK3 — DreamCRM call → BLOCKED (need: test env with DreamCRM access)
 ```
+
+## Terminal state
+
+All checks confirmed (pass or explicitly blocked with reason). FR finalized. Invoke `up:ureview`.

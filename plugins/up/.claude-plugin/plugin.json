@@ -1,18 +1,18 @@
 {
   "name": "up",
-  "version": "0.3.5",
-  "description": "ultrapack — lean, opinionated Claude Code skill pack for spec-driven, git-centered development",
+  "version": "1.0.0",
+  "description": "sa-ultrapack — lean, opinionated Claude Code skill pack for systems analysts: scope analysis, FR writing, endpoint validation, gap tracking",
   "author": {
     "name": "Boris Tseitlin",
     "email": "iambtseytlin@gmail.com"
   },
   "license": "WTFPL",
   "keywords": [
-    "skills",
-    "workflow",
-    "planning",
-    "tdd",
-    "ml",
-    "data-engineering"
+    "systems-analysis",
+    "functional-requirements",
+    "endpoint-validation",
+    "gap-analysis",
+    "api-documentation",
+    "migration"
   ]
 }

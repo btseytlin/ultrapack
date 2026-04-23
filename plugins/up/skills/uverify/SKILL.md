@@ -1,189 +1,135 @@
 ---
 name: uverify
-description: Use after execute to confirm the change actually works end-to-end. Builds a positive + negative + invariant checklist, runs each check freshly, does a manual smoke test, writes a short summary to the task file's Verify section, loops back to execute on any failure.
+description: Use after writing an FR to confirm it against the real system. Mandatory real curl requests — no curl, no pass. Records actual HTTP responses. Links requirement → endpoint → curl → response → verdict. Updates FR if behavior differs from what was written.
 ---
 
-# Verify
+# Validate
 
-Confirm the change actually works — not "looks right", not "tests probably pass", but *verified by running the thing in this message*. Verify's verdict either advances the workflow to `up:ureview` or bounces it back to `up:uexecute` with remediation notes. A short summary is persisted to the task file's `## Verify` section so review (and later readers) see what was checked.
+Confirm the FR against the real system — not "looks right", not "OpenAPI says so", but *verified by running a real curl against the real endpoint in this message*.
+
+This is the SA equivalent of TDD's test run. An FR cycle is not complete without it. OpenAPI is a spec, not evidence. A curl response is evidence.
 
 ## Brevity
 
 <required>
-Before writing the Verify section, read `plugins/up/skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Passed checks are one line; evidence citations attach to failures, deferrals, or genuinely surprising passes. Omit `Smoke:` and `Notes:` when there's nothing to report. The Exception clause still holds: failures always carry evidence and a clear "how it should have worked" note.
+Passed checks are one line. Evidence attaches to failures, mismatches, and blocked checks. Failures always carry: the exact curl command used, the actual response received, and what the FR claimed. Omit `Notes:` when nothing to report.
 </required>
 
-## Phase 1 — Build the checklist (positive, negative, invariant, interfaces)
+## Phase 1 — Build the validation checklist
 
-The checklist enumerates every behavior you'll actually run. Built from the Plan, IV / PC / AS from Design, not imagined.
+From the FR document and the plan's validation targets:
 
-Checks are numbered CK1..CKN within the task file. Each one covers exactly one behavior or guard.
+- **Positive (CK):** `POST /api/auth/login` with valid credentials → 200 + access_token
+- **Negative (CK):** `POST /api/auth/login` with wrong password → 401 invalid_credentials
+- **Contract (CK):** Response body contains field `user.cardNumber` (mapped from `b_user.PERSONAL_PAGER`)
+- **Error case (CK):** Blocked user → 423 account_blocked
+- **Open question (CK):** UK2 — DreamCRM step behavior: BLOCKED until server-side log available
 
-- Positive (CK): "POST /items returns 201 for a valid payload." "`Dataset.load()` reads the file and returns the expected schema." Specific inputs → specific expected outputs.
-- Negative (CK): "POST /items returns 400 for missing fields." "`Dataset.load()` raises on a missing file." Things that must still fail correctly.
-- Invariant / assumption (CK): one check per IV that can be mechanically verified, plus any AS the verifier can confirm. Reference the source by ID. "IV1: `Dataset` does not import from `training/`" → a grep that must return nothing.
-- Interfaces (CK): one check per IF declared in the Plan's `### Interfaces`. Each asserts the contract end-to-end — a real call that exercises the declared signature (for code IFs), or a structural grep / anchor lookup that the declared contract is present and callable (for doc IFs). Reference the source as `IF<n>`.
+The checklist lives in-session. Do not write it to the task file.
 
-The checklist lives in-session. It is not written to the task file.
-
-<good-example>
-```
-Positive:
-- CK1 — POST /items {valid} → 201, body contains new id
-- CK2 — Dataset.load("good.csv") → DataFrame with 3 columns
-
-Negative:
-- CK3 — POST /items {missing name} → 400, "name is required"
-- CK4 — Dataset.load("nope.csv") → FileNotFoundError
-
-Invariants / assumptions:
-- CK5 (IV1) — grep "from training" src/dataset/ → empty
-- CK6 (IV2) — all DB writes go through transaction() helper → manual trace
-- CK7 (AS1) — upstream /users response sampled — `email` is UTF-8
-
-Interfaces:
-- CK8 (IF1) — grep 'Parser.parse' callers → all match (arg: str) -> AST
-- CK9 (IF2) — invoke Formatter.render(ast) with sample AST → returns str, no exception
-```
-</good-example>
-
-<bad-example>
-"I'll test the happy path." Too vague. No negatives, no invariants, no specific inputs or expected outputs.
-</bad-example>
-
-## Phase 2 — Run each check freshly, in this message
-
-Evidence before claims. If you haven't run it in this message, you cannot claim it passes.
-
-- Use `/up:try`-style minimal verification — the direct command, no harness
-- One-off scripts go in project-local `tmp/` (gitignored); clean up after
-- Capture *actual* output. "Looks right" is not evidence.
-- Decide pass/fail on what you saw, not what you expected
-
-If a check passed in an earlier session or an earlier message — re-run it now. State does drift.
-
-## Phase 3 — Manual smoke test end-to-end
-
-Run the shortest full path that exercises the change in its real shape:
-
-- CLI change → invoke the command with representative input
-- API change → `curl` against a running server
-- UI change → open in a browser, click through the feature
-- ML change → run a tiny training step or inference call
-
-If you can't run the smoke test (e.g. infra unavailable), say so explicitly. Do not fabricate success. Do not substitute a unit test for the smoke test.
-
-## Phase 4 — Write the Verify summary to the task file
+## Phase 2 — Run each curl freshly, in this message
 
 <required>
-Append (or replace) the `## Verify` section of `docs/tasks/<slug>.md`. Keep it short — this is not a transcript, it's an audit trail.
+- Run the exact curl in this message. Do not rely on prior session results.
+- Use real test environment credentials if available; document what was used.
+- Capture the full response: HTTP status code + body.
+- Pass/fail based on what was actually returned, not what was expected.
+- If infra is unavailable (no test env, no credentials): log as BLOCKED — do not fabricate success.
+</required>
 
-Format:
+Curl formats:
 
+```bash
+# Status-only check
+curl -s -o /dev/null -w "%{http_code}" -X POST https://back-new.dreamisland.ru/api/security/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test@example.com","password":"secret123"}'
+
+# Full response check
+curl -s -X POST https://back-new.dreamisland.ru/api/security/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test@example.com","password":"secret123"}'
+```
+
+## Phase 3 — Reconcile with the FR
+
+For each check result:
+
+- **Match** — FR claim matches actual response → pass, one-line note
+- **Mismatch** — FR claim differs from actual response → update the FR document directly to reflect actual behavior; flag for re-review
+- **Blocked** — curl not runnable (no env, no credentials, requires server-side log) → log reason, mark as deferred
+
+Mismatches update the FR first, then get logged in the Verify section. The FR must always reflect what the system actually does.
+
+## Phase 4 — Write `## Verify` to the task file
+
+<required>
 ```markdown
 ## Verify
 
-**Result:** passed | failed
+**Result:** passed | failed | partially-blocked
+
+**Environment:** <base URL used, test user or token if relevant>
 
 Positive:
-- CK1 — <check>                   (evidence only on fail or surprise)
-- CK2 — <check> → <evidence>      (failure: required)
+- CK1 — POST /api/auth/login → 200 ✓
+- CK2 — POST /api/auth/login (wrong password) → 401 ✓
 
 Negative:
-- CK3 — <check>
+- CK3 — Blocked user → 423 ✓
 
-Invariants / assumptions:
-- CK4 (IV1) — <how verified>
-- CK5 (AS1) — <how verified or "unverifiable at this layer">
+Contract:
+- CK4 — `user.cardNumber` present in response body ✓
 
-Interfaces:
-- CK6 (IF1) — <how verified>
-- CK7 (IF2) — <how verified>
+Mismatches:
+- CK5 — FR said 422 for missing email, actual was 400. FR updated at step 3 of Алгоритм.
 
-Smoke: `<command>` → <one-line result>   (omit if no smoke test run or nothing to report)
+Blocked:
+- CK6 — DreamCRM call verification requires server-side log access — deferred (need: log access to test env)
 
-Notes: <anomalies, re-runs, deferrals>   (omit if none)
+curl commands used:
+```bash
+curl -s -X POST https://back-new.dreamisland.ru/api/security/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test@example.com","password":"secret123"}'
+# → 200 {"access_token":"eyJ...","token_type":"Bearer","expires_in":3600}
 ```
-
-Write this whether verify passed or failed. On failure, the Notes section names what failed and points to where execute should pick up.
+```
 </required>
 
-<good-example>
-Fully-passing terse form:
-```markdown
-## Verify
+## Phase 5 — Verdict
 
-**Result:** passed
-
-Positive:
-- CK1 — POST /items {valid} → 201 with new id
-- CK2 — Dataset.load("good.csv") → 3-column DataFrame
-
-Negative:
-- CK3 — POST /items {missing name} → 400
-- CK4 — Dataset.load("nope.csv") → FileNotFoundError
-
-Invariants / assumptions:
-- CK5 (IV1) — `Dataset` does not import from `training/`
-- CK6 (IV2) — all DB writes go through `transaction()`
-
-Interfaces:
-- CK7 (IF1) — `Dataset.load(path: str) -> DataFrame` called with real file → matches declared signature
-- CK8 (IF2) — grep `transaction(` call sites → all DB writes routed correctly
-
-Smoke: `curl -X POST /items ... → 201` — end-to-end OK
-```
-No `Notes:` (nothing anomalous), no evidence padding on passes.
-</good-example>
-
-## Phase 5 — Consolidate: pass loops to review, fail loops to execute
-
-- All checks passed → declare verify passed. Invoke `up:ureview`.
-- Any check failed → for each failure, describe how it *should have* worked conceptually (not "add the missing line" — the behavior it was supposed to exhibit). Loop back to `up:uexecute` with these notes. Do not move forward.
-
-<good-example>
-Failure note: "POST /items returned 500 instead of 400 for a missing `name`. The validation layer should reject the payload with a 400 and a 'name is required' message before the handler runs."
-</good-example>
-
-<bad-example>
-Failure note: "Test failed, fix it." Tells execute nothing about what the behavior should be.
-</bad-example>
-
-## Future Work vs. incomplete work — the slacking-loophole rule
-
-When a check fails or surfaces ambiguity, do not move it to `## Conclusion → Future Work` unless you have justification.
-
-<required>
-- In-scope = do it. If the plan mandated it, it's not future work. Complete it, or explicitly rescope with user consent.
-- Justification required. Future Work needs a pointer to (a) a Design-scope line that excludes it, or (b) a new fact discovered mid-execution that changes scope. Hand-waving doesn't count.
-- Out-of-scope but related? Fine — add to Future Work with justification, keep verifying the rest.
-</required>
+- All CKs passed, no mismatches → passed → invoke `up:ureview`
+- Mismatches found → FR updated → re-run verify once for updated checks → if all pass, invoke `up:ureview`
+- Blocked items remain → partially-blocked → invoke `up:ureview` with blocked items explicitly listed
 
 ## Red flags — STOP, do not claim pass
 
 <system-reminder>
-These phrases mean verify did not actually happen:
-- "Just this once"
+These phrases mean verify did not happen:
+- "The FR looks correct"
+- "OpenAPI confirms this"
 - "I'm confident it works"
-- "Linter passed" (linter is not runtime)
-- "Unit tests pass" (unit tests are not smoke tests)
-- "Agent said done" (you haven't verified the diff yourself)
-- "Should work", "probably works", "looks correct"
+- "Should return 200"
+- "Probably works"
+- "Curl not needed for documentation"
+- "This is a to-be requirement, can't test yet"
 </system-reminder>
 
-If you used any of those as the basis of a pass verdict: back to Phase 1.
+"Can't test yet" is BLOCKED, not PASSED. Log it as blocked with the reason.
 
 ## Never
 
-- Claim pass without running the check in this message
-- Declare pass when any check failed
-- Skip verify to get to review faster
-- Trust a prior session's verdict — re-run
+- Claim pass without running curl in this message
+- Fabricate a curl response
+- Skip verify because the endpoint "obviously works"
+- Use OpenAPI as a substitute for running curl
+- Leave mismatches unresolved in the FR
 
 ## Hands-off mode
 
-See `up:handsoff` for the full contract. Stage-specific delta: verify's behavior is unchanged — the pass → review / fail → execute loop already runs without user confirmation. Infeasible smoke tests (infra unavailable, etc.) are logged under `### Deferred (needs user input)` so the user knows what wasn't verified end-to-end. Never fabricate success to skip a deferred entry.
+Infeasible curls (no credentials, no test environment) go to `### Deferred (needs user input)` with the exact environment needed. Never claim pass on blocked checks.
 
 ## Terminal state
 
-Verify summary written to task file. Pass → invoke `up:ureview`. Fail → invoke `up:uexecute` with failure notes describing intended behavior.
+`## Verify` written to task file. Pass → invoke `up:ureview`. Fail → invoke `up:uexecute` with mismatch notes. Partially-blocked → invoke `up:ureview` with blocked items listed explicitly.

@@ -1,190 +1,85 @@
 ---
 name: uplan
-description: Use after design to turn a validated spec into a lean implementation plan. Outputs the `## Plan` section of the task file — files, line numbers, class/method names, invariants, test strategy, order. Ends with a scope-creep / simpler-way check.
+description: Use after scope analysis to plan FR coverage — which documents to write, in what order, which endpoints each covers, what curl validation each needs.
 ---
 
-# Plan
+# Coverage Plan
 
-Convert the approved Design into a lean, concrete implementation plan. Output fills the `## Plan` section of `docs/tasks/<slug>.md`. The plan is the contract that `up:uexecute` will follow.
+Convert the approved Design into a concrete FR coverage plan. Output fills `## Plan` in `docs/tasks/<slug>.md`. The plan is the contract that `up:uexecute` will follow document by document.
 
-## What a plan is
+## What a coverage plan is
 
-A plan is the minimum information an engineer needs to implement the Design without re-doing the thinking. That means:
+A plan that specifies: which FR documents to write, in what order, what each must cover, and how each will be validated. That means:
 
-- Concrete locations: exact file paths, line number ranges, class/method/interface names. "Modify `parser.py`" is not enough — `parser.py:120-160, Parser.tokenize()` is.
-- Per-file change bullets: what changes in each file, by name. Not prose.
-- Interface signatures: new or changed function/method signatures. No bodies.
-- Phases with commits: ordered phases, one commit per phase minimum.
-- Test strategy: the behaviors to cover, not test code.
-- Snippets only where words fail: one regex, one tricky algorithm, one non-obvious API call. Never full implementations.
-
-If an engineer could read your plan and implement the wrong thing, the plan is incomplete. If they need to re-derive the Design to understand the plan, the plan is bloated.
-
-## Scope is decided in design, not here
-
-By the time you plan, the task's scope is fixed. If you discover a subsystem-split issue now, it means design missed it — stop planning, go back to the user, and decide whether to re-open design or keep the current scope.
-
-Do **not** silently split the task here. Do not silently expand it either.
-
-## Output
-
-Fill `## Plan` in `docs/tasks/<slug>.md`. Do not create a separate plan file.
-
-## Brevity
-
-<required>
-Before writing the Plan, read `plugins/up/skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Treat every subsection in the Format block below as optional — include only when the content is non-default. Failures, deviations, deferrals, and known risks always include evidence.
-</required>
+- Concrete FR document names with codes (following `WRITING_GUIDE.md` naming: `SECTION-NN-MM-ROLE`)
+- Per-document scope: which endpoint(s), which algorithm sections, which DB fields
+- Endpoint per document: HTTP method + exact path from `routes.php`
+- Validation target per document: the curl command that will confirm the behavior
+- Dependencies: auth FRs before feature FRs, GEN documents before module-specific ones
 
 ## Process
 
 <required>
-1. Read the task file's `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK). Know what you're planning for.
-2. Sketch the file structure — which files change, which are new, which classes/methods.
-3. Break into phases. Each phase is a coherent commit.
-4. Write phase-by-phase plan entries. Concrete locations, per-file bullets, interfaces.
-5. Write test strategy (per task's TDD decision).
-6. Write order + dependencies, open questions, risks, rollback.
-7. Add snippets only for the single most critical component per phase.
-8. Backwards-compat check — restate Design's compat risks in concrete plan terms.
-9. Self-review inline (placeholders, consistency, invariants, spec coverage).
-10. Scope-creep / simpler-way check — see below. This is the final step before handoff.
-11. Present the plan to the user. In interactive mode, wait for approval, then invoke `up:uexecute`. In hands-off mode (task-file `**Mode:** hands-off`), auto-invoke `up:uexecute` after presenting, and log `- uplan: plan auto-approved (hands-off)` to `## Conclusion → ### Hands-off decisions`.
+1. Read the task file's `## Design`, `### Invariants` (IV), `### Assumptions` (AS), `### Unknowns` (UK).
+2. List all FR documents needed. Each document covers one endpoint or one coherent set of related endpoints.
+3. Order by dependency: auth before features; GEN-01-XX before module-specific; as-is before to-be when documenting migration.
+4. For each document: list endpoints covered, key sections needed (algorithm, DB mapping, error cases), planned curl validation.
+5. Identify which UK items block which documents. A blocked document can proceed to stub only — validation is blocked until the UK is resolved.
+6. Self-review: is every in-scope endpoint from Design covered by at least one FR document?
+7. Present to user. Wait for approval, then invoke `up:uexecute`.
 </required>
-
-## Required contents
-
-Required always:
-- Approach: 1-2 sentences on the strategy and why it fits the Design
-- File structure: for each file, `path/to/file.ext:lineA-lineB` (create|modify) + affected class/method names
-- Per-file bullets: what changes, by name
-- New/changed interfaces: signatures only
-- IV/PC/AS referenced by ID: which Design entities each phase preserves or relies on
-
-## ID conventions in Plan
-
-Plan introduces two entity types, numbered within the task file:
-
-- PH1, PH2, … — Phases. Each phase heading is `### PH<N> — <name>`.
-- RK1, RK2, … — Risks. Each is one sentence.
-
-References to Design entities use IDs (IV3, AS1, UK2) — never re-quote the full sentence.
-
-Required when relevant (omit the subsection when it would say "single phase, no deps", "none", or similar):
-- Test strategy: behaviors to cover. If `TDD: yes`, list the failing tests to write first.
-- Order + dependencies: phases, what blocks what
-- Open questions / risks / rollback: what could go wrong, how to back out
-- Interfaces: declare cross-phase contracts when ≥2 phases share a signature / anchor / API shape. Omit for single-phase plans.
-- Interface graph: declare phase shape when ≥2 phases exist. Omit for single-phase plans.
-
-Optional:
-- Code snippets: only for the most critical component per phase. If tempted to include full code, you're over-planning.
 
 ## Format
 
 ```markdown
 ## Plan
 
-Approach: <1-2 sentences>
+Approach: <1-2 sentences on coverage strategy>
 
-### PH1 — <name>
+### PH1 — <FR document code and name>
+- **1.1** `docs/FR/<code>. <name>.md` (create)
+  - Endpoints: `POST /api/path`, `GET /api/other`
+  - Covers: algorithm, DB mapping table, error cases (list codes)
+  - Validation curl: `curl -X POST <url> -H "..." -d '{...}'` → expected: <HTTP status>
+  - Blocked on: UK1 (if applicable — skip validation until resolved)
+  - Respects: IV1, AS2
+- Commit: `doc: draft <code> <name>`
 
-- **1.1** `path/to/file.ext:lineA-lineB` (create|modify)
-  - `ClassName.method_name(arg: Type) -> Ret` — <what changes, by name>
-  - Respects: IV2, AS1
-- **1.2** ...
-- Commit: `<message>`
-
-### PH2 — <name>
+### PH2 — <next FR document>
 ...
 
-### Test strategy   (optional — omit if no tests / doc-only)
-<behavior list, per file or per phase>
+### Test strategy
+<which curl commands cover which documents; what responses to record>
 
-### Order & dependencies   (optional — omit for single-phase or obviously-sequential plans)
-<what blocks what, parallelizable phases>
+### Order & dependencies
+<what blocks what; e.g. "PH2 requires PH1 to define the auth token format">
 
-### Risks / rollback   (optional — omit if none non-trivial)
-- RK1 — <one-sentence risk and mitigation>
+### Risks / rollback
+- RK1 — DreamCRM API key not available in test env — validation of DreamCRM-dependent steps will be blocked
 - RK2 — <...>
-
-### Interfaces   (optional — omit for single-phase plans)
-- IF1 — `<signature>` — <contract sentence>
-- IF2 — `<signature>` — <contract sentence>
-
-### Interface graph   (optional — omit for single-phase plans)
-- PH1              -> IF1, IF2   @ plugins/up/skills/foo/SKILL.md
-- PH2  IF1         -> IF3        @ plugins/up/skills/bar/SKILL.md
-- PH3  IF2, IF3 ->               @ plugins/up/agents/baz/AGENT.md
 ```
 
-## When to declare interfaces
+## Rules
 
-- An interface is a cross-phase contract: a function/method signature, a shared SKILL.md section anchor, or any API shape that one phase produces and another phase consumes.
-- The consume arrow (`IF<N> ->`) means runtime coupling — one phase's output is the other phase's input. Doc-only phases that merely reference a prior phase's plan text are sources, not consumers; leave the consume side empty (the line starts with `PH<N>  -> <produces>`).
-- `@ <paths>` marks the filesystem boundary for each phase. Paths declared by phases in the same wave must be disjoint; `up:uexecute` uses this to detect boundary violations after each commit.
-- Waves are derived from the graph — phases with no unconsumed dependencies can run in parallel. Do not hand-declare waves; declare the graph and let the executor derive them.
-- Omit both `### Interfaces` and `### Interface graph` for single-phase plans.
+- Every in-scope endpoint from Design must appear in at least one plan phase.
+- UK-blocked documents get a stub note, not a skip — the document is started, the validation is deferred.
+- Curl commands are planned here and run in `up:uverify`. Do not run them in this stage.
+- Scope is fixed in `up:udesign`. If new scope issues appear here, go back to the user — do not silently expand or shrink.
+- No TDD decision needed — this is doc-only work.
 
-## Self-review (inline, no subagent)
-
-<required>
-1. Spec coverage — every IV / PC / AS / UK item maps to at least one plan bullet, or is explicitly deferred to execute / verify.
-2. Placeholder scan — no "TBD", "handle edge cases", "add validation", "similar to task N", "write tests for the above".
-3. Consistency — method/class names match across bullets; later phases' interfaces reference what earlier phases define.
-4. Leanness — plan size should fit the task. If it exceeds ~1 screen per day of expected work, trim.
-5. IV / AS coverage — each IV and AS has a referencing bullet somewhere (by ID).
-6. If `### Interface graph` is present: every phase declares `@ <paths>`; paths declared by phases in the same wave are disjoint; every IF consumed by any phase is defined in `### Interfaces`; every IF defined is produced by exactly one phase.
-</required>
-
-Fix issues inline. No re-review loop.
-
-## Backwards-compat check — restate the design's risks in plan terms
+## Self-review
 
 <required>
-Design should already have surfaced backwards-compat risks. In the plan, restate each one with its concrete phase and the mitigation step. If you discover a new break the Design missed (schema rename in phase 2, config key no longer read, output format drift), stop planning and go back to the user — don't smuggle it in.
+1. Coverage: every endpoint from Design maps to at least one document.
+2. Dependency order: no document precedes its dependency.
+3. Validation: every document has a planned curl command, or a UK explaining why it's blocked.
+4. Format: document names follow `WRITING_GUIDE.md` naming convention.
 </required>
-
-<good-example>
-"Phase 3 renames `log_level` → `logging.level`. Per Design decision, Phase 3 also adds a one-release compat read of the old key with a deprecation warning. Removal is out of scope for this task."
-</good-example>
-
-<bad-example>
-Plan includes a schema migration with no mention of the compat strategy. Execute runs the migration; the old service version in prod breaks on the next deploy.
-</bad-example>
-
-If the task is greenfield, skip this check explicitly in one line.
-
-## Default principles
-
-<required>
-Read `plugins/up/skills/_principles.md` before sketching phases. Every phase must be consistent with GPC1–GPC8; where a phase deviates, the bullet names the GPC and the reason in one line (e.g. "breaks GPC3 — single call site, split would obscure the flow").
-</required>
-
-## Final check — scope creep, elegance, simpler way
-
-<required>
-Before handing off to the user, ask yourself honestly:
-
-1. Scope creep: is every phase directly serving the Design, or have I snuck in "while I'm here" refactors, extra validation layers, speculative generality?
-2. Elegance: can any pair of phases merge? Are there accidental duplicate data paths? Does the plan introduce abstractions that aren't pulling their weight?
-3. Simpler way: is there a one-paragraph alternative plan that gets 90% of the value with 30% of the work? If yes, propose it to the user as an option.
-</required>
-
-<good-example>
-"Plan says 7 phases. The honest version is 3 phases — phases 4-7 are a generalization layer for a second caller that doesn't exist. Cut to 3, flag the generalization as future work."
-</good-example>
-
-<bad-example>
-"Plan is 12 phases. I'll just hand it off — the user can decide what to cut." No. That's the agent's job here, not the user's.
-</bad-example>
-
-If this check surfaces real simplifications, rewrite the plan. Don't stack warnings on top of a bloated plan.
 
 ## Hands-off mode
 
-See `up:handsoff` for the full contract. Stage-specific delta: skip the approval wait — present the plan highlights, log `- uplan: plan auto-approved` to `### Hands-off decisions`, invoke `up:uexecute` directly. Self-review, scope-creep check, and backwards-compat restatement are unchanged. Ambiguities that would require a user call go to `### Deferred (needs user input)` and the plan stops — do not guess around them.
+Skip the approval wait — present plan highlights, log `- uplan: plan auto-approved (hands-off)` to `### Hands-off decisions`, invoke `up:uexecute` directly.
 
 ## Terminal state
 
-Plan written, self-reviewed, scope-checked. Interactive: present highlights, wait for approval, invoke `up:uexecute`. Hands-off: present highlights, log auto-approval, invoke `up:uexecute`.
+Plan written, self-reviewed. Interactive: present highlights, wait for approval, invoke `up:uexecute`. Hands-off: present highlights, log auto-approval, invoke `up:uexecute`.
