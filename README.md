@@ -30,7 +30,7 @@ Core ideas:
 
 ## Install
 
-Add the repo as a marketplace and install the plugin:
+### Claude Code
 
 ```
 /plugin marketplace add btseytlin/ultrapack
@@ -38,6 +38,15 @@ Add the repo as a marketplace and install the plugin:
 ```
 
 Then `/reload-plugins`. Verify with `/up:make` or by listing skills.
+
+### Codex
+
+```
+git clone https://github.com/btseytlin/ultrapack ~/.local/share/ultrapack
+~/.local/share/ultrapack/scripts/install-codex.sh
+```
+
+Restart Codex. Skills appear with the `up:` prefix (`up:udesign`, `up:uplan`, …); subagents with the `up-` prefix (`up-implementer`, `up-reviewer`, …). Re-run the script after `git pull` to refresh links.
 
 ## Design
 

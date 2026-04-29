@@ -1,0 +1,5 @@
+#!/bin/sh
+# Regenerate the Codex subagent TOMLs from plugins/up/agents/*.md, stage updates.
+set -e
+python3 "$(git rev-parse --show-toplevel)/scripts/build-codex.py" >&2
+git add .codex/agents
