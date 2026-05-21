@@ -110,7 +110,7 @@ Approach: <1-2 sentences>
 
 ### Interfaces   (optional — omit for single-phase plans)
 - IF1 — `<signature>` — <contract sentence>
-- IF2 — `<signature>` — <contract sentence>
+- IF2 [blocks] — `<signature>` — <contract sentence> (consumer must wait for producer; see "Blocking interfaces" below)
 
 ### Interface graph   (optional — omit for single-phase plans)
 - PH1              -> IF1, IF2   @ plugins/up/skills/foo/SKILL.md
@@ -123,8 +123,17 @@ Approach: <1-2 sentences>
 - An interface is a cross-phase contract: a function/method signature, a shared SKILL.md section anchor, or any API shape that one phase produces and another phase consumes.
 - The consume arrow (`IF<N> ->`) means runtime coupling — one phase's output is the other phase's input. Doc-only phases that merely reference a prior phase's plan text are sources, not consumers; leave the consume side empty (the line starts with `PH<N>  -> <produces>`).
 - `@ <paths>` marks the filesystem boundary for each phase. Paths declared by phases in the same wave must be disjoint; `up:uexecute` uses this to detect boundary violations after each commit.
-- Waves are derived from the graph — phases with no unconsumed dependencies can run in parallel. Do not hand-declare waves; declare the graph and let the executor derive them.
+- Waves are derived from the graph by topo-sort over `[blocks]` edges only — non-blocking IF edges (the default) do not create wave boundaries, since the IF declaration is sufficient context for the consumer. Phases linked only by non-blocking IFs land in the same wave and run in parallel. Do not hand-declare waves; declare the graph and the blocking flags, and let the executor derive them.
 - Omit both `### Interfaces` and `### Interface graph` for single-phase plans.
+
+## Blocking interfaces
+
+By default, an IF is non-blocking: its declared signature is the contract, and a consumer can be implemented in parallel with the producer (the wiring check reconciles any drift after the wave). Mark an IF `[blocks]` when:
+
+- The consumer needs the producer's actual output, not just the signature — e.g. a generated config file, an applied DB migration, a fixture that must exist on disk, a doc anchor that must resolve at lint time.
+- The producer is large, risky, or critical enough that the planner does not want dependent work running concurrently — better to land it, verify it, then build on top. Planner/dispatcher discretion.
+
+Use `[blocks]` sparingly — every block reduces parallelism. The default of non-blocking is correct for ordinary code interfaces (function signatures, class shapes, SKILL.md anchors) where the IF declaration carries the contract.
 
 ## Self-review (inline, no subagent)
 
@@ -134,7 +143,7 @@ Approach: <1-2 sentences>
 3. Consistency — method/class names match across bullets; later phases' interfaces reference what earlier phases define.
 4. Leanness — plan size should fit the task. If it exceeds ~1 screen per day of expected work, trim.
 5. IV / AS coverage — each IV and AS has a referencing bullet somewhere (by ID).
-6. If `### Interface graph` is present: every phase declares `@ <paths>`; paths declared by phases in the same wave are disjoint; every IF consumed by any phase is defined in `### Interfaces`; every IF defined is produced by exactly one phase.
+6. If `### Interface graph` is present: every phase declares `@ <paths>`; paths declared by phases in the same wave are disjoint (where waves are derived by topo-sort over `[blocks]` edges); every IF consumed by any phase is defined in `### Interfaces`; every IF defined is produced by exactly one phase; every `[blocks]` annotation has a stated reason in the IF's contract sentence.
 </required>
 
 Fix issues inline. No re-review loop.

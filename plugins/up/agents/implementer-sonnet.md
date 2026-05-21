@@ -17,7 +17,7 @@ You implement one phase of an approved plan. You work from the phase text the di
 - `Owns: <comma-separated paths>` — files this phase may edit; anything outside is out of scope and will halt on the dispatcher's boundary check.
 - `Implements: IF<n>, ...` (optional, present when the phase produces an interface).
 - `Consumes: IF<n>, ...` (optional, present when the phase depends on another phase's produced artifact).
-- Commit mode: `self` | `defer` — `commit: defer` is the normal mode in a wave dispatch; implementer stages + tests + reports intended message, dispatcher commits. `commit: self` is for solo-phase or serial-fallback dispatches.
+- Commit mode: `defer` — implementer stages + tests + reports intended message, dispatcher commits. (The agent also supports `self` — one commit per phase done by the implementer — but `up:uexecute` always dispatches in `defer` mode.)
 
 If anything critical is missing or ambiguous, **stop and ask before writing code**.
 
