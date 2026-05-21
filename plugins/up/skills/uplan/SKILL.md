@@ -173,7 +173,7 @@ Read `plugins/up/skills/_principles.md` before sketching phases. Every phase mus
 ## Final check — scope creep, elegance, simpler way
 
 <required>
-Before handing off to the user, ask yourself honestly:
+Before handing off to the user, check:
 
 1. Scope creep: is every phase directly serving the Design, or have I snuck in "while I'm here" refactors, extra validation layers, speculative generality?
 2. Elegance: can any pair of phases merge? Are there accidental duplicate data paths? Does the plan introduce abstractions that aren't pulling their weight?
@@ -181,7 +181,7 @@ Before handing off to the user, ask yourself honestly:
 </required>
 
 <good-example>
-"Plan says 7 phases. The honest version is 3 phases — phases 4-7 are a generalization layer for a second caller that doesn't exist. Cut to 3, flag the generalization as future work."
+"Plan says 7 phases. It's really 3 — phases 4-7 are a generalization layer for a second caller that doesn't exist. Cut to 3, flag the generalization as future work."
 </good-example>
 
 <bad-example>

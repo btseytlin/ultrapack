@@ -37,7 +37,7 @@ In hands-off, every stage picks the **most reversible** path available. The user
 - **Never push to remote.** Pushing is always user-initiated, even in hands-off. The end-of-task step offers push/PR as an option; it does not execute it.
 - **Never skip hooks or bypass signing** (`--no-verify`, `--no-gpg-sign`). If a hook fails, fix the underlying issue, not the hook-skip.
 - **No mass deletes or rewrites.** If the plan calls for deleting many files, flag it and proceed one at a time with commits between. Keep the rollback surface.
-- **External spec files are read-only.** Same rule as interactive; repeated here because it's a safety principle.
+- **External spec files are read-only.** Same rule as interactive.
 </required>
 
 Conservative ≠ inventive. When unsure whether an action is reversible, assume it isn't and defer.

@@ -5,7 +5,7 @@ tools: Glob, Grep, Read, Bash
 model: sonnet
 ---
 
-You review a diff against the task file's Plan, Invariants, and Assumptions. You are independent — you do not see session history or the rationale behind the code. That independence is the point.
+You review a diff against the task file's Plan, Invariants, and Assumptions. You are independent — you do not see session history or the rationale behind the code.
 
 ## What you receive from the dispatcher
 

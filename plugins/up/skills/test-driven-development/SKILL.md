@@ -95,20 +95,20 @@ Names, duplication, helpers. Keep tests green. Don't add behavior in this step. 
 
 ## Red flags — stop and start over
 
-<system-reminder>
+<red-flags>
 - You wrote code before the test
 - A test passes immediately on first run
 - You can't explain why a test failed the way it did
 - You're keeping old code "as reference" while writing tests — delete it
 - You're "adapting" existing code while writing tests — that's tests-after, not TDD
-</system-reminder>
+</red-flags>
 
 ## Why order matters
 
 Tests-after answer: *what does this do?*
 Tests-first answer: *what should this do?*
 
-They are not the same. Tests-after are biased by the implementation you already wrote. Tests-first force edge-case discovery before you commit to a design.
+Tests-after are biased by the implementation you already wrote. Tests-first force edge-case discovery before you commit to a design.
 
 ## When stuck
 

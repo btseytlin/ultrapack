@@ -11,7 +11,7 @@ You are taking custody of a process the user will not be watching. Their trust i
 
 ## Away by default
 
-Assume the user is asleep or gone the moment they hand you the job — that's the point of the skill. So you cannot ask anything mid-flight. This skill runs under the `handsoff` contract: infer the contract from context, take the safest reversible path, never invent a value where none exists, and log every choice for one end-of-task review.
+Assume the user is asleep or gone the moment they hand you the job. You cannot ask anything mid-flight. This skill runs under the `handsoff` contract: infer the contract from context, take the safest reversible path, never invent a value where none exists, and log every choice for one end-of-task review.
 
 - **Never block on a question.** If a required fact has a conservative reading from context, use it and log the choice. If it has none, do not guess (handsoff no-default rule).
 - **Structural blocker before launch → stop, don't launch.** Log it under `### Deferred (needs user input)` and notify. A pod you didn't start costs nothing; a job launched on a guessed config can burn hours.
@@ -29,7 +29,7 @@ For remote work, also read `remote-ssh` (nohup launch, log redirection, connecti
 
 ## Phase 0 — Contract (before launching anything)
 
-You cannot guard a process whose health you can't define. Derive these from what the user gave you and the repo (their instructions, configs, `train.py`, env, prior runs). The user is away, so you can't ask — where a fact has a conservative reading, use it and log it; where it doesn't, defer and stop (Away by default).
+You cannot guard a process whose health you can't define. Derive these from what the user gave you and the repo (their instructions, configs, `train.py`, env, prior runs), per Away by default.
 
 <required>
 1. **Launch command** — exact command, working dir, env. Take it as the user wrote it (handsoff rigid path); never reword it into something "equivalent." Output must be captured to a file (GPC5; never run-then-grep).
@@ -42,7 +42,7 @@ You cannot guard a process whose health you can't define. Derive these from what
 8. **Notify-on** — terminal events that pull the user back: done, torn down, gave up. Routine progress does not.
 </required>
 
-Write the contract into the task file or a short note so a fresh session (or the user at 7am) can read what you committed to. Anything you had to infer goes in the decision log; anything you couldn't infer goes under `### Deferred (needs user input)` — and if it's needed to launch safely, don't launch.
+Write the contract into the task file or a short note so a fresh session (or the user at 7am) can read what you committed to. Inferred facts go in the decision log; unresolved ones under `### Deferred (needs user input)`.
 
 ## Phase 1 — Setup
 
@@ -104,14 +104,14 @@ Unrecoverable — escalate, do not improvise — when any holds:
 - It needs a human decision (config change, code fix, data problem, budget call).
 - Repeated identical crashes — restarting a deterministic failure just burns money.
 
-On unrecoverable: capture the failure (last log lines, error, what you tried), pull any artifacts off the pod, then run the reversible teardown (Phase 0 #6) to stop the spend, then notify. Never escalate to a destructive teardown the user didn't name — `stop` ends the spend without losing the disk.
+On unrecoverable: capture the failure (last log lines, error, what you tried), then go to Phase 5.
 
 ## Phase 5 — Terminal: teardown + notify
 
 <required>
 1. Preserve outputs first — pull checkpoints, logs, results off the pod *before* any teardown, in case teardown destroys the disk.
 2. Release the resource (done, gave up, budget hit) with the reversible teardown (`stop`, not destroy). Verify it actually released (pod stopped) — a teardown you didn't confirm is not done (GPC5).
-3. Write the record: outcome, final metrics or error, recovery actions taken, where logs/checkpoints live, plus the two handsoff lists — `### Hands-off decisions` (every inferred choice, one line each) and `### Deferred (needs user input)` (anything you couldn't resolve). This is the review that replaces the questions you couldn't ask.
+3. Write the record: outcome, final metrics or error, recovery actions taken, where logs/checkpoints live, plus the two handsoff lists — `### Hands-off decisions` (every inferred choice, one line each) and `### Deferred (needs user input)`.
 4. `PushNotification` on the contracted terminal events, lead with what the user acts on: `"train done: 50k steps, loss 1.8, pod stopped"`, `"job died — OOM, 3 restarts failed, pod stopped, log saved"`. Not routine progress.
 </required>
 

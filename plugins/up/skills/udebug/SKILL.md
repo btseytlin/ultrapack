@@ -106,7 +106,7 @@ After systematic investigation, if the issue is timing, external, or truly non-d
 - Implement appropriate handling (retry, timeout with condition polling, loud error)
 - Add logging / monitoring for future occurrences
 
-But 95% of "no root cause" verdicts are incomplete investigations. Double-check before settling for this.
+But most "no root cause" verdicts are incomplete investigations. Double-check before settling for this.
 
 ## Terminal state
 

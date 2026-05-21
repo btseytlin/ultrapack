@@ -232,8 +232,6 @@ Scope hints: <optional — preferred sources, depth, time budget>
 
 <required>
 Any time you (or the implementer) change how code handles a pattern — tightening a fallback, renaming a symbol, adding a guard, flipping a default — grep the diff and the wider repo for the same pattern. Skim `git log -p` for the commit that introduced it, in case siblings were added the same way. Apply the change everywhere in the same commit.
-
-The reviewer's job is to catch what you missed. Your job is to minimize what you miss.
 </required>
 
 <good-example>
