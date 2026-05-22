@@ -9,6 +9,8 @@ Convert the approved Design into a lean, concrete implementation plan. Output fi
 
 ## What a plan is
 
+Plan answers: how do we get from where we are now to the Design's vision? It's the delta — the concrete path from current code to the approved spec. Design owns what it should be; Plan owns how we get there from here.
+
 A plan is the minimum information an engineer needs to implement the Design without re-doing the thinking. That means:
 
 - Concrete locations: exact file paths, line number ranges, class/method/interface names. "Modify `parser.py`" is not enough — `parser.py:120-160, Parser.tokenize()` is.

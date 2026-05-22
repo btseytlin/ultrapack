@@ -7,6 +7,12 @@ description: Use before any creative work — features, components, behavior cha
 
 Turn an idea into a validated spec through collaborative dialogue. Output lives in `docs/tasks/<slug>.md` — `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK) — with a TDD decision recorded. Nothing is planned or written until the user approves.
 
+## What design is
+
+Design answers: given what we want, how should it work? Reason forward from the goal — if this were built right, what would it look like? — then distill into invariants and principles.
+
+Explore how it works now and what's been tried (step 1) to inform that answer, never to constrain it. "We already have X, so our options are…" is banned — it anchors the ideal to the accident of what exists. Getting from today's code to the design is the Plan's job.
+
 ## When to invoke
 
 Before any creative work: new features, component builds, behavior changes, architectural moves. Even "simple" tasks — five minutes of design prevents hours of rework. Skip only when the task is trivial (typo, one-line fix) and the user has confirmed the skip.
@@ -16,7 +22,7 @@ Before any creative work: new features, component builds, behavior changes, arch
 <required>
 Follow these steps in order. Do not combine or skip.
 
-1. Explore project context — files, recent commits, existing patterns. No exceptions.
+1. Explore project context — how it works now, what's been tried, existing patterns, recent commits. Inform the ideal; don't let current state constrain it. No exceptions.
 2. Scope check — split into multiple tasks now if the ask is too large.
 3. Ask clarifying questions, one at a time. Prefer multiple choice.
 4. Propose 2–3 approaches. Each with explicit tradeoffs and unknowns.
