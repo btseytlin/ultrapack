@@ -1,11 +1,15 @@
 ---
 name: uverify
-description: Use after execute to confirm the change actually works end-to-end. Builds a positive + negative + invariant checklist, runs each check freshly, does a manual smoke test, writes a short summary to the task file's Verify section, loops back to execute on any failure.
+description: Use after execute to attack the change and demonstrate how it's broken. Default stance — the change is broken; prove and demonstrate it. Builds an attack checklist (happy-path / negative / invariant / interface hypotheses), runs each freshly, smokes the end-to-end, writes a short summary to the task file's Verify section, loops back to execute on any demonstrated break.
 ---
 
 # Verify
 
-Confirm the change actually works — not "looks right", not "tests probably pass", but *verified by running the thing in this message*. Verify's verdict either advances the workflow to `up:ureview` or bounces it back to `up:uexecute` with remediation notes. A short summary is persisted to the task file's `## Verify` section so review (and later readers) see what was checked.
+Verify is the adversary. Default stance: the change is broken — prove and demonstrate it with running evidence in this message. Each check is a hypothesis about how the change bites; verify tries to make the bite land. Pass = honest attack produced no demonstrated break. Fail = break demonstrated, here's the evidence.
+
+Verify's verdict either advances the workflow to `up:ureview` or bounces it back to `up:uexecute` with remediation notes. A short summary is persisted to the task file's `## Verify` section so review (and later readers) see what was attacked.
+
+Steelman the critique: don't fish for cases that pass — fish for the case that would bite a future reader, on-call, or downstream user. If you didn't try to break it, you didn't verify it.
 
 ## Brevity
 
@@ -13,70 +17,81 @@ Confirm the change actually works — not "looks right", not "tests probably pas
 Before writing the Verify section, read `plugins/up/skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Passed checks are one line; evidence citations attach to failures, deferrals, or genuinely surprising passes. Omit `Smoke:` and `Notes:` when there's nothing to report. The Exception clause still holds: failures always carry evidence and a clear "how it should have worked" note.
 </required>
 
-## Phase 1 — Build the checklist (positive, negative, invariant, interfaces)
+## Phase 1 — Build the attack list (happy-path, negative, invariant, interface)
 
-The checklist enumerates every behavior you'll actually run. Built from the Plan, IV / PC / AS from Design, not imagined.
+Each CK is a hypothesis: a specific way the change might bite. Built from the Plan, IV / PC / AS from Design, plus your own adversarial reading — not imagined confirmations.
 
-Checks are numbered CK1..CKN within the task file. Each one covers exactly one behavior or guard.
+Checks are numbered CK1..CKN within the task file. Each one targets exactly one bite.
 
-- Positive (CK): "POST /items returns 201 for a valid payload." "`Dataset.load()` reads the file and returns the expected schema." Specific inputs → specific expected outputs.
-- Negative (CK): "POST /items returns 400 for missing fields." "`Dataset.load()` raises on a missing file." Things that must still fail correctly.
-- Invariant / assumption (CK): one check per IV that can be mechanically verified, plus any AS the verifier can confirm. Reference the source by ID. "IV1: `Dataset` does not import from `training/`" → a grep that must return nothing.
-- Interfaces (CK): one check per IF declared in the Plan's `### Interfaces`. Each asserts the contract end-to-end — a real call that exercises the declared signature (for code IFs), or a structural grep / anchor lookup that the declared contract is present and callable (for doc IFs). Reference the source as `IF<n>`.
+- Happy-path attack (CK): hypothesize the claimed happy path falls over for some input shape, env condition, ordering, or hidden state the author didn't consider. "POST /items: find a valid payload the handler mishandles (unicode name, max-length, concurrent submit, retried request)." Not "show it returns 201" — find the valid case where it doesn't.
+- Negative attack (CK): hypothesize bad input slips past validation, gets silently coerced, or surfaces the wrong error. "POST /items: find a missing-field shape that bypasses validation (null, empty string, whitespace, type confusion, deeply nested)." Not "show it returns 400" — find the bad input that doesn't get rejected.
+- Invariant attack (CK): hypothesize the IV is already violated, or trivially bypassable. Reference IV<n>. "IV1: hunt for `from training` in `src/dataset/`, and re-exports / dynamic imports that smuggle it in."
+- Interface attack (CK): hypothesize the declared contract doesn't match real callers or real returns. Reference IF<n>. "IF1: find a caller passing the wrong type, or a return path that violates the declared signature (None on error, str instead of bytes)."
 
-The checklist lives in-session. It is not written to the task file.
+The attack list lives in-session. It is not written to the task file.
 
 <good-example>
 ```
-Positive:
-- CK1 — POST /items {valid} → 201, body contains new id
-- CK2 — Dataset.load("good.csv") → DataFrame with 3 columns
+Happy-path:
+- CK1 — POST /items: try unicode name, 10KB body, double-submit — find one that doesn't 201
+- CK2 — Dataset.load("good.csv"): try LF vs CRLF, BOM, trailing newline — find a "good" file it mishandles
 
 Negative:
-- CK3 — POST /items {missing name} → 400, "name is required"
-- CK4 — Dataset.load("nope.csv") → FileNotFoundError
+- CK3 — POST /items: try {name: ""}, {name: null}, {name: "  "}, missing field entirely — find one that doesn't 400
+- CK4 — Dataset.load: try missing file, directory, symlink to /dev/null, file with no read perms — find one that doesn't raise cleanly
 
 Invariants / assumptions:
-- CK5 (IV1) — grep "from training" src/dataset/ → empty
-- CK6 (IV2) — all DB writes go through transaction() helper → manual trace
-- CK7 (AS1) — upstream /users response sampled — `email` is UTF-8
+- CK5 (IV1) — grep "from training" src/dataset/ and re-export chains — try to find a smuggled import
+- CK6 (IV2) — find a DB write that bypasses transaction() (raw cursor, ORM escape hatch)
+- CK7 (AS1) — sample upstream /users — find a non-UTF-8 `email` in the wild
 
 Interfaces:
-- CK8 (IF1) — grep 'Parser.parse' callers → all match (arg: str) -> AST
-- CK9 (IF2) — invoke Formatter.render(ast) with sample AST → returns str, no exception
+- CK8 (IF1) — grep `Parser.parse` callers — find one passing non-str
+- CK9 (IF2) — invoke Formatter.render with malformed AST — find a return that violates `-> str`
 ```
 </good-example>
 
 <bad-example>
-"I'll test the happy path." Too vague. No negatives, no invariants, no specific inputs or expected outputs.
+"I'll test the happy path." Confirmation, not attack. No hypothesis of how it breaks.
 </bad-example>
 
-## Phase 2 — Run each check freshly, in this message
+## Phase 2 — Run each attack freshly, in this message
 
-Evidence before claims. If you haven't run it in this message, you cannot claim it passes.
+Evidence before claims. If you haven't run the attack in this message, you cannot claim "no break demonstrated."
 
-- Use `/up:try`-style minimal verification — the direct command, no harness
+- Use `/up:try`-style minimal probes — the direct command, no harness
 - One-off scripts go in project-local `tmp/` (gitignored); clean up after
-- Capture *actual* output. "Looks right" is not evidence.
-- Decide pass/fail on what you saw, not what you expected
+- Capture *actual* output. "Looks right" is not evidence; a stack trace is.
+- Decide on what you saw, not what you expected. A passed attack (you tried hard and couldn't break it) is a real outcome; so is a landed attack (you broke it — record the repro).
 
-If a check passed in an earlier session or an earlier message — re-run it now. State does drift.
+If an attack failed to land in an earlier session — re-run it. State drifts; what couldn't be broken yesterday may break today.
 
-## Phase 3 — Manual smoke test end-to-end
+## Phase 3 — Smoke the end-to-end (lowest-bar attack)
 
-Run the shortest full path that exercises the change in its real shape:
+The smoke is the most basic attack hypothesis: the change is broken enough that it doesn't even run end-to-end in its real shape.
+
+Run the shortest full path:
 
 - CLI change → invoke the command with representative input
 - API change → `curl` against a running server
 - UI change → open in a browser, click through the feature
 - ML change → run a tiny training step or inference call
 
-If you can't run the smoke test (e.g. infra unavailable), say so explicitly. Do not fabricate success. Do not substitute a unit test for the smoke test.
+If smoke fails, that's a demonstrated break — record it. If smoke passes, the change clears the lowest bar; the per-attack hypotheses still need to land or fail to land on their own.
+
+If you can't run the smoke (infra unavailable), say so explicitly. Do not fabricate success. Do not substitute a unit test for the smoke.
 
 ## Phase 4 — Write the Verify summary to the task file
 
 <required>
-Append (or replace) the `## Verify` section of `docs/tasks/<slug>.md`. Keep it short — this is not a transcript, it's an audit trail.
+Append (or replace) the `## Verify` section of `docs/tasks/<slug>.md`. Keep it short — this is not a transcript, it's an audit trail of what was attacked.
+
+Per-CK verdict vocabulary:
+- `held` — attack ran, no break demonstrated.
+- `broke` — attack landed; evidence required (one line, real output).
+- `deferred` — attack couldn't be run (infra, scope); name what blocks it.
+
+Overall `Result:` is `passed` only if every CK is `held` (or justifiably `deferred` with user-visible deferral). Any `broke` → `failed`.
 
 Format:
 
@@ -85,68 +100,81 @@ Format:
 
 **Result:** passed | failed
 
-Positive:
-- CK1 — <check>                   (evidence only on fail or surprise)
-- CK2 — <check> → <evidence>      (failure: required)
+Happy-path:
+- CK1 — <attack hypothesis> — held
+- CK2 — <attack hypothesis> — broke: <evidence>
 
 Negative:
-- CK3 — <check>
+- CK3 — <attack hypothesis> — held
 
 Invariants / assumptions:
-- CK4 (IV1) — <how verified>
-- CK5 (AS1) — <how verified or "unverifiable at this layer">
+- CK4 (IV1) — <attack hypothesis> — held: <how attacked>
+- CK5 (AS1) — <attack hypothesis> — deferred: <what blocks>
 
 Interfaces:
-- CK6 (IF1) — <how verified>
-- CK7 (IF2) — <how verified>
+- CK6 (IF1) — <attack hypothesis> — held
+- CK7 (IF2) — <attack hypothesis> — broke: <evidence>
 
-Smoke: `<command>` → <one-line result>   (omit if no smoke test run or nothing to report)
+Smoke: `<command>` → <one-line result>   (omit if not run; never substitute a non-smoke)
 
-Notes: <anomalies, re-runs, deferrals>   (omit if none)
+Notes: <break repros, deferrals, re-runs>   (omit if none)
 ```
 
-Write this whether verify passed or failed. On failure, the Notes section names what failed and points to where execute should pick up.
+Write this whether verify passed or failed. On failure, Notes names the demonstrated break(s) and points to where execute should pick up.
 </required>
 
 <good-example>
-Fully-passing terse form:
+Fully-passing terse form (every attack held):
 ```markdown
 ## Verify
 
 **Result:** passed
 
-Positive:
-- CK1 — POST /items {valid} → 201 with new id
-- CK2 — Dataset.load("good.csv") → 3-column DataFrame
+Happy-path:
+- CK1 — unicode/long/double-submit POST /items — held
+- CK2 — LF/CRLF/BOM variants of good.csv — held
 
 Negative:
-- CK3 — POST /items {missing name} → 400
-- CK4 — Dataset.load("nope.csv") → FileNotFoundError
+- CK3 — null/empty/whitespace/missing name on POST /items — held (all 400)
+- CK4 — missing/dir/symlink-to-null inputs to Dataset.load — held (all raise)
 
 Invariants / assumptions:
-- CK5 (IV1) — `Dataset` does not import from `training/`
-- CK6 (IV2) — all DB writes go through `transaction()`
+- CK5 (IV1) — grep + re-export sweep for `from training` in `src/dataset/` — held
+- CK6 (IV2) — manual trace of write paths — held, all go through `transaction()`
 
 Interfaces:
-- CK7 (IF1) — `Dataset.load(path: str) -> DataFrame` called with real file → matches declared signature
-- CK8 (IF2) — grep `transaction(` call sites → all DB writes routed correctly
+- CK7 (IF1) — caller-type sweep for `Dataset.load` — held
+- CK8 (IF2) — malformed AST to Formatter.render — held (raises ValueError, doesn't violate `-> str`)
 
 Smoke: `curl -X POST /items ... → 201` — end-to-end OK
 ```
-No `Notes:` (nothing anomalous), no evidence padding on passes.
 </good-example>
 
-## Phase 5 — Consolidate: pass loops to review, fail loops to execute
+<good-example>
+Failing form (a break landed):
+```markdown
+## Verify
 
-- All checks passed → declare verify passed. Invoke `up:ureview`.
-- Any check failed → for each failure, describe how it *should have* worked conceptually (not "add the missing line" — the behavior it was supposed to exhibit). Loop back to `up:uexecute` with these notes. Do not move forward.
+**Result:** failed
+
+Negative:
+- CK3 — null name on POST /items — broke: `{"name": null}` → 500 (TypeError in handler), not 400
+
+Notes: validation layer doesn't reject `null` before the handler; should reject with 400 "name is required". Loop back to execute.
+```
+</good-example>
+
+## Phase 5 — Consolidate: held loops to review, broke loops to execute
+
+- Every attack held (or justifiably deferred) → declare verify passed. Invoke `up:ureview`.
+- Any attack broke → for each, describe how it *should have* worked conceptually (not "add the missing line" — the behavior it was supposed to exhibit under the attack). Loop back to `up:uexecute` with these notes. Do not move forward.
 
 <good-example>
-Failure note: "POST /items returned 500 instead of 400 for a missing `name`. The validation layer should reject the payload with a 400 and a 'name is required' message before the handler runs."
+Break note: "POST /items returned 500 instead of 400 when `name` was `null`. The validation layer should reject the payload with a 400 and a 'name is required' message before the handler runs, for null/empty/whitespace equally."
 </good-example>
 
 <bad-example>
-Failure note: "Test failed, fix it." Tells execute nothing about what the behavior should be.
+Break note: "Attack landed, fix it." Tells execute nothing about what the behavior should be.
 </bad-example>
 
 ## Future Work vs. incomplete work — the slacking-loophole rule
@@ -162,21 +190,23 @@ When a check fails or surfaces ambiguity, do not move it to `## Conclusion → F
 ## Red flags — STOP, do not claim pass
 
 <system-reminder>
-These phrases mean verify did not actually happen:
+These phrases mean verify did not actually attack:
 - "Just this once"
 - "I'm confident it works"
 - "Linter passed" (linter is not runtime)
-- "Unit tests pass" (unit tests are not smoke tests)
-- "Agent said done" (you haven't verified the diff yourself)
+- "Unit tests pass" (unit tests are not adversarial)
+- "Agent said done" (you haven't tried to break it yourself)
 - "Should work", "probably works", "looks correct"
+- "Couldn't think of a way to break it" — without naming the angles you tried (input shapes, ordering, partial failure, stale state, hidden coupling)
 </system-reminder>
 
-If you used any of those as the basis of a pass verdict: back to Phase 1.
+If any of these was the basis of a pass verdict: back to Phase 1.
 
 ## Never
 
-- Claim pass without running the check in this message
-- Declare pass when any check failed
+- Claim a CK held without running the attack in this message
+- Declare pass when any attack broke
+- Build the attack list as restatements of the happy path (no adversarial angle = not an attack)
 - Skip verify to get to review faster
 - Trust a prior session's verdict — re-run
 
