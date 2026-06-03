@@ -27,13 +27,14 @@ Before creating a new task file, check if `docs/tasks/<slug>.md` already exists.
   - `planning` → run `up:uplan`
   - `executing` → run `up:uexecute`
   - `reviewing` → run `up:ureview`
+  - `validating` → re-check the Goal with the user (step 11); on confirmation → `done`
   - `done` → ask the user what they want to do (start a follow-up, re-open, view conclusion)
 - Doesn't exist: proceed to step 3.
 - Multiple in-flight tasks: if more than one `docs/tasks/*.md` has Status ≠ `done`, list them and ask which one the user means (or whether this is a new task).
 
 ### 3. Create task file
 
-Create `docs/tasks/<slug>.md` from the template. Status = `design`. Branch = `main` (placeholder until step 5). No worktree. Mode = `hands-off` if the keyword was present, else `interactive`.
+Create `docs/tasks/<slug>.md` from the template. Status = `design`. Branch = `main` (placeholder until step 5). No worktree. Mode = `hands-off` if the keyword was present, else `interactive`. Goal = a first draft of the observable success condition from the description; `up:udesign` finalizes it, or `up:make` sets it directly when Design is skipped (trivial/small).
 
 Template:
 
@@ -43,6 +44,7 @@ Template:
 **Status:** design
 **Branch:** main
 **Worktree:** none
+**Goal:** <observable success condition that defines done — note if confirming it needs a real-world run or user sign-off beyond the diff>
 **Mode:** <interactive|hands-off>
 
 ## Design
@@ -124,11 +126,22 @@ Invoke `up:uverify`. On failure: `up:uverify` describes how each failure *should
 
 ### 10. Review stage
 
-Status → `reviewing`. Invoke `up:ureview`. It dispatches `up:ureviewer`, processes findings, fills `## Conclusion`. Status → `done`.
+Status → `reviewing`. Invoke `up:ureview`. It dispatches `up:reviewer`, processes findings, fills `## Conclusion`. Status → `validating` — code is verified and reviewed, but the task is not `done` until its Goal is confirmed achieved (step 11).
 
-Once the task is concluded as `done`, run the docs-refresh check (see below).
+### 11. Validate the goal
 
-### 11. Finish
+`done` means the Goal is achieved — not merely that code verified and review cleared. Check the Goal against reality:
+
+- The verified diff already demonstrates the full Goal (verify's smoke exercised the real end state, nothing out-of-band remains) → state the evidence; the Goal is met.
+- The Goal needs steps the agent can't or shouldn't finish alone — a run at full scale, an expensive / remote / paid job, or an outcome only observable in the user's environment ("training works on the dataset") → do what's safely in reach (the small or local proxy, captured in `## Verify`), then list the remaining steps and hand them to the user. Status stays `validating`.
+
+Set Status → `done` only once the Goal is confirmed: by the agent's own end-to-end evidence when it could observe it, or by the user when it couldn't. Never declare `done` off "verified + reviewed" alone.
+
+If the Goal is still pending, proceed to step 12 to offer finish actions — the verified code can still merge — but keep Status `validating` and state that the task is not done until the Goal is confirmed; a later session resumes from `validating` to re-check it.
+
+Once `done`, run the docs-refresh check (see below).
+
+### 12. Finish
 
 Hands-off mode — first: print the `## Conclusion → ### Hands-off decisions` list (and `### Deferred (needs user input)` if non-empty) to the user and ask verbatim: "Here's what I did to make it hands-off. Want to change anything?" Wait for the user's response before continuing.
 
@@ -141,7 +154,7 @@ Execute only after the user chooses.
 
 ## After task is done — docs refresh
 
-Run this once, after Review concludes the task as `done` (not after every stage). Scan the project docs and update them if the work surfaced something they should reflect. Cheap, light-touch; not a full doc pass.
+Run this once, after the Goal is confirmed and Status is `done` (step 11) — not after every stage. Scan the project docs and update them if the work surfaced something they should reflect. Cheap, light-touch; not a full doc pass.
 
 Files to scan:
 - `CLAUDE.md` (project-wide agent guidance)
@@ -171,7 +184,8 @@ Stop and ask the user when:
 ## Rules
 
 - Never skip Review (both modes)
-- Never auto-merge or auto-push — the user chooses at step 11 (both modes)
+- Never auto-merge or auto-push — the user chooses at step 12 (both modes)
+- Never mark `done` until the Goal is confirmed achieved (step 11) — verified + reviewed is not done
 - Never create a worktree without confirming in interactive mode
 - Never edit `main` / `master` directly in hands-off (see `up:handsoff` safety principles)
 - Keep the task file as the single source of truth — each stage reads it, each stage writes to it
@@ -181,8 +195,8 @@ Stop and ask the user when:
 
 ## Hands-off mode
 
-Activated by prefixing `/up:make` arguments with the literal token `handsoff`. The full contract — safety principles (worktree-first, reversible-first, no destructive ops, no push), decision log format, deferred log, no-default rule, end-of-task summary — lives in `up:handsoff`. Read that skill once when the task file's `**Mode:**` header is `hands-off`; the references in step 4, step 6, step 7, step 11 above are the stage-specific touches on top of it.
+Activated by prefixing `/up:make` arguments with the literal token `handsoff`. The full contract — safety principles (worktree-first, reversible-first, no destructive ops, no push), decision log format, deferred log, no-default rule, end-of-task summary — lives in `up:handsoff`. Read that skill once when the task file's `**Mode:**` header is `hands-off`; the references in step 4, step 6, step 7, step 12 above are the stage-specific touches on top of it.
 
 ## Terminal state
 
-Task file Status = `done`, Conclusion filled, user has chosen a finish action (merge, PR, cleanup, or defer). In hands-off, the user has also reviewed the `### Hands-off decisions` list.
+Task file Status = `done` (Goal confirmed achieved, step 11), Conclusion filled, user has chosen a finish action (merge, PR, cleanup, or defer). In hands-off, the user has also reviewed the `### Hands-off decisions` list.

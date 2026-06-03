@@ -38,6 +38,7 @@ In hands-off, every stage picks the **most reversible** path available. The user
 - **Never skip hooks or bypass signing** (`--no-verify`, `--no-gpg-sign`). If a hook fails, fix the underlying issue, not the hook-skip.
 - **No mass deletes or rewrites.** If the plan calls for deleting many files, flag it and proceed one at a time with commits between. Keep the rollback surface.
 - **External spec files are read-only.** Same rule as interactive.
+- **Never auto-mark `done` on an unconfirmed Goal.** If the Goal needs a real-world run or an outcome the agent can't observe (training works at scale), the task ends at `validating`: list the remaining steps under `### Deferred (needs user input)` and surface them at end-of-task. The user confirms the Goal later; hands-off does not.
 </required>
 
 Conservative ≠ inventive. When unsure whether an action is reversible, assume it isn't and defer.
@@ -77,7 +78,7 @@ This rule is strictly stronger than the interactive-mode `uexecute` rule ("no si
 
 ## End-of-task summary
 
-The final stage (`/up:make` step 11) presents the `### Hands-off decisions` list plus any `### Deferred (needs user input)` items to the user with the verbatim prompt:
+The final stage (`/up:make` step 12) presents the `### Hands-off decisions` list plus any `### Deferred (needs user input)` items to the user with the verbatim prompt:
 
 > Here's what I did to make it hands-off. Want to change anything?
 

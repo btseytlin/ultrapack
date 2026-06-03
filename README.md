@@ -26,6 +26,7 @@ Core ideas:
 - Invariants-, principles-, and assumptions-first. Discovered in design, obeyed in plan, checked at review. Short IDs (IV, PC, AS, UK, PH, RK, CK) let later sections reference them without re-quoting.
 - Per-phase subagent implementation. Each plan phase dispatched to a fresh `up:implementer`. Plan declares interfaces (`### Interfaces`) and an execution graph (`### Interface graph`); the executor topo-sorts it into waves and dispatches independent phases in parallel.
 - Mandatory manual testing. Agent must run what it built before claiming done.
+- Goal-gated done. Each task carries a `**Goal:**` — the observable end state that defines done. The task isn't `done` until the Goal is confirmed achieved (a `validating` status sits between review and done); verified + reviewed code is not done if the real-world outcome — e.g. "training works on the new dataset" — isn't confirmed.
 - As short as I could make it.
 
 ## Install

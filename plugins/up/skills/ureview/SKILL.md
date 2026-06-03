@@ -133,7 +133,7 @@ If fixes are substantial, re-dispatch the reviewer on the new diff.
 ```markdown
 ## Conclusion
 
-Outcome: <≤1 sentence + commit SHA. Don't re-narrate the diff.>
+Outcome: <≤1 sentence on whether the Goal is achieved or what real-world validation remains, + commit SHA. Don't re-narrate the diff.>
 
 Invariants:
 - IV1 — <how it was verified>
@@ -199,4 +199,4 @@ See `up:handsoff` for the full contract. Stage-specific delta is embedded in ste
 
 ## Terminal state
 
-Conclusion written, all Critical/Important resolved or explicitly deferred with justification → present merge / PR / cleanup options to the user. The user chooses; you don't auto-merge.
+Conclusion written, all Critical/Important resolved or explicitly deferred with justification → Status → `validating`. Review does not mark `done`: control returns to `/up:make` to validate the Goal (step 11) before any finish action. The user chooses the finish action; you don't auto-merge.

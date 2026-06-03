@@ -13,6 +13,12 @@ Design answers: given what we want, how should it work? Reason forward from the 
 
 Explore how it works now and what's been tried (step 1) to inform that answer, never to constrain it. "We already have X, so our options are…" is banned — it anchors the ideal to the accident of what exists. Getting from today's code to the design is the Plan's job.
 
+## The Goal — definition of done
+
+Every task has one Goal: the observable end state that means the work is finished. Write it to the `**Goal:**` header and confirm it with the user as part of design approval. It is the definition of done — the task is not `done` until the Goal is confirmed achieved (`/up:make` step 11), not when code merely verifies and reviews clean.
+
+State it as an outcome, not an activity: "training runs end-to-end on the full converted dataset and loss matches the old format", not "convert the dataset". If confirming the Goal needs a step beyond the diff — a run at full scale, an expensive / remote job, or an outcome only visible in the user's environment — say so in the Goal, so verify and the done-gate know a local proxy isn't the real thing.
+
 ## When to invoke
 
 Before any creative work: new features, component builds, behavior changes, architectural moves. Even "simple" tasks — five minutes of design prevents hours of rework. Skip only when the task is trivial (typo, one-line fix) and the user has confirmed the skip.
@@ -30,7 +36,7 @@ Follow these steps in order. Do not combine or skip.
 6. Present the design in sections. Get per-section approval.
 7. Identify invariants (IV), principles (PC), assumptions (AS), and unknowns (UK).
 8. Decide TDD — yes or no, with reason. Use `up:test-driven-development`'s applicability rule.
-9. Write to task file — `## Design`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns`.
+9. Write to task file — set the `**Goal:**` header (the definition of done — see below), then `## Design`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns`.
 10. Self-review for placeholders, contradictions, scope, ambiguity. Fix inline.
 11. Wait for user approval before invoking `up:uplan`.
 </required>
@@ -199,4 +205,4 @@ See `up:handsoff` for the full contract. Stage-specific delta: Design is still t
 
 ## Terminal state
 
-User has approved the Design section (interactive) or the Design has been written and self-reviewed (hands-off) → invoke `up:uplan`. Do not write code. Do not invoke any other skill.
+User has approved the Design section and the `**Goal:**` header (interactive) or both have been written and self-reviewed (hands-off) → invoke `up:uplan`. Do not write code. Do not invoke any other skill.
