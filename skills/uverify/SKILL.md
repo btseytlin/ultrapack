@@ -14,7 +14,7 @@ Steelman the critique: don't fish for cases that pass — fish for the case that
 ## Brevity
 
 <required>
-Before writing the Verify section, read `plugins/up/skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Passed checks are one line; evidence citations attach to failures, deferrals, or genuinely surprising passes. Omit `Smoke:`, `Goal:`, and `Notes:` when there's nothing to report (`Goal:` only when a proxy stood in for the real run). The Exception clause still holds: failures always carry evidence and a clear "how it should have worked" note.
+Before writing the Verify section, read `skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Passed checks are one line; evidence citations attach to failures, deferrals, or genuinely surprising passes. Omit `Smoke:`, `Goal:`, and `Notes:` when there's nothing to report (`Goal:` only when a proxy stood in for the real run). The Exception clause still holds: failures always carry evidence and a clear "how it should have worked" note.
 </required>
 
 ## Phase 1 — Build the attack list (happy-path, negative, invariant, interface)
@@ -59,7 +59,7 @@ Interfaces:
 
 Evidence before claims. If you haven't run the attack in this message, you cannot claim "no break demonstrated."
 
-- Use `/up:try`-style minimal probes — the direct command, no harness
+- Use `up-try`-style minimal probes — the direct command, no harness
 - One-off scripts go in project-local `tmp/` (gitignored); clean up after
 - Capture *actual* output. "Looks right" is not evidence; a stack trace is.
 - Decide on what you saw, not what you expected. A passed attack (you tried hard and couldn't break it) is a real outcome; so is a landed attack (you broke it — record the repro).
@@ -81,7 +81,7 @@ If smoke fails, that's a demonstrated break — record it. If smoke passes, the 
 
 If you can't run the smoke (infra unavailable), say so explicitly. Do not fabricate success. Do not substitute a unit test for the smoke.
 
-If the smoke only exercises a proxy for the Goal — a small or local stand-in for a full-scale or real-world run (converting 10 files when the Goal is 700GB on a pod) — say so: name what the proxy covered and what real-world validation still stands between here and the Goal. That gap is what `/up:make` step 11 hands to the user.
+If the smoke only exercises a proxy for the Goal — a small or local stand-in for a full-scale or real-world run (converting 10 files when the Goal is 700GB on a pod) — say so: name what the proxy covered and what real-world validation still stands between here and the Goal. That gap is what the workflow's goal-validation step hands to the user.
 
 ## Phase 4 — Write the Verify summary to the task file
 

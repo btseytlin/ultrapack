@@ -1,0 +1,41 @@
+{
+  "name": "up",
+  "version": "0.3.24",
+  "description": "Ultrapack — lean, opinionated workflows for spec-driven, git-centered development.",
+  "author": {
+    "name": "Boris Tseitlin",
+    "email": "iambtseytlin@gmail.com",
+    "url": "https://github.com/btseytlin"
+  },
+  "homepage": "https://github.com/btseytlin/ultrapack",
+  "repository": "https://github.com/btseytlin/ultrapack",
+  "license": "WTFPL",
+  "keywords": [
+    "skills",
+    "workflow",
+    "planning",
+    "tdd",
+    "git",
+    "code-review"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Ultrapack",
+    "shortDescription": "Spec-driven, git-centered development workflows",
+    "longDescription": "Guide coding work from design through planning, execution, verification, review, and documented handoff.",
+    "developerName": "Boris Tseitlin",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/btseytlin/ultrapack",
+    "defaultPrompt": [
+      "Use up-make to plan and implement a feature.",
+      "Use udebug to investigate this failure.",
+      "Use up-try to test my latest change."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

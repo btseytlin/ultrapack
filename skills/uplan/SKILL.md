@@ -35,7 +35,7 @@ Fill `## Plan` in `docs/tasks/<slug>.md`. Do not create a separate plan file.
 ## Brevity
 
 <required>
-Before writing the Plan, read `plugins/up/skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Treat every subsection in the Format block below as optional — include only when the content is non-default. Failures, deviations, deferrals, and known risks always include evidence.
+Before writing the Plan, read `skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Treat every subsection in the Format block below as optional — include only when the content is non-default. Failures, deviations, deferrals, and known risks always include evidence.
 </required>
 
 ## Process
@@ -115,9 +115,9 @@ Approach: <1-2 sentences>
 - IF2 [blocks] — `<signature>` — <contract sentence> (consumer must wait for producer; see "Blocking interfaces" below)
 
 ### Interface graph   (optional — omit for single-phase plans)
-- PH1              -> IF1, IF2   @ plugins/up/skills/foo/SKILL.md
-- PH2  IF1         -> IF3        @ plugins/up/skills/bar/SKILL.md
-- PH3  IF2, IF3 ->               @ plugins/up/agents/baz/AGENT.md
+- PH1              -> IF1, IF2   @ skills/foo/SKILL.md
+- PH2  IF1         -> IF3        @ skills/bar/SKILL.md
+- PH3  IF2, IF3 ->               @ agents/baz/AGENT.md
 ```
 
 ## When to declare interfaces
@@ -169,7 +169,7 @@ If the task is greenfield, skip this check explicitly in one line.
 ## Default principles
 
 <required>
-Read `plugins/up/skills/_principles.md` before sketching phases. Every phase must be consistent with GPC1–GPC8; where a phase deviates, the bullet names the GPC and the reason in one line (e.g. "breaks GPC3 — single call site, split would obscure the flow").
+Read `skills/_principles.md` before sketching phases. Every phase must be consistent with GPC1–GPC8; where a phase deviates, the bullet names the GPC and the reason in one line (e.g. "breaks GPC3 — single call site, split would obscure the flow").
 </required>
 
 ## Final check — scope creep, elegance, simpler way

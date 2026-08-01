@@ -5,7 +5,11 @@ description: Use to implement an approved plan. When the plan declares `### Inte
 
 # Execute
 
-Implement the approved `## Plan` from `docs/tasks/<slug>.md`. You are the dispatcher — each phase is handed to a fresh implementer subagent (`up:implementer` by default; `up:implementer-sonnet` for trivial phases — see "Choosing the implementer agent" below). After each phase returns, you run the plan-diff check and consistency pass before moving on. The goal is a working change that honors Design and Plan.
+Implement the approved `## Plan` from `docs/tasks/<slug>.md`. You are the dispatcher — each concurrent phase is handed to a fresh implementer subagent. After each phase returns, run the plan-diff check and consistency pass before moving on. The goal is a working change that honors Design and Plan.
+
+## Harness adaptation
+
+On Claude Code, use the packaged `up:implementer`, `up:implementer-sonnet`, `up:explorer`, and `up:researcher` agents. On Codex, delegate with the host's subagent/task mechanism and include the role's prompt contract from this skill; do not claim a particular model or custom agent type is available. References to `TodoWrite` mean the harness's available task checklist. In either harness, pass the absolute working directory and preserve the same ownership, commit, and report rules.
 
 ## Before starting
 
@@ -13,13 +17,13 @@ Implement the approved `## Plan` from `docs/tasks/<slug>.md`. You are the dispat
 1. Read the full task file — Design, Invariants (IV), Principles (PC), Assumptions (AS), Unknowns (UK), Plan. Plan is not optional reading.
 2. Scan the plan for ambiguity, missing dependencies, or contradictory steps. Raise now, not after writing half the code.
 3. Verify branch + worktree. Check `git rev-parse --show-toplevel` and `git branch --show-current` match the task file's `**Branch:**` and `**Worktree:**` headers. If mismatched: stop and ask.
-4. Build the checklist — one todo per plan phase (or per task if phases are coarse). Use TodoWrite.
+4. Build the checklist — one task per plan phase (or per task if phases are coarse) using the harness's task tracker.
 </required>
 
 ## Brevity
 
 <required>
-Before writing anything into the task file (deviations, hands-off decisions, known risks), read `plugins/up/skills/_brevity.md`. Apply its five principles. Specifically:
+Before writing anything into the task file (deviations, hands-off decisions, known risks), read `skills/_brevity.md`. Apply its five principles. Specifically:
 - `### Deviations from plan` — create the subsection only when a deviation happens. Do not add an empty "no deviations" line.
 - `### Hands-off decisions` — when every stage auto-approved with no interventions, collapse to a single entry `- all stages auto-approved, no interventions`. When a stage did intervene (reviewer fix, deferral, etc.), keep its own entry.
 - `### Deferred (needs user input)` — one line per deferral, with the concrete artifact the user needs (file path / command / question).
@@ -61,7 +65,7 @@ Before dispatching a wave:
 For each phase (serial fallback) or wave (parallel):
 
 <required>
-1. Mark the phase(s) `in_progress` in TodoWrite.
+1. Mark the phase(s) `in_progress` in the harness's task tracker.
 2. Dispatch implementers (multi-phase wave only — see "Wave dispatch" below). Otherwise edit inline yourself.
 3. On implementer return, handle status:
    - `DONE` → continue to step 4.
@@ -77,19 +81,19 @@ Parallelism comes only from the Plan's `### Interface graph` via the wave schedu
 
 ## Dispatch per phase
 
-Applies only when two or more phases fire concurrently in a wave. Each phase runs in a fresh implementer subagent. You (the dispatcher, on Opus) coordinate. For single-implementer cases (single-phase plan, serial fallback, or a wave that reduced to one phase), do the work inline — see "When to skip dispatch and do it inline" below.
+Applies only when two or more phases fire concurrently in a wave. Each phase runs in a fresh implementer subagent. You coordinate. For single-implementer cases (single-phase plan, serial fallback, or a wave that reduced to one phase), do the work inline — see "When to skip dispatch and do it inline" below.
 
 ### Choosing the implementer agent
 
 <required>
-Two implementer agents are available:
+Choose the implementer role appropriate to the phase:
 
-- `up:implementer` (Opus) — default. Use for any phase requiring judgment: multi-file changes, new logic, TDD, introducing or changing an interface, anything where reading multiple files informs the implementation.
-- `up:implementer-sonnet` (Sonnet) — trivial phases only. Use when the phase is unambiguously mechanical and well-localized: single-file typo or copy fix, mechanical rename, import/lint cleanup, version/changelog bump, doc edit with no behavioral claims.
+- **Complex implementer** — default. Use for any phase requiring judgment: multi-file changes, new logic, TDD, introducing or changing an interface, anything where reading multiple files informs the implementation.
+- **Trivial implementer** — only for an unambiguously mechanical, well-localized edit: a single-file typo/copy fix, mechanical rename, import/lint cleanup, version bump, or doc edit with no behavioral claims.
 
-Default to `up:implementer`. Pick `up:implementer-sonnet` only when every criterion is met. If unsure, pick `up:implementer`.
+Default to the complex implementer. Pick the trivial role only when every criterion is met. If unsure, use the complex role.
 
-If `up:implementer-sonnet` returns `NEEDS_CONTEXT` with `escalate: up:implementer`, re-dispatch the same phase to `up:implementer` — its scope check correctly bounced a non-trivial phase.
+If the trivial implementer returns `NEEDS_CONTEXT` with an escalation, re-dispatch the same phase to the complex implementer — its scope check correctly bounced a non-trivial phase.
 </required>
 
 <required>

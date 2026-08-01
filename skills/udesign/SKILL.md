@@ -15,7 +15,7 @@ Explore how it works now and what's been tried (step 1) to inform that answer, n
 
 ## The Goal — definition of done
 
-Every task has one Goal: the observable end state that means the work is finished. Write it to the `**Goal:**` header and confirm it with the user as part of design approval. It is the definition of done — the task is not `done` until the Goal is confirmed achieved (`/up:make` step 11), not when code merely verifies and reviews clean.
+Every task has one Goal: the observable end state that means the work is finished. Write it to the `**Goal:**` header and confirm it with the user as part of design approval. It is the definition of done — the task is not `done` until the workflow's goal-validation step confirms it, not when code merely verifies and reviews clean.
 
 State it as an outcome, not an activity: "training runs end-to-end on the full converted dataset and loss matches the old format", not "convert the dataset". If confirming the Goal needs a step beyond the diff — a run at full scale, an expensive / remote job, or an outcome only visible in the user's environment — say so in the Goal, so verify and the done-gate know a local proxy isn't the real thing.
 
@@ -133,7 +133,7 @@ IV — specific things that must hold. Concrete enough to check against the code
 </invariants>
 
 <principles>
-PC — softer abstract guidance. Still concrete enough to audit. Task-specific only — the Global Principles (GPC1–GPC8) in `plugins/up/skills/_principles.md` apply everywhere and don't need to be restated. List a PC only when the task deviates from a GPC (name which one and why) or when it needs an extra rule the GPCs don't cover.
+PC — softer abstract guidance. Still concrete enough to audit. Task-specific only — the Global Principles (GPC1–GPC8) in `skills/_principles.md` apply everywhere and don't need to be restated. List a PC only when the task deviates from a GPC (name which one and why) or when it needs an extra rule the GPCs don't cover.
 - PC1 — Fail fast, no silent fallbacks.
 - PC2 — Prefer composition over inheritance.
 </principles>

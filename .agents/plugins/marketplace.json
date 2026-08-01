@@ -1,0 +1,20 @@
+{
+  "name": "ultrapack",
+  "interface": {
+    "displayName": "Ultrapack"
+  },
+  "plugins": [
+    {
+      "name": "up",
+      "source": {
+        "source": "url",
+        "url": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

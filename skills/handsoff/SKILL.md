@@ -1,6 +1,6 @@
 ---
 name: handsoff
-description: Contract for hands-off mode — the ultrapack workflow variant that minimizes user prompts after Design, takes the safest reversible path, and logs every auto-choice for one end-of-task review. Referenced by /up:make and the child skills (udesign, uplan, uexecute, uverify, ureview). Read when the task file's **Mode:** header is `hands-off`.
+description: Contract for hands-off mode — the ultrapack workflow variant that minimizes user prompts after Design, takes the safest reversible path, and logs every auto-choice for one end-of-task review. Referenced by the workflow entry point and child skills (udesign, uplan, uexecute, uverify, ureview). Read when the task file's **Mode:** header is `hands-off`.
 ---
 
 # Hands-off mode
@@ -31,8 +31,8 @@ The user trades per-step approval for one end-of-task review against the decisio
 <required>
 In hands-off, every stage picks the **most reversible** path available. The user isn't there to catch a destructive move. Specifically:
 
-- **Always work on a dedicated branch + worktree.** Never edit `main` / `master` directly in hands-off. If `up:git-worktrees` cannot provision one, log under `### Deferred (needs user input)` and stop — do not fall back to working on the main branch.
-- **Prefer additive over subtractive edits.** Rename before deleting. Comment-out before removing. Add a new file before replacing the old one in place. The reviewer (`up:reviewer`) still catches unused cruft; better that than a deleted file the user wanted.
+- **Always work on a dedicated branch + worktree.** Never edit `main` / `master` directly in hands-off. If `git-worktrees` cannot provision one, log under `### Deferred (needs user input)` and stop — do not fall back to working on the main branch.
+- **Prefer additive over subtractive edits.** Rename before deleting. Comment-out before removing. Add a new file before replacing the old one in place. The independent reviewer still catches unused cruft; better that than a deleted file the user wanted.
 - **Never destructive git operations.** No `reset --hard`, no `branch -D`, no force-push, no `clean -f`, no overwriting of uncommitted work. If a clean state is needed, stash.
 - **Never push to remote.** Pushing is always user-initiated, even in hands-off. The end-of-task step offers push/PR as an option; it does not execute it.
 - **Never skip hooks or bypass signing** (`--no-verify`, `--no-gpg-sign`). If a hook fails, fix the underlying issue, not the hook-skip.
@@ -78,7 +78,7 @@ This rule is strictly stronger than the interactive-mode `uexecute` rule ("no si
 
 ## End-of-task summary
 
-The final stage (`/up:make` step 12) presents the `### Hands-off decisions` list plus any `### Deferred (needs user input)` items to the user with the verbatim prompt:
+The final stage (the workflow entry point's step 12) presents the `### Hands-off decisions` list plus any `### Deferred (needs user input)` items to the user with the verbatim prompt:
 
 > Here's what I did to make it hands-off. Want to change anything?
 
