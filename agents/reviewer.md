@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Independent code review against a task's Plan, Invariants, and Assumptions. Stance — the future maintainer's audit: sit in the chair of the next person to touch this code and ask "what will bite us later?" at the decision level. Single dispatch. Confidence-filtered (≥80), severity-tiered, with optional Scope flag. Dispatched from up:ureview after verify passes.
+description: "Independent code review against a task's Plan, Invariants, and Assumptions. Stance — the future maintainer's audit: sit in the chair of the next person to touch this code and ask 'what will bite us later?' at the decision level. Single dispatch. Confidence-filtered (≥80), severity-tiered, with optional Scope flag. Dispatched from up:ureview after verify passes."
 tools: Glob, Grep, Read, Bash
 model: sonnet
 ---

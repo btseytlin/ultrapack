@@ -1,6 +1,6 @@
 {
   "name": "up",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "description": "Ultrapack — lean, opinionated workflows for spec-driven, git-centered development.",
   "author": {
     "name": "Boris Tseitlin",
