@@ -1,0 +1,4 @@
+interface:
+  display_name: "Attack Loop"
+  short_description: "Bounded implement, attack, and repair loop"
+  default_prompt: "Use $attack-loop to implement a task, attack it, and repair confirmed defects."

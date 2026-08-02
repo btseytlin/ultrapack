@@ -106,11 +106,12 @@ Discipline skills:
 
 - `/up:make [handsoff] <description>` — Orchestrate the full flow: task file → design → branch → plan → execute → verify → review → update docs.
 - `/up:try` — Design one positive and one negative test case, run both, report.
+- `/up:attack-loop <description>` — Run bounded implement, independent attack, and repair rounds; require a maximum round count and stop condition.
 - `/up:step-back` — Circuit breaker: stop, diagnose why approaches failed, propose new direction.
 - `/up:summary` — Produce a summary so another session can continue with zero context.
 - `/up:reflect` — Reflect on the dialogue, extract learnings into CLAUDE.md / memory / docs.
 
-Codex exposes the same command workflows as skills: `up-make`, `up-e`, `up-try`, `up-step-back`, `up-summary`, and `up-reflect`. Invoke them with `$<name>` or ask Codex to use the named skill. Codex uses its own delegation tools for the implementation, exploration, research, and independent-review roles; it does not rely on Claude-specific custom-agent model pins or transcript files.
+Codex exposes the same command workflows as skills: `up-make`, `up-e`, `up-try`, `attack-loop`, `up-step-back`, `up-summary`, and `up-reflect`. Invoke them with `$<name>` or ask Codex to use the named skill. Codex uses its own delegation tools for the implementation, exploration, research, and independent-review roles; it does not rely on Claude-specific custom-agent model pins or transcript files.
 
 ### Claude Code agents
 
