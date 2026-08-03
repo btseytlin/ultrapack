@@ -1,5 +1,5 @@
 ---
-name: up-make
+name: make
 description: "Orchestrate the full Ultrapack workflow in Codex: create or resume a task file, design, plan, execute, verify, review, and validate the observable goal. Use when the user asks to build, fix, or deliver a non-trivial change with the complete workflow."
 ---
 
@@ -42,4 +42,4 @@ Use `handsoff` for the shared safety contract. Record every automatic decision i
 
 ## Harness adaptation
 
-Use the existing skills by name (`udesign`, `uplan`, `uexecute`, `uverify`, `ureview`, and `git-worktrees`). Codex has no Claude slash-command syntax, so tell users to invoke this skill as `$up-make` or say “use up-make.”
+Use the existing skills by name (`udesign`, `uplan`, `uexecute`, `uverify`, `ureview`, and `git-worktrees`). Codex has no Claude slash-command syntax, so tell users to invoke this skill as `$make` or say “use make.”

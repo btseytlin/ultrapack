@@ -1,5 +1,5 @@
 ---
-name: up-reflect
+name: reflect
 description: Extract durable, non-obvious lessons from the current dialogue and route them to project guidance, memory, documentation, or the active task conclusion. Use when the user asks to reflect on a session or preserve learnings.
 ---
 

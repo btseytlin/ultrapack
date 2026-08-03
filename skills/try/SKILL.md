@@ -1,5 +1,5 @@
 ---
-name: up-try
+name: try
 description: Manually test the latest change with one realistic positive case and one adversarial negative case, capturing evidence before any further fix. Use when the user asks for a quick confidence check or wants to test a recent implementation.
 ---
 

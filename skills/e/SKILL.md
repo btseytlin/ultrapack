@@ -1,5 +1,5 @@
 ---
-name: up-e
+name: e
 description: "Explain a file, error, design, diff, or concept like a helpful engineering colleague: grounded in evidence, concise, and with useful follow-up threads. Use when the user asks for a clear explanation of the current work or codebase."
 ---
 

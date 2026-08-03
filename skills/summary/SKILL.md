@@ -1,5 +1,5 @@
 ---
-name: up-summary
+name: summary
 description: Produce a compact, zero-context handoff for the current Codex work and, after user confirmation, save it to the active task conclusion or a new task summary file. Use when the user asks to preserve progress for a later session.
 ---
 

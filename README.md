@@ -13,7 +13,7 @@ Claude Code:
 Codex:
 
 ```
-Use $up-make to fix the flaky login test.
+Use $make to fix the flaky login test.
 ```
 
 Will take you through the process: design → plan → execute → verify → review → update docs.
@@ -23,7 +23,7 @@ Each stage populates `docs/tasks/<slug>.md`. The task file is the source of trut
 
 Claude Code: `/up:make handsoff fix the flaky login test`.
 
-Codex: `Use $up-make handsoff to fix the flaky login test.`
+Codex: `Use $make handsoff to fix the flaky login test.`
 
 Same, but ask you as few questions as possible.
 
@@ -59,7 +59,7 @@ codex plugin marketplace add btseytlin/ultrapack --ref main
 codex plugin add up@ultrapack
 ```
 
-Verify by invoking `$up-make` or asking Codex to use `up-make` for a small task. For a local checkout, replace `btseytlin/ultrapack` with the checkout path.
+Verify by invoking `$make` or asking Codex to use `make` for a small task. For a local checkout, replace `btseytlin/ultrapack` with the checkout path.
 
 ## Design
 
@@ -69,7 +69,7 @@ Inspired by [feature-dev](https://github.com/anthropics/claude-code/tree/main/pl
 
 Shortened and simplified, taking from both. The whole workflow is built around updating one markdown file per task `docs/tasks/<slug>.md` with sections Design, Plan, Verify, Conclusion. It's also git centered: use worktrees by default for easier parallel work, incremental commits for easier rollback and review.
 
-Each stage of task planning and execution is a skill. Claude Code's `/up:make` and Codex's `up-make` both orchestrate the whole flow.
+Each stage of task planning and execution is a skill. Claude Code's `/up:make` and Codex's `make` both orchestrate the whole flow.
 
 `up:udesign` is the first stage: discuss trade-offs with the user, discover invariants (specific things that must hold, e.g. "class Player must not access internals of class Enemy"), principles (softer guidance, like "prefer composition over inheritance"), assumptions (unverified premises the design rests on — the Conclusion reports whether each held), and unknowns (open questions to resolve during plan/execute). Prepare initial spec in the task file.
 
@@ -111,7 +111,7 @@ Discipline skills:
 - `/up:summary` — Produce a summary so another session can continue with zero context.
 - `/up:reflect` — Reflect on the dialogue, extract learnings into CLAUDE.md / memory / docs.
 
-Codex exposes the same command workflows as skills: `up-make`, `up-e`, `up-try`, `attack-loop`, `up-step-back`, `up-summary`, and `up-reflect`. Invoke them with `$<name>` or ask Codex to use the named skill. Codex uses its own delegation tools for the implementation, exploration, research, and independent-review roles; it does not rely on Claude-specific custom-agent model pins or transcript files.
+Codex exposes the same command workflows as skills: `make`, `e`, `try`, `attack-loop`, `step-back`, `summary`, and `reflect`. Invoke them with `$<name>` or ask Codex to use the named skill. Codex uses its own delegation tools for the implementation, exploration, research, and independent-review roles; it does not rely on Claude-specific custom-agent model pins or transcript files.
 
 ### Claude Code agents
 

@@ -59,7 +59,7 @@ Interfaces:
 
 Evidence before claims. If you haven't run the attack in this message, you cannot claim "no break demonstrated."
 
-- Use `up-try`-style minimal probes — the direct command, no harness
+- Use `try`-style minimal probes — the direct command, no harness
 - One-off scripts go in project-local `tmp/` (gitignored); clean up after
 - Capture *actual* output. "Looks right" is not evidence; a stack trace is.
 - Decide on what you saw, not what you expected. A passed attack (you tried hard and couldn't break it) is a real outcome; so is a landed attack (you broke it — record the repro).

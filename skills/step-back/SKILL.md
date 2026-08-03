@@ -1,5 +1,5 @@
 ---
-name: up-step-back
+name: step-back
 description: Break a failed implementation loop by tracing attempts, identifying the real blocker, and proposing a materially different direction before further changes. Use when repeated fixes or investigations are not converging.
 ---
 

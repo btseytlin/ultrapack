@@ -17,7 +17,7 @@ The repository root is the plugin. Codex loads `skills/`; Claude Code also loads
 
 ## Naming
 
-Internal plugin name: `up`. Claude Code slash/skill invocations use the `up:` prefix: `/up:make`, `up:udesign`, `up:reviewer`. Codex uses the shared process skills and namespaced command skills such as `$up-make` and `$up-try`. Process skills are `u`-prefixed (`udesign`, `uplan`, `uexecute`, `uverify`, `ureview`, `udebug`, `udocument`) to dodge collisions.
+Internal plugin name: `up`. Claude Code slash/skill invocations use the `up:` prefix: `/up:make`, `up:udesign`, `up:reviewer`. Codex command skills use the same names as Claude commands, without Claude's namespace: `$make`, `$try`. Process skills are `u`-prefixed (`udesign`, `uplan`, `uexecute`, `uverify`, `ureview`, `udebug`, `udocument`) to dodge collisions.
 
 ## Design principles
 

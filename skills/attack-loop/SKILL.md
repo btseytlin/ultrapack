@@ -5,7 +5,7 @@ description: "Run a bounded implement-attack-repair loop for a user-specified ta
 
 # Attack loop
 
-Use this standalone workflow when a task needs independent adversarial passes without an `up-make` task file.
+Use this standalone workflow when a task needs independent adversarial passes without a `make` task file.
 
 ## Require a bounded contract
 
