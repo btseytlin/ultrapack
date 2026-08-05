@@ -30,7 +30,7 @@ Same, but ask you as few questions as possible.
 While you sleep, the agent picks the safest, most reversible choices: don't delete things (copy and rename instead), work in a git branch, don't introduce silent defaults and fallbacks, fix only critical and important issues.
 
 Core ideas:
-- One file per task. `docs/tasks/<slug>.md` evolves through Design → Plan → Verify → Conclusion.
+- One file per task. `docs/tasks/<slug>.md` evolves through Context → Design → Plan → Verify → Conclusion.
 - Invariants-, principles-, and assumptions-first. Discovered in design, obeyed in plan, checked at review. Short IDs (IV, PC, AS, UK, PH, RK, CK) let later sections reference them without re-quoting.
 - Per-phase subagent implementation. Each plan phase dispatched to a fresh `up:implementer`. Plan declares interfaces (`### Interfaces`) and an execution graph (`### Interface graph`); the executor topo-sorts it into waves and dispatches independent phases in parallel.
 - Mandatory manual testing. Agent must run what it built before claiming done.
@@ -67,7 +67,7 @@ Ultrapack is a small set of shared skills plus Claude Code commands and agents t
 
 Inspired by [feature-dev](https://github.com/anthropics/claude-code/tree/main/plugins/feature-dev) and [obra/superpowers](https://github.com/obra/superpowers). feature-dev is too barebones. superpowers is great, but creates huge plans with a lot of work duplication, changes too frequently and is geared to a specific type of dev work. Also it's a chore to type "superpowers" every time.
 
-Shortened and simplified, taking from both. The whole workflow is built around updating one markdown file per task `docs/tasks/<slug>.md` with sections Design, Plan, Verify, Conclusion. It's also git centered: use worktrees by default for easier parallel work, incremental commits for easier rollback and review.
+Shortened and simplified, taking from both. The whole workflow is built around updating one markdown file per task `docs/tasks/<slug>.md` with sections Context, Design, Plan, Verify, Conclusion. It's also git centered: use worktrees by default for easier parallel work, incremental commits for easier rollback and review.
 
 Each stage of task planning and execution is a skill. Claude Code's `/up:make` and Codex's `make` both orchestrate the whole flow.
 
@@ -88,7 +88,7 @@ Finally, the conclusion section of the task markdown file is populated. Then all
 ### Skills
 
 Process skills (u-prefixed to dodge Claude Code built-ins):
-- `up:udesign` — Brainstorm requirements, populate Design + Invariants + Principles + Assumptions + Unknowns, decide whether to use TDD.
+- `up:udesign` — Brainstorm requirements, populate Context + Design + Invariants + Principles + Assumptions + Unknowns, decide whether to use TDD.
 - `up:uplan` — Plan: what files to change, what class/methods and with what interfaces, test strategy, order. Only non-trivial code blocks.
 - `up:uexecute` — Dispatch `up:implementer` per phase (parallel waves derived from `### Interface graph`), incremental commits, Boundary + plan-diff + consistency sweep per phase, Wiring check after the final wave.
 - `up:uverify` — Positive + negative + invariant checklist, manual smoke test, writes summary to task file, loops back to execute on failure.

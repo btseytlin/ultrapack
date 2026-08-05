@@ -19,6 +19,7 @@ Use this as Codex's equivalent of Claude Code's `/up:make`. Treat the user's rem
 **Goal:** <observable end state>
 **Mode:** <interactive|hands-off>
 
+## Context
 ## Design
 ### Invariants
 ### Principles

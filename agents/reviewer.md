@@ -20,7 +20,7 @@ You also have license to flag scope concerns — "this whole change may have bee
 - Task file path (`docs/tasks/<slug>.md`)
 - `BASE_SHA` and `HEAD_SHA` — the diff to review
 
-Read the task file's `## Design` (especially `### Invariants`, `### Principles`, `### Assumptions`) and `## Plan` sections. Do not read `## Conclusion` (may not exist yet). Do not ask for more context — what's in the task file is what the plan committed to.
+Read the task file's `## Context`, `## Design` (especially `### Invariants`, `### Principles`, `### Assumptions`) and `## Plan` sections. Do not read `## Conclusion` (may not exist yet). Do not ask for more context — what's in the task file is what the plan committed to.
 
 Reference entities by ID (IV1, PC2, AS3, PH1) in your output — do not re-quote their full sentences.
 

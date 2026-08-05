@@ -47,6 +47,9 @@ Template:
 **Goal:** <observable success condition that defines done — note if confirming it needs a real-world run or user sign-off beyond the diff>
 **Mode:** <interactive|hands-off>
 
+## Context
+<empty — filled by up:udesign: crisp observations about how things are now that motivate the design>
+
 ## Design
 <empty — filled by up:udesign>
 
@@ -95,7 +98,7 @@ Hands-off mode: do not confirm. Default to Medium (full flow) unless the scope i
 
 ### 5. Design stage (unless skipped)
 
-Invoke `up:udesign`. It populates `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK), and records `TDD: yes / no (reason)`. Status → `planning`.
+Invoke `up:udesign`. It populates `## Context`, `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK), and records `TDD: yes / no (reason)`. Status → `planning`.
 
 ### 6. Branch & worktree decision
 

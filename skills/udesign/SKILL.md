@@ -1,17 +1,39 @@
 ---
 name: udesign
-description: Use before any creative work — features, components, behavior changes. Turns an idea into a validated spec with explicit tradeoffs and unknowns, and splits scope into multiple tasks if it's too large. Output is the `## Design` section of the task file.
+description: Use before any creative work — features, components, behavior changes. Turns an idea into a validated spec with explicit tradeoffs and unknowns, and splits scope into multiple tasks if it's too large. Output is the `## Context` and `## Design` sections of the task file.
 ---
 
 # Design
 
-Turn an idea into a validated spec through collaborative dialogue. Output lives in `docs/tasks/<slug>.md` — `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK) — with a TDD decision recorded. Nothing is planned or written until the user approves.
+Turn an idea into a validated spec through collaborative dialogue. Output lives in `docs/tasks/<slug>.md` — `## Context`, `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK) — with a TDD decision recorded. Nothing is planned or written until the user approves.
 
 ## What design is
 
 Design answers: given what we want, how should it work? Reason forward from the goal — if this were built right, what would it look like? — then distill into invariants and principles.
 
 Explore how it works now and what's been tried (step 1) to inform that answer, never to constrain it. "We already have X, so our options are…" is banned — it anchors the ideal to the accident of what exists. Getting from today's code to the design is the Plan's job.
+
+## Context — the observations that motivate the design
+
+`## Context` comes before `## Design` in the task file and holds a short list of observations about how things are today: what exists, how it behaves, what hurts. It is the evidence; Design is the response to it. A reader should be able to look at the list and see why this task exists without having been in the room.
+
+Distil it from the step-1 exploration. Each bullet is one observation, one sentence, checkable against the repo or the user's stated experience. Aim for 3–6; if a bullet doesn't push toward some part of the design, cut it.
+
+State facts, not solutions — no "we should", no chosen approach. Anything you can't confirm is an assumption (AS) or an unknown (UK), not a context bullet.
+
+<good-example>
+## Context
+- Every task file jumps straight to the chosen approach; the observations behind it live only in the design chat.
+- Reviewers arriving months later re-derive the problem from the diff, and sometimes get it wrong.
+- The `## Design` section already runs long, so motivation gets buried in the approach prose.
+</good-example>
+
+<bad-example>
+## Context
+- We should add a Context section before Design.        ← a solution, not an observation
+- The workflow could probably be better documented.     ← not checkable, pushes toward nothing
+- Task files live in `docs/tasks/` and are markdown.    ← true, but motivates nothing
+</bad-example>
 
 ## The Goal — definition of done
 
@@ -36,7 +58,7 @@ Follow these steps in order. Do not combine or skip.
 6. Present the design in sections. Get per-section approval.
 7. Identify invariants (IV), principles (PC), assumptions (AS), and unknowns (UK).
 8. Decide TDD — yes or no, with reason. Use `up:test-driven-development`'s applicability rule.
-9. Write to task file — set the `**Goal:**` header (the definition of done — see below), then `## Design`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns`.
+9. Write to task file — set the `**Goal:**` header (the definition of done — see below), then `## Context`, `## Design`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns`.
 10. Self-review for placeholders, contradictions, scope, ambiguity. Fix inline.
 11. Wait for user approval before invoking `up:uplan`.
 </required>
@@ -169,6 +191,10 @@ TDD: no (reason: one-off migration script; no reusable logic)
 ## Task-file output shape
 
 ```markdown
+## Context
+- <observation about how things are now that motivates the design>
+- <...>
+
 ## Design
 <purpose, scope, chosen approach, key decisions, tradeoffs that settled it>
 <TDD: yes|no (reason)>
@@ -197,7 +223,7 @@ TDD: no (reason: one-off migration script; no reusable logic)
 - Follow existing patterns. Targeted improvements only if they serve this task.
 - Isolation. Units with one clear purpose; interfaces understandable without reading internals.
 - No code yet. Design's output is words, not code.
-- Omit empty subsections. `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns` are pre-seeded by the `/up:make` template. Delete any that end up with no entries — never leave a placeholder like `<empty>`, "none", or "n/a". See `_brevity.md` principle 1.
+- Omit empty subsections. `## Context`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns` are pre-seeded by the `/up:make` template. Delete any that end up with no entries — never leave a placeholder like `<empty>`, "none", or "n/a". See `_brevity.md` principle 1.
 
 ## Hands-off mode
 
@@ -205,4 +231,4 @@ See `up:handsoff` for the full contract. Stage-specific delta: Design is still t
 
 ## Terminal state
 
-User has approved the Design section and the `**Goal:**` header (interactive) or both have been written and self-reviewed (hands-off) → invoke `up:uplan`. Do not write code. Do not invoke any other skill.
+User has approved the Context and Design sections and the `**Goal:**` header (interactive) or both have been written and self-reviewed (hands-off) → invoke `up:uplan`. Do not write code. Do not invoke any other skill.

@@ -14,7 +14,7 @@ On Claude Code, use the packaged `up:implementer`, `up:implementer-sonnet`, `up:
 ## Before starting
 
 <required>
-1. Read the full task file — Design, Invariants (IV), Principles (PC), Assumptions (AS), Unknowns (UK), Plan. Plan is not optional reading.
+1. Read the full task file — Context, Design, Invariants (IV), Principles (PC), Assumptions (AS), Unknowns (UK), Plan. Plan is not optional reading.
 2. Scan the plan for ambiguity, missing dependencies, or contradictory steps. Raise now, not after writing half the code.
 3. Verify branch + worktree. Check `git rev-parse --show-toplevel` and `git branch --show-current` match the task file's `**Branch:**` and `**Worktree:**` headers. If mismatched: stop and ask.
 4. Build the checklist — one task per plan phase (or per task if phases are coarse) using the harness's task tracker.
