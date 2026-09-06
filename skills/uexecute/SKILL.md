@@ -9,7 +9,7 @@ Implement the approved `## Plan` from `docs/tasks/<slug>.md`. You are the dispat
 
 ## Harness adaptation
 
-On Claude Code, use the packaged `up:implementer`, `up:implementer-sonnet`, `up:explorer`, and `up:researcher` agents. On Codex, delegate with the host's subagent/task mechanism and include the role's prompt contract from this skill; do not claim a particular model or custom agent type is available. References to `TodoWrite` mean the harness's available task checklist. In either harness, pass the absolute working directory and preserve the same ownership, commit, and report rules.
+On Claude Code, use the packaged `up:implementer`, `up:implementer-sonnet`, `up:explorer`, and `up:researcher` agents. On Codex or Pi, delegate with the host's subagent/task mechanism and include the role's prompt contract from this skill; do not claim a particular model or custom agent type is available. References to `TodoWrite` mean the harness's available task checklist. In either harness, pass the absolute working directory and preserve the same ownership, commit, and report rules.
 
 ## Before starting
 
@@ -23,7 +23,7 @@ On Claude Code, use the packaged `up:implementer`, `up:implementer-sonnet`, `up:
 ## Brevity
 
 <required>
-Before writing anything into the task file (deviations, hands-off decisions, known risks), read `skills/_brevity.md`. Apply its five principles. Specifically:
+Before responding or writing anything into the task file (deviations, hands-off decisions, known risks), read the [brevity rules](../_brevity.md). Apply its principles. Specifically:
 - `### Deviations from plan` — create the subsection only when a deviation happens. Do not add an empty "no deviations" line.
 - `### Hands-off decisions` — when every stage auto-approved with no interventions, collapse to a single entry `- all stages auto-approved, no interventions`. When a stage did intervene (reviewer fix, deferral, etc.), keep its own entry.
 - `### Deferred (needs user input)` — one line per deferral, with the concrete artifact the user needs (file path / command / question).
@@ -248,7 +248,7 @@ Fix one spot, commit, reviewer finds four more siblings, two rounds of fixups, n
 
 ## Incidental code smells
 
-Implementers and `up:explorer` report smells they pass; you also hit them while reading code to coordinate. For each: fix it in the same commit when it's in task scope or an easy, low-risk win (Boy-Scout); otherwise append it to the task file's `## Code smells` section — `file:line — one-line smell` — and leave it for review's Future-work call. Don't let out-of-scope smells balloon the change. See `_principles.md` → Incidental code smells.
+Implementers and `up:explorer` report smells they pass; you also hit them while reading code to coordinate. For each: fix it in the same commit when it's in task scope or an easy, low-risk win (Boy-Scout); otherwise append it to the task file's `## Code smells` section — `file:line — one-line smell` — and leave it for review's Future-work call. Don't let out-of-scope smells balloon the change. See [global principles](../_principles.md) → Incidental code smells.
 
 ## Don't modify upstream specs or external design docs
 
@@ -299,7 +299,7 @@ A deviation is any structural change from what the plan says. File moved to a di
 When a deviation happens:
 
 1. Do not edit the Plan inline. The plan is the contract that was approved; it stays as-is for the review.
-2. Record the deviation in the task file's `## Conclusion` under a `### Deviations from plan` subsection (create if missing). Format: `- <what changed> — <why>`. If no deviation happens, do not create the subsection at all — per `_brevity.md`, empty subsections are deleted, not written.
+2. Record the deviation in the task file's `## Conclusion` under a `### Deviations from plan` subsection (create if missing). Format: `- <what changed> — <why>`. If no deviation happens, do not create the subsection at all — per the [brevity rules](../_brevity.md), empty subsections are deleted, not written.
 3. If the deviation is minor (renamed a helper, swapped two steps) — continue execution.
 4. If the deviation is structural enough that later phases in the plan no longer apply — stop executing. Invoke `up:uplan` with enough context (what was done, what no longer applies, what new reality is). Let the planner skill update the plan before resuming.
 </required>

@@ -1,6 +1,6 @@
 # ultrapack
 
-Ultrapack is an opinionated Claude Code and Codex skill pack for developers: plan-driven, git-centered, minimalistic. Built around frequently clearing context and using one conversation for one feature.
+Ultrapack is an opinionated Claude Code, Codex, and Pi skill pack for developers: plan-driven, git-centered, minimalistic. Built around frequently clearing context and using one conversation for one feature.
 
 ## TL;DR
 
@@ -14,6 +14,12 @@ Codex:
 
 ```
 Use $make to fix the flaky login test.
+```
+
+Pi:
+
+```
+/make fix the flaky login test
 ```
 
 Will take you through the process: design → plan → execute → verify → review → update docs.
@@ -61,9 +67,19 @@ codex plugin add up@ultrapack
 
 Verify by invoking `$make` or asking Codex to use `make` for a small task. For a local checkout, replace `btseytlin/ultrapack` with the checkout path.
 
+### Pi
+
+Install the Git package, then start a new Pi session so it discovers the skills:
+
+```
+pi install git:github.com/btseytlin/ultrapack@main
+```
+
+Verify with `/make` or `/skill:make`.
+
 ## Design
 
-Ultrapack is a small set of shared skills plus Claude Code commands and agents to help either harness handle non-trivial work.
+Ultrapack is a small set of shared skills plus Claude Code commands and agents. Pi loads the shared skills and commands from `package.json`.
 
 Inspired by [feature-dev](https://github.com/anthropics/claude-code/tree/main/plugins/feature-dev) and [obra/superpowers](https://github.com/obra/superpowers). feature-dev is too barebones. superpowers is great, but creates huge plans with a lot of work duplication, changes too frequently and is geared to a specific type of dev work. Also it's a chore to type "superpowers" every time.
 

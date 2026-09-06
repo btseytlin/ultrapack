@@ -6,6 +6,10 @@ description: Orchestrate the full ultrapack workflow — slug, task file, design
 
 Drives a task through the full ultrapack workflow: one task file at `docs/tasks/<slug>.md`, evolving through Design → Plan → Conclusion. Each stage is a separate skill. You orchestrate; the skills do the work.
 
+<required>
+Before responding or writing the task file, read the [brevity rules](../skills/_brevity.md) and [global principles](../skills/_principles.md). Apply them throughout the workflow.
+</required>
+
 ## Arguments
 
 The user's description of the task follows the command. May be a one-liner ("fix the flaky login test") or a paragraph. Use it as the seed for the slug and the initial framing for `up:udesign`.

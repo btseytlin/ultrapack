@@ -5,7 +5,7 @@ description: "Explain a file, error, design, diff, or concept like a helpful eng
 
 # Explain
 
-Use this as Codex's equivalent of `/up:e`.
+Use this as the Codex and Pi equivalent of `/up:e`.
 
 1. If the user named a file, error, diff, or behavior, inspect it before explaining. If they did not, infer the most recent clear topic and state what you selected; ask once only if no target is clear.
 2. Lead with the mechanism that answers the question. Assume the reader only vaguely remembers surrounding context.

@@ -12,6 +12,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SEMVER = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$")
 SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SHARED_REFERENCES = {
+    "commands/make.md": ("../skills/_brevity.md", "../skills/_principles.md"),
+    "skills/make/SKILL.md": ("../_brevity.md", "../_principles.md"),
+    "skills/udesign/SKILL.md": ("../_brevity.md", "../_principles.md"),
+    "skills/uexecute/SKILL.md": ("../_brevity.md",),
+    "skills/uplan/SKILL.md": ("../_brevity.md", "../_principles.md"),
+    "skills/ureview/SKILL.md": ("../_brevity.md",),
+    "skills/uverify/SKILL.md": ("../_brevity.md",),
+}
 
 
 def load_json(path: Path, errors: list[str]) -> dict:
@@ -56,6 +65,8 @@ def main() -> int:
     codex_marketplace = load_json(ROOT / ".agents/plugins/marketplace.json", errors)
     claude_plugin = load_json(ROOT / ".claude-plugin/plugin.json", errors)
     codex_plugin = load_json(ROOT / ".codex-plugin/plugin.json", errors)
+    pi_package = load_json(ROOT / "package.json", errors)
+    pi_lock = load_json(ROOT / "package-lock.json", errors)
 
     if claude_marketplace.get("plugins") != [{
         "name": "up",
@@ -78,17 +89,41 @@ def main() -> int:
         elif entry.get("category") != "Developer Tools":
             errors.append(".agents/plugins/marketplace.json: expected Developer Tools category")
 
-    versions = [claude_plugin.get("version"), codex_plugin.get("version")]
+    lock_root = pi_lock.get("packages", {}).get("", {})
+    versions = [
+        claude_plugin.get("version"),
+        codex_plugin.get("version"),
+        pi_package.get("version"),
+        pi_lock.get("version"),
+        lock_root.get("version"),
+    ]
     if len(set(versions)) != 1 or not isinstance(versions[0], str) or not SEMVER.fullmatch(versions[0]):
         errors.append("plugin manifests: expected matching strict-semver versions")
     if claude_plugin.get("name") != "up" or codex_plugin.get("name") != "up":
         errors.append("plugin manifests: expected name up")
     if codex_plugin.get("skills") != "./skills/":
         errors.append("Codex manifest: expected skills path ./skills/")
+    if pi_package.get("keywords") != ["pi-package"]:
+        errors.append("Pi package: expected pi-package keyword")
+    if pi_package.get("pi") != {"skills": ["./skills"], "prompts": ["./commands"]}:
+        errors.append("Pi package: expected shared skills and command prompts")
     interface = codex_plugin.get("interface")
     required_interface = {"displayName", "shortDescription", "longDescription", "developerName", "category", "capabilities", "defaultPrompt"}
     if not isinstance(interface, dict) or not required_interface.issubset(interface):
         errors.append("Codex manifest: missing required interface metadata")
+
+    for relative_path, references in SHARED_REFERENCES.items():
+        path = ROOT / relative_path
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as error:
+            errors.append(f"{relative_path}: unreadable ({error})")
+            continue
+        for reference in references:
+            if reference not in text:
+                errors.append(f"{relative_path}: missing shared reference {reference}")
+            elif not (path.parent / reference).is_file():
+                errors.append(f"{relative_path}: broken shared reference {reference}")
 
     for skill_dir in sorted((ROOT / "skills").iterdir()):
         if not skill_dir.is_dir() or skill_dir.name.startswith("_") or skill_dir.name.startswith("."):

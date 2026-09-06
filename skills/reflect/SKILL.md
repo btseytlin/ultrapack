@@ -5,7 +5,7 @@ description: Extract durable, non-obvious lessons from the current dialogue and 
 
 # Reflect
 
-Use this as Codex's equivalent of `/up:reflect`.
+Use this as the Codex and Pi equivalent of `/up:reflect`.
 
 1. Identify non-obvious user corrections, discovered conventions, external-system details, and decisions the code does not explain. Discard one-off debugging facts and anything already documented.
 2. Route each remaining lesson to the right home: `CLAUDE.md` for durable repository guidance, memory for cross-session personal context, project docs for domain knowledge, or the task conclusion for task-specific discoveries.

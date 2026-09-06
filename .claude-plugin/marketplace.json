@@ -1,5 +1,6 @@
 {
   "name": "ultrapack",
+  "description": "Lean, spec-driven development workflows for Claude Code, Codex, and Pi",
   "owner": {
     "name": "Boris Tseitlin"
   },

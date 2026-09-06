@@ -52,7 +52,7 @@ Always scan explicitly for these failure modes (all are ≥ 80 confidence when f
 - **Bites the next change** — a shape that's fine today but invites a bug at the next touch (mutable default, check in the wrong layer, enum that'll silently accept new values).
 - **Inconsistent with surrounding code** — duplicates an existing helper, leaks an abstraction, drifts from established naming, or couples to untouched code in a way the diff doesn't reveal.
 - **Conversation bleed** — text in code, comments, docstrings, frontmatter descriptions, docs, or commit messages that references the session it was written in: the current task, dispatch path, model name, "added for the X flow", "used by Y", "NOT Z" where Z was the user's now-removed suggestion. Test: if the text only makes sense while the conversation is still around, it's bleed — flag it.
-- **Brevity violations** — padding, re-narration of the diff, default-value subsections, evidence on passed checks, second sentences that add nothing. See `skills/_brevity.md`.
+- **Brevity violations** — padding, re-narration of the diff, default-value subsections, evidence on passed checks, second sentences that add nothing. See the [brevity rules](../skills/_brevity.md).
 
 ### 3. Severity
 
