@@ -62,7 +62,7 @@ Follow these steps in order. Do not combine or skip.
 6. Present the design in sections. Get per-section approval.
 7. Identify invariants (IV), principles (PC), assumptions (AS), and unknowns (UK).
 8. Decide TDD — yes or no, with reason. Use `up:test-driven-development`'s applicability rule.
-9. Write to task file — set the `**Goal:**` header (the definition of done — see below), then `## Context`, `## Design`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns`.
+9. Write to task file — set the `**Goal:**` header (see "The Goal — definition of done"), then `## Context`, `## Design`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns`.
 10. Self-review for placeholders, contradictions, scope, ambiguity. Fix inline.
 11. Wait for user approval before invoking `up:uplan`.
 </required>

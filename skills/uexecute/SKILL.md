@@ -9,7 +9,7 @@ Implement the approved `## Plan` from `docs/tasks/<slug>.md`. You are the dispat
 
 ## Harness adaptation
 
-On Claude Code, use the packaged `up:implementer`, `up:implementer-sonnet`, `up:explorer`, and `up:researcher` agents. On Codex or Pi, delegate with the host's subagent/task mechanism and include the role's prompt contract from this skill; do not claim a particular model or custom agent type is available. References to `TodoWrite` mean the harness's available task checklist. In either harness, pass the absolute working directory and preserve the same ownership, commit, and report rules.
+On Claude Code, use the packaged `up:implementer`, `up:implementer-sonnet`, `up:explorer`, and `up:researcher` agents. On Codex or Pi, delegate with the host's subagent/task mechanism and include the role's prompt contract from this skill; do not claim a particular model or custom agent type is available. References to `TodoWrite` mean the harness's available task checklist. In every harness, pass the absolute working directory and preserve the same ownership, commit, and report rules.
 
 ## Before starting
 
@@ -49,7 +49,7 @@ If the plan contains a `### Interface graph` subsection (declared by `up:uplan`)
 - An IF without `[blocks]` is non-blocking — the IF declaration is sufficient context for the consumer to be implemented in parallel with the producer.
 - Wave 1: phases with no blocking Consumes. Wave N+1: phases whose every blocking Consumes IF is produced by phases in waves 1..N. Non-blocking IF edges are ignored when computing waves.
 
-Mismatches between an implementer's actual output and the IF declaration surface in the wiring check (post-wave) and are reconciled there. Otherwise fall back to the serial one-phase-at-a-time loop (IV6).
+Reconcile mismatches between actual output and declared interfaces in the wiring check after the final wave. Without an interface graph, use the serial loop.
 
 **Serial fallback (no `### Interface graph`):** execute phases in order, one at a time, inline — never dispatch a single implementer (see "When to skip dispatch and do it inline").
 
@@ -58,7 +58,7 @@ Mismatches between an implementer's actual output and the IF declaration surface
 <required>
 Before dispatching a wave:
 1. Collect the `@` paths declared by every phase in the wave.
-2. Verify pairwise disjointness: no path may appear in more than one phase of the same wave. On overlap, stop execution and log under `### Deferred (needs user input)` with the conflicting paths and phase names. Do not dispatch the wave (PC4, IV2).
+2. Verify pairwise disjointness: no path may appear in more than one phase of the same wave. On overlap, stop execution and log under `### Deferred (needs user input)` with the conflicting paths and phase names. Do not dispatch the wave.
 3. If the wave contains only one phase, skip dispatch and edit inline.
 </required>
 
@@ -77,7 +77,7 @@ For each phase (serial fallback) or wave (parallel):
 6. Mark the phase `completed`.
 </required>
 
-Parallelism comes only from the Plan's `### Interface graph` via the wave scheduler; the scheduler ignores non-blocking IF edges and respects `[blocks]` ones; never infer ordering at runtime (IV4, PC5).
+Parallelism comes only from the Plan's `### Interface graph` via the wave scheduler; the scheduler ignores non-blocking IF edges and respects `[blocks]` ones; never infer ordering at runtime.
 
 ## Dispatch per phase
 
@@ -136,7 +136,7 @@ Consumes: <IF<n>, ...>                                      (if this phase consu
 
 ## Wave dispatch
 
-Used when the Plan declares `### Interface graph` (written by `up:uplan`) and a wave contains two or more phases. Waves are derived by topo-sort over `[blocks]` edges only — never hand-declared (PC5). If a wave reduces to one phase, do it inline instead.
+Used when the Plan declares `### Interface graph` (written by `up:uplan`) and a wave contains two or more phases. Waves are derived by topo-sort over `[blocks]` edges only — never hand-declared. If a wave reduces to one phase, do it inline instead.
 
 **Reading the graph:**
 Parse each line of the form `PH<N>  <consumes-CSV> -> <produces-CSV>   @ <paths-CSV>`. Empty left of `->` = source (no consumed IFs). Empty right = sink. Collect Owns (`@`), Consumes (left), Produces (right) per phase. For each IF in Consumes, look up its kind in `### Interfaces`: `[blocks]` = blocking edge (creates wave boundary), bare = non-blocking (ignored by topo-sort).
@@ -152,21 +152,21 @@ Before dispatching a wave, verify the `@` sets of all phases in that wave are pa
 **Dispatching the wave:**
 
 <system-reminder>
-All implementer dispatches for the wave MUST occur in a single assistant response containing multiple concurrent `Agent` tool calls (AS1). Set `run_in_background: true` on each Agent call so they fire concurrently and you receive notifications as each completes.
+Launch all phases in a wave concurrently through the host's supported delegation mechanism. On Claude Code, use concurrent `Agent` calls with `run_in_background: true`. On Codex and Pi, use the host's parallel workflow mechanism.
 
-Do NOT dispatch one implementer, wait for its result, then dispatch the next — that is sequential, not parallel, regardless of how the preamble reads. If you announce "Wave: PH2 + PH3 in parallel" and your next message contains exactly one Agent call, you have lied to the user. Stop and re-dispatch all wave phases together.
+Do not wait for one phase before launching the next. If dispatch was accidentally sequential, report it and track the existing runs. Never relaunch active or completed work merely to make the dispatch parallel.
 </system-reminder>
 
-Choose `up:implementer` or `up:implementer-sonnet` per phase using "Choosing the implementer agent" above. Pass `commit: defer` to each (AS3 — only the dispatcher touches git in defer mode). Include `Owns`, `Implements`, `Consumes` from the graph line (IF3). A consumer is dispatched in parallel with its producer; the IF declaration in `### Interfaces` is the consumer's ground truth for signatures it depends on.
+Choose the implementer role per phase using "Choosing the implementer agent" above. Pass `Commit mode: defer` to each. Implementers stage their owned paths and report, while the dispatcher commits. Include `Owns`, `Implements`, and `Consumes` from the graph line. A non-blocking consumer uses the declaration in `### Interfaces` as its signature contract while its producer runs.
 
 **Serialized commit protocol:**
-After all `Agent` calls in the response return, process successful implementers in ascending PH order:
+After every phase run in the wave finishes, process successful implementers in ascending PH order:
 
 <required>
 For each phase whose implementer returned `DONE` or `DONE_WITH_CONCERNS`:
 1. `git add <paths staged by the implementer>`.
 2. `git commit -m "<proposed message from implementer report>"`.
-3. **Boundary check (IF5):** run `git show <sha> --name-only`. Every changed path must be a member of the phase's declared `@` set. On trespass: halt the wave, log under `### Deferred (needs user input)` with the trespassed path and phase, then either re-dispatch with tightened scope or escalate to `up:uplan`.
+3. **Boundary check:** run `git show <sha> --name-only`. Every changed path must be a member of the phase's declared `@` set. On trespass: halt the wave, log under `### Deferred (needs user input)` with the trespassed path and phase, then either re-dispatch with tightened scope or escalate to `up:uplan`.
 4. Plan-diff check: every plan bullet reflected in the diff? every diff change covered?
 5. Consistency pass: grep for sibling patterns; apply missing changes if any.
 </required>
@@ -174,12 +174,12 @@ For each phase whose implementer returned `DONE` or `DONE_WITH_CONCERNS`:
 Only after all successful phases are committed, handle failures.
 
 **Failure handling:**
-- On `BLOCKED` or `NEEDS_CONTEXT` from one phase: do not abort sibling phases mid-work. Wait for all siblings to return, commit their successful results per the protocol above, then diagnose the failure — re-dispatch with corrected context, invoke `up:uplan` if the plan is wrong, or stop and log under `### Deferred (needs user input)` (PC4).
+- On `BLOCKED` or `NEEDS_CONTEXT` from one phase: do not abort sibling phases mid-work. Wait for all siblings to return, commit their successful results per the protocol above, then diagnose the failure — re-dispatch with corrected context, invoke `up:uplan` if the plan is wrong, or stop and log under `### Deferred (needs user input)`.
 - A failure in one phase never rolls back a sibling's already-committed work.
 
 ## Wiring check
 
-Runs once, after the final wave's phases commit (IF6). For non-blocking IFs, consumers were dispatched in parallel against the IF declaration rather than against the producer's actual output — this check is the reconciliation step, catching every place a producer drifted from the declared signature.
+Runs once, after the final wave's phases commit. For non-blocking IFs, consumers were dispatched in parallel against the IF declaration rather than against the producer's actual output — this check is the reconciliation step, catching every place a producer drifted from the declared signature.
 
 <required>
 For each `IF<n>` declared in the Plan's `### Interfaces`:

@@ -130,7 +130,7 @@ Approach: <1-2 sentences>
 
 ## Blocking interfaces
 
-By default, an IF is non-blocking: its declared signature is the contract, and a consumer can be implemented in parallel with the producer (the wiring check reconciles any drift after the wave). Mark an IF `[blocks]` when:
+By default, an IF is non-blocking: its declared signature is the contract, and a consumer can be implemented in parallel with the producer (the wiring check reconciles drift after the final wave). Mark an IF `[blocks]` when:
 
 - The consumer needs the producer's actual output, not just the signature — e.g. a generated config file, an applied DB migration, a fixture that must exist on disk, a doc anchor that must resolve at lint time.
 - The producer is large, risky, or critical enough that the planner does not want dependent work running concurrently — better to land it, verify it, then build on top. Planner/dispatcher discretion.

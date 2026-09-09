@@ -48,7 +48,7 @@ The asymmetry is deliberate. A tough reviewer catches more real issues; a fair d
 
 ## Harness adaptation
 
-On Claude Code, dispatch `up:reviewer`. On Codex or Pi, delegate an independent subagent with the same task file, SHAs, working directory, and review contract below. Do not pass session rationale in either harness, and do not review the change yourself in place of the independent reviewer.
+On Claude Code, dispatch `up:reviewer`. On Codex or Pi, delegate an independent subagent with the same task file, SHAs, working directory, and review contract below. Do not pass session rationale in any harness, and do not review the change yourself in place of the independent reviewer.
 
 ## Process
 
@@ -203,4 +203,4 @@ See `up:handsoff` for the full contract. Stage-specific delta is embedded in ste
 
 ## Terminal state
 
-Conclusion written, all Critical/Important resolved or explicitly deferred with justification → Status → `validating`. Review does not mark `done`: control returns to `/up:make` to validate the Goal (step 11) before any finish action. The user chooses the finish action; you don't auto-merge.
+Conclusion written, all Critical/Important resolved or explicitly deferred with justification → Status → `validating`. Return to [make](../make/SKILL.md) for goal validation before any finish action. Review does not mark `done`. The user chooses the finish action.

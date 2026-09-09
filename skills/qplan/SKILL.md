@@ -48,6 +48,7 @@ Use plain bullets. Keep context short, omit empty sections, and add detail only 
 ## Required planning output
 
 Before requesting approval:
+
 1. Read the relevant code, docs, guidance, and current changes.
 2. Write `docs/tasks/<slug>.md` with Context, Desired design, Invariants and principles, Implementation plan, and Verification.
 3. Ground the plan in what you read. State concrete constraints, sequential changes, and positive and negative checks.

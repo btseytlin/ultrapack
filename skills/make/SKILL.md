@@ -5,7 +5,7 @@ description: "Orchestrate the full Ultrapack workflow in Codex and Pi: create or
 
 # Ultrapack workflow
 
-Use this as the Codex and Pi equivalent of Claude Code's `/up:make`. Treat the user's remaining message as the task description. A `handsoff` first token enables hands-off mode and is otherwise removed before making the slug.
+Use this as the Codex and Pi equivalent of Claude Code's `/up:make`. Treat the user's remaining message as the task description. If the first token is exactly `handsoff`, enable hands-off mode and remove that token before making the slug. Otherwise keep the task description unchanged.
 
 <required>
 Before responding or writing the task file, read the [brevity rules](../_brevity.md) and [global principles](../_principles.md). Apply them throughout the workflow.
