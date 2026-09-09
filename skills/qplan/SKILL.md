@@ -5,12 +5,13 @@ description: "Quickly design and plan, then execute sequential phases with focus
 
 # Quick plan
 
-Use `qplan` for a bounded change that needs a clear design and an actionable plan without the full `make` flow. Invoke as `/up:qplan` in Claude Code or `$qplan` in Codex.
+Use `qplan` for a bounded change that needs a clear design and an actionable plan without the full `make` flow. Invoke as `/up:qplan` in Claude Code, `$qplan` in Codex, or `/skill:qplan` in Pi.
 
 Example: `Use $qplan to add a date filter to the activity list.`
 
 ## Design and plan in one pass
 
+0. Grill the user until their intent is clear to you and there is no blocking ambiguity. Only ask if something is not resolvable by common sense and existing guidance.
 1. Read the relevant docs, code, project guidance, and current changes. Find existing patterns to reuse. Keep exploration tied to the request.
 2. Ask only for decisions that block a safe, correct implementation. State small assumptions in the plan. If the work spans independent goals or needs a major architectural decision, propose a split or `make` and stop for direction.
 3. Write one compact plan using the shape below. Save it to `docs/tasks/<slug>.md`, or update the task file supplied by the user. In native plan mode or a read-only request, use the permitted plan location or chat and do not change project files.
@@ -46,9 +47,9 @@ Use plain bullets. Keep context short, omit empty sections, and add detail only 
 ## Execute directly
 
 - Implement phases in order in the current session. No subagent dispatch, parallel work, or automatic calls to `make`, `udesign`, `uplan`, `uexecute`, or `ureview`.
-- Follow the repository's branch, worktree, and commit rules. Preserve unrelated changes. This skill grants no permission to merge, push, delete data, or run paid or long jobs.
+- Follow the repository's branch, worktree, and commit rules. Preserve unrelated changes.
 - Use existing code and focused regression tests where behavior warrants them. Update phase progress briefly in the same task file.
-- Do not overengineer. Choose the smallest correct change. Avoid speculative abstractions, new dependencies, compatibility layers, unrelated cleanup, and extra features unless the goal requires them.
+- Do not overengineer. Choose the smallest correct change. Avoid speculative abstractions, extensive validators, new dependencies, compatibility layers, unrelated cleanup, and extra features unless the goal requires them.
 - Check each phase against the desired design and invariants. Adjust implementation details inline. If a finding changes the goal, scope, or a material design choice, stop and get approval before expanding the plan.
 
 ## Verify and finish with a manual try
