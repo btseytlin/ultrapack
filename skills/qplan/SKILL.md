@@ -45,6 +45,18 @@ Use plain bullets. Keep context short, omit empty sections, and add detail only 
 - Manual try, negative: <likely misuse or edge case and expected rejection or safe behavior>
 ```
 
+## Required planning output
+
+Before requesting approval:
+1. Read the relevant code, docs, guidance, and current changes.
+2. Write `docs/tasks/<slug>.md` with Context, Desired design, Invariants and principles, Implementation plan, and Verification.
+3. Ground the plan in what you read. State concrete constraints, sequential changes, and positive and negative checks.
+4. Show the saved path and summarize the plan.
+
+Approval gates implementation, not planning. Reading and writing the plan must happen first. A chat summary does not replace the plan file unless an explicit read-only restriction prevents saving it.
+
+Hands-off mode auto-approves the completed plan. It does not skip planning. Read and follow the [handsoff skill](../handsoff/SKILL.md).
+
 ## Execute after plan approval
 
 - Start only after explicit plan approval or hands-off auto-approval under the rule above.
