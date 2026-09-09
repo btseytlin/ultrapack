@@ -26,8 +26,7 @@ Will take you through the process: design → plan → execute → verify → re
 
 Each stage populates `docs/tasks/<slug>.md`. The task file is the source of truth — any fresh agent can read it and resume from wherever the last one stopped.
 
-For smaller tasks, use `/up:qplan add a date filter` in Claude Code or `Use $qplan to add a date filter.` in Codex. It combines short context, desired design, invariants and principles, sequential implementation phases, and a minimal verification plan in one task file. Then it executes directly and finishes with a positive and negative manual try. No subagents or separate workflow stages. Plan-only requests stay read-only.
-
+For smaller tasks, use `/up:qplan add a date filter` in Claude Code or `Use $qplan to add a date filter.` in Codex. It combines short context, desired design, invariants and principles, sequential implementation phases, and a minimal verification plan in one task file. After explicit plan approval, it executes and finishes with a positive and negative manual try. Hands-off mode auto-approves the plan under the [handsoff contract](skills/handsoff/SKILL.md). No subagents or separate workflow stages. Plan-only requests stay read-only.
 
 Claude Code: `/up:make handsoff fix the flaky login test`.
 
@@ -38,6 +37,7 @@ Same, but ask you as few questions as possible.
 While you sleep, the agent picks the safest, most reversible choices: don't delete things (copy and rename instead), work in a git branch, don't introduce silent defaults and fallbacks, fix only critical and important issues.
 
 Core ideas:
+
 - One file per task. `docs/tasks/<slug>.md` evolves through Context → Design → Plan → Verify → Conclusion.
 - Invariants-, principles-, and assumptions-first. Discovered in design, obeyed in plan, checked at review. Short IDs (IV, PC, AS, UK, PH, RK, CK) let later sections reference them without re-quoting.
 - Per-phase subagent implementation. Each plan phase dispatched to a fresh `up:implementer`. Plan declares interfaces (`### Interfaces`) and an execution graph (`### Interface graph`); the executor topo-sorts it into waves and dispatches independent phases in parallel.
@@ -106,6 +106,7 @@ Finally, the conclusion section of the task markdown file is populated. Then all
 ### Skills
 
 Process skills (u-prefixed to dodge Claude Code built-ins):
+
 - `up:udesign` — Brainstorm requirements, populate Context + Design + Invariants + Principles + Assumptions + Unknowns, decide whether to use TDD.
 - `up:uplan` — Plan: what files to change, what class/methods and with what interfaces, test strategy, order. Only non-trivial code blocks.
 - `up:uexecute` — Dispatch `up:implementer` per phase (parallel waves derived from `### Interface graph`), incremental commits, Boundary + plan-diff + consistency sweep per phase, Wiring check after the final wave.
@@ -115,6 +116,7 @@ Process skills (u-prefixed to dodge Claude Code built-ins):
 - `up:udocument` — Guidance for updating docs, CLAUDE.md, READMEs, in-code comments.
 
 Discipline skills:
+
 - `up:test-driven-development` — write failing test → make change → test passes.
 - `up:git-worktrees` — guidance for using git worktrees.
 - `up:job-guardian` — babysit a long-running process (training run, batch job) while the user is away: launch contract, immediate-crash gate, stability poll, recoverable→fix/resume vs unrecoverable→reversible teardown + notify. Runs under the `up:handsoff` contract.

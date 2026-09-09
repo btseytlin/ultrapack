@@ -1,6 +1,6 @@
 ---
 name: qplan
-description: "Quickly design and plan, then execute sequential phases with focused verification and a manual try. Use when a task needs more than a prompt but does not need the full ultrapack make workflow, or the user asks for a quick plan."
+description: "Quickly design and plan, wait for plan approval, then execute sequential phases with focused verification and a manual try. Use when a task needs more than a prompt but does not need the full ultrapack make workflow, or the user asks for a quick plan."
 ---
 
 # Quick plan
@@ -15,7 +15,8 @@ Example: `Use $qplan to add a date filter to the activity list.`
 1. Read the relevant docs, code, project guidance, and current changes. Find existing patterns to reuse. Keep exploration tied to the request.
 2. Ask only for decisions that block a safe, correct implementation. State small assumptions in the plan. If the work spans independent goals or needs a major architectural decision, propose a split or `make` and stop for direction.
 3. Write one compact plan using the shape below. Save it to `docs/tasks/<slug>.md`, or update the task file supplied by the user. In native plan mode or a read-only request, use the permitted plan location or chat and do not change project files.
-4. Present the combined design and plan once. If the user already authorized implementation, continue directly. Otherwise ask for approval once. A plan-only request or native plan mode stops here until implementation is authorized and the harness allows edits.
+4. Present the combined design and plan, then stop and wait for the user's explicit approval of that plan before execution. The initial task request or general permission to implement does not count as plan approval.
+5. If the user invoked `/skill:handsoff` or specified or mentioned hands-off mode for this task, read and follow the [handsoff skill](../handsoff/SKILL.md) for planning and execution. Record `Mode: hands-off` in the task file. The presented plan is auto-approved under that contract. Explicit plan-only requests and harness read-only restrictions still prevent execution.
 
 Use plain bullets. Keep context short, omit empty sections, and add detail only where it prevents a likely mistake. No mandatory IDs, interface graphs, risk registers, or separate stage approvals.
 
@@ -44,8 +45,9 @@ Use plain bullets. Keep context short, omit empty sections, and add detail only 
 - Manual try, negative: <likely misuse or edge case and expected rejection or safe behavior>
 ```
 
-## Execute directly
+## Execute after plan approval
 
+- Start only after explicit plan approval or hands-off auto-approval under the rule above.
 - Implement phases in order in the current session. No subagent dispatch, parallel work, or automatic calls to `make`, `udesign`, `uplan`, `uexecute`, or `ureview`.
 - Follow the repository's branch, worktree, and commit rules. Preserve unrelated changes.
 - Use existing code and focused regression tests where behavior warrants them. Update phase progress briefly in the same task file.
