@@ -1,6 +1,6 @@
 {
   "name": "ultrapack-pi",
-  "version": "0.3.34",
+  "version": "0.3.35",
   "private": true,
   "keywords": [
     "pi-package"
@@ -10,7 +10,7 @@
       "./skills"
     ],
     "prompts": [
-      "./commands"
+      "./pi/prompts"
     ]
   }
 }

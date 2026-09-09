@@ -16,7 +16,7 @@ Design decides the outcome and scope. Planning names the concrete changes needed
 ## Process
 
 1. Read context, design, invariants, principles, assumptions, and unknowns in the task file.
-2. Identify files, symbols, and interfaces to change. Include in-scope or easy, low-risk defects in the plan. Record other findings under `## Code smells` per the global principles.
+2. Identify files, symbols, and interfaces to change. Include only defects within the approved scope in the plan. Report unrelated findings under `## Code smells` without adding their fixes.
 3. Divide the work into coherent phases with at least one commit per phase.
 4. Write concrete file changes, interfaces, verification behavior, and dependencies. Follow the design's test-driven-development decision.
 5. Map compatibility risks to phases and mitigation steps. If a new break was not covered by the design, stop and ask the user. For greenfield work, state that this check does not apply.

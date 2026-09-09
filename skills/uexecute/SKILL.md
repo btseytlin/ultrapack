@@ -45,9 +45,13 @@ PH<N>  <consumed-interfaces> -> <produced-interfaces> @ <owned-paths>
 
 ### Dispatch contract
 
-Pass the phase verbatim, its design constraints, and these fields:
+Start every child prompt with the authorization and guidance fields below. Resolve paths for the current host rather than copying another user's paths. Require the child to read that guidance before acting and stop if required guidance is unavailable. Then pass the phase verbatim and its design constraints.
 
 ```text
+Authority: <read-only or approved editing scope>
+Guidance: <absolute paths to applicable global and project instructions and guides>
+Limits: <approved commands, installations, spending, duration, and restart permissions>
+Precedence: user authorization and supplied guidance override conflicting workflow advice
 Phase: <verbatim phase text from the plan>
 Invariants: <definitions from design>
 Principles: <definitions from design>
@@ -120,7 +124,7 @@ For example, if a metric now rejects empty input, check sibling metrics for the 
 
 ## Incidental code smells
 
-Follow the [global principles](../_principles.md): fix in-scope or easy, low-risk defects. Record other smells under `## Code smells` as `file:line — issue` for review to consider as future work. Do not expand the task into a broad refactor.
+Follow the [global principles](../_principles.md): fix only defects within the approved request. Record unrelated smells under `## Code smells` as `file:line — issue` without changing them. Owning a file does not authorize incidental cleanup inside it.
 
 ## External specs and deviations
 

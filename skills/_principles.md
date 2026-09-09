@@ -13,10 +13,10 @@ GPC1–GPC8. Apply to every task unless clearly irrelevant. Deviations name the 
 
 ## Incidental code smells
 
-While exploring code for a task you'll pass smells unrelated to the change — a 200-line function, a duplicated helper, a leaked layer boundary. Two outcomes, no third:
+Every changed line must trace directly to the approved request. File ownership and ease of repair do not authorize unrelated changes.
 
-- In task scope, or a genuinely easy and low-risk win → fix it (Boy-Scout rule, GPC2/GPC8). The fix lands in the diff; nothing to record.
-- Out of scope and non-trivial — a wide rename, a risky refactor, a new test surface → don't balloon the task. Record it, one line, in the task file's `## Code smells` section:
+- In task scope: fix the defect and verify the requested behavior.
+- Out of scope: report the defect without changing it, even when the fix is small. Record it in the task file's `## Code smells` section:
 
   `- <file:line> — <smell, one sentence> (<GPC it offends, if one fits>)`
 
@@ -27,4 +27,4 @@ A pointer plus a sentence; the next reader opens the line. Recorded smells are `
 - `up:udesign` — surface GPC tradeoffs (layering, SSOT, fail-fast, debuggability) as Design decisions; reference by ID. Task-specific PCs only when deviating from a GPC or adding a rule the GPCs don't cover.
 - `up:uplan` — every phase consistent with GPCs; deviating bullets cite the GPC and why.
 - `up:udebug` — anti-whack-a-mole: name the pattern behind a bug and grep for the same shape before closing (not a GPC, same family).
-- Incidental code smells — `up:udesign` / `up:uplan` fold an in-scope or easy fix into the design/plan, else record to `## Code smells`; `up:uexecute` fixes in-scope/easy ones, records the rest; `up:explorer` / `up:implementer` report passed smells in their output for the dispatcher to act on.
+- Incidental code smells: design, planning, and execution include only fixes required by the approved request. Explorers and implementers report unrelated defects for a separate scope decision.

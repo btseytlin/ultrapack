@@ -85,7 +85,7 @@ Don't scatter defensive code everywhere. One or two layers past the fix is enoug
 
 ## Anti-whack-a-mole — find the pattern before closing
 
-One bug is rarely alone. Before marking the fix done, name the pattern behind it in one sentence and grep the rest of the code for the same shape. Report matches: fix the trivial ones in the same commit, file follow-ups for the rest. Closing without this check is how the same bug ships three more times in three more places.
+Before marking the fix done, name the failure pattern and check the relevant code for the same cause. Fix matches only when they belong to the approved request. Report unrelated matches without editing them. A small fix is not permission to expand scope.
 
 ## Red flags — STOP, return to Phase 1
 

@@ -81,7 +81,7 @@ Verify with `/make` or `/skill:make`.
 
 ## Design
 
-Ultrapack is a small set of shared skills plus Claude Code commands and agents. Pi loads the shared skills and commands from `package.json`.
+All three harnesses use the same `main` branch and shared `skills/`. Claude Code uses `commands/` and `agents/`. Pi loads thin wrappers from `pi/prompts/` through `package.json`. Each wrapper forwards the user's arguments and loads the shared skill by its installed absolute path.
 
 Inspired by [feature-dev](https://github.com/anthropics/claude-code/tree/main/plugins/feature-dev) and [obra/superpowers](https://github.com/obra/superpowers). feature-dev is too barebones. superpowers is great, but creates huge plans with a lot of work duplication, changes too frequently and is geared to a specific type of dev work. Also it's a chore to type "superpowers" every time.
 

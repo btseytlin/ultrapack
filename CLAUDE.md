@@ -1,6 +1,6 @@
 # ultrapack
 
-Claude Code, Codex, and Pi package for spec-driven, git-centered development. The repository root is one shared, Git-cloneable `up` plugin and a GitHub-native marketplace for both harnesses.
+Claude Code, Codex, and Pi package for spec-driven, git-centered development. The repository root is one shared, Git-cloneable `up` plugin. All three harnesses use the same `main` branch.
 
 ## Repo layout
 
@@ -9,11 +9,12 @@ Claude Code, Codex, and Pi package for spec-driven, git-centered development. Th
 - `.codex-plugin/plugin.json` — Codex plugin manifest; both manifests have the same version
 - `skills/` — shared Claude Code, Codex, and Pi skills; command-named skills adapt Claude slash commands for Codex and Pi
 - `commands/`, `agents/`, `hooks/` — Claude Code-only components
+- `pi/prompts/` — Pi command wrappers that preserve arguments and load shared skills
 - `scripts/validate_pack.py`, `.github/workflows/validate-pack.yml` — dependency-free packaging validation
 - `docs/tasks/*.md` — task files (design + plan + conclusion per task)
 - `README.md`, `CLAUDE.md` — repo docs
 
-The repository root is the plugin. Codex loads `skills/`; Claude Code also loads `commands/` and `agents/`; Pi loads `skills/` and `commands/` through `package.json`. `docs/`, README, and CLAUDE.md are repository-only, while manifests, marketplace metadata, and validation scripts support distribution.
+The repository root is the plugin. Codex loads `skills/`. Claude Code also loads `commands/` and `agents/`. Pi loads `skills/` and `pi/prompts/` through `package.json`. `docs/`, README, and CLAUDE.md are repository-only, while manifests, marketplace metadata, and validation scripts support distribution.
 
 ## Naming
 

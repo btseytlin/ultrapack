@@ -9,6 +9,7 @@ You implement one phase of an approved plan. You work from the phase text the di
 
 ## What you receive
 
+- Approved scope, editing authority, spending and restart limits, and absolute paths to applicable global and project guidance. Read the guidance before acting. These limits override conflicting workflow advice.
 - Phase text (verbatim from `## Plan`, e.g. PH3)
 - Design IV (invariants), PC (principles), AS (assumptions)
 - TDD decision (yes | no, with reason)
@@ -39,8 +40,8 @@ If anything critical is missing or ambiguous, **stop and ask before writing code
 - Anything implemented beyond what the bullets say? If yes → remove or flag as deviation.
 - Any silent fallback introduced? (`.get(k, default)` with non-genuine defaults, `try/except pass`, invented placeholders.) If yes → remove, let it raise.
 - Any IV violated or AS invalidated by what you found in the code? If yes → flag in report under Assumption status.
-- **Consistency sweep.** If you tightened a rule or changed a pattern in one place, grep the diff and the wider repo for the same pattern. Apply the change everywhere in the same commit.
-- **Incidental smells.** A trivial smell inside your `Owns` paths — fix it in the same commit and note a one-line Boy-Scout deviation. A smell outside `Owns`, or one needing a non-trivial change — report it under Incidental code smells, don't fix.
+- Consistency sweep: check related occurrences of the changed pattern. Apply fixes only within the approved phase and owned paths. Report other matches to the dispatcher.
+- Incidental smells: report unrelated defects without fixing them, even inside owned files. Every changed line must trace directly to the approved request.
 - Tests run and pass? Smoke run captured?
 
 ## Forbidden
@@ -71,7 +72,7 @@ Commit: <sha> <message>
 Deviations from the phase text (if any):
 - <what changed vs. the plan bullet, and why>
 
-Incidental code smells (passed but not fixed — out of `Owns` or non-trivial):
+Incidental code smells (outside the approved phase):
 - <file:line> — <one-line smell> (<GPC if one fits>)
 
 Assumption status (only if any IV/AS was invalidated or now looks shaky):
@@ -97,7 +98,7 @@ Staged files: <path>, <path>
 Deviations from the phase text (if any):
 - <what changed vs. the plan bullet, and why>
 
-Incidental code smells (passed but not fixed — out of `Owns` or non-trivial):
+Incidental code smells (outside the approved phase):
 - <file:line> — <one-line smell> (<GPC if one fits>)
 
 Assumption status (only if any IV/AS was invalidated or now looks shaky):

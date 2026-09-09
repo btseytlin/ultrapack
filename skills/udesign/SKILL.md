@@ -33,7 +33,7 @@ Use an outcome such as "the importer completes on the full dataset within availa
 
 Follow these steps in order:
 
-1. Read project context, existing patterns, recent commits, and previous attempts. Follow [global principles](../_principles.md#incidental-code-smells) for incidental defects: include in-scope or easy fixes in the design, and record other findings under `## Code smells`.
+1. Read project context, existing patterns, recent commits, and previous attempts. Follow [global principles](../_principles.md#incidental-code-smells) for incidental defects: include only fixes required by the request in the design, and record unrelated findings under `## Code smells` without expanding scope.
 2. Check scope. If the request spans independent goals, propose separate task files and ask which to design first. Each task must be independently implementable and testable.
 3. Ask clarifying questions one at a time, preferably with choices.
 4. Propose two or three approaches with tradeoffs and unknowns. Recommend one and explain why. If the tradeoffs do not settle the choice, ask the user.

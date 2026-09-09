@@ -1,100 +1,66 @@
 ---
 name: git-worktrees
-description: Use when a task needs isolation from the current workspace. Picks a worktree directory via a fixed priority order, verifies it's gitignored, creates the worktree, auto-detects project setup, runs baseline tests.
+description: Use when a task needs an isolated checkout. Verify the worktree location, keep mutable environments and build outputs local, and run only authorized setup and checks.
 ---
 
-# Git Worktrees
+# Git worktrees
 
-Worktrees let you work on multiple branches simultaneously without stashing or switching. Use one when:
-- The task is large enough to warrant isolation
-- You want to run different branches in parallel
-- You're dispatching subagents that shouldn't step on the active workspace
+Worktrees isolate branch changes without stashing or switching another checkout. Use one for concurrent writers or a task that needs its own checkout.
 
-## Directory selection — priority order
+## Choose the location
 
-<priority>
-1. `.worktrees/` exists → use it
-2. `worktrees/` exists → use it
-3. Both exist → `.worktrees/` wins
-4. Neither exists → check `CLAUDE.md` for a preference (grep `worktree.*director`); if present, use it
-5. Still nothing → ask the user: project-local `.worktrees/` or a global path?
-</priority>
-
-## Safety — confirm project-local dirs are gitignored before creating
-
-For a project-local directory, verify the selected directory is ignored before creating the worktree:
+1. Follow the user's or project's worktree-location rule.
+2. Otherwise use the repository's `.worktrees/` directory.
+3. For a directory inside the repository, verify the chosen directory is ignored before creating it. An ignored sibling directory is not evidence that this path is ignored.
 
 ```bash
 directory="<selected-dir>"
 git check-ignore -q "$directory/"
 ```
 
-An ignored sibling directory does not make the selected directory safe.
+If the path is not ignored, add the required ignore entry only within the authorized setup scope. Otherwise ask before proceeding.
 
-If not ignored: add the line to `.gitignore`, commit (`chore: ignore worktree directory`), then proceed.
+## Create the checkout
 
-For global directories (outside the project), no gitignore check needed.
-
-## Creation
+Confirm the repository root, base revision, branch name, and destination. Do not replace an existing directory or change another checkout's state.
 
 ```bash
-project=$(basename "$(git rev-parse --show-toplevel)")
-path="<selected-dir>/<branch-name>"  # e.g. .worktrees/feature-auth
-git worktree add "$path" -b "<branch-name>"
-cd "$path"
+branch="<branch-name>"
+base_ref="<base-ref>"
+git worktree add "$directory/$branch" -b "$branch" "$base_ref"
 ```
 
-## Share environment from main
+After creation, confirm the new checkout's root, branch, and revision before editing.
 
-At creation, a fresh worktree has no project environment — tools that resolve deps via ancestor walks (LSPs, language resolvers) either emit bogus diagnostics or reinstall from scratch. Avoidable: at this moment the worktree's deps are identical to the parent's (same commit base, same manifest). Share the main repo's environment into the worktree. Rebuild locally only if deps later diverge.
+## Keep environments local
 
-Worked example — Python (uv / venv):
+- Each worktree owns its mutable virtual environment, installed dependencies, and build outputs.
+- Do not symlink or copy `.venv`, `node_modules`, `vendor/bundle`, `target`, or equivalent mutable directories from another checkout.
+- Share download caches only when the package manager supports safe concurrent cache access.
+- Use the project's declared manager and lockfile to create a fresh local environment when setup is authorized. Do not run an installer merely because a manifest exists.
+- If the required environment is missing and setup is not authorized, report the blocker and proposed command. Do not fall back to another installer or interpreter.
+- If a worktree already points to shared mutable state, stop before installing or testing. Propose replacing that link with a local environment without modifying its target.
+- Before trusting tests or diagnostics, confirm project imports and source resolution point into this worktree. Editable installs and ancestor dependency lookup can resolve the original checkout even when manifests match.
 
-```bash
-main=$(git worktree list --porcelain | awk '/^worktree / {print $2; exit}')
-if [ -f pyproject.toml ] && [ ! -e .venv ] && [ -d "$main/.venv" ]; then
-  ln -s "$main/.venv" .venv
-fi
-```
+## Establish a baseline
 
-Absolute symlink target so the link survives nested worktree paths. The `! -e .venv` guard means an existing real env or symlink is never overwritten. If main has no `.venv`, skip — baseline setup below falls through to the install command.
+Run the relevant existing checks within the approved task scope and runtime limits. A worktree does not authorize installations, expensive tests, or additional experiments.
 
-For other stacks, do the analogous share-from-main (`node_modules`, `vendor/bundle`, `target`, …). Go and Gradle share caches globally (`$GOMODCACHE`, `~/.gradle`) — nothing to link.
+If a check fails before implementation, record its command, revision, and failure. Ask before continuing when the failure prevents meaningful verification. If a check cannot run, report it as unrun rather than treating an absent environment as a passing baseline.
 
-If the worktree later changes its manifest or lockfile, replace the shared env with a local install (e.g. `rm .venv && uv sync`). The skill doesn't detect this; it's guidance for whoever edits deps.
+Report the worktree path, branch, revision, environment state, and the checks actually performed.
 
-## Baseline setup — auto-detect and run
+## Clean up after approval
 
-```bash
-[ -f package.json ] && npm install
-[ -f Cargo.toml ]   && cargo build
-[ -f pyproject.toml ] && [ ! -e .venv ] && (uv sync || pip install -e .)
-[ -f go.mod ]       && go mod download
-```
-
-Then run the project's tests to confirm a clean baseline. If tests fail before you've changed anything: stop and report. You can't distinguish future bugs from pre-existing ones.
-
-## Report to the user
-
-```
-Worktree ready at <full-path>
-Baseline: <test summary, or "skipped — no test command">
-```
-
-## Cleanup when task is done
-
-After the user chooses cleanup, check the worktree is clean and the work is merged or otherwise preserved. Then remove it and use safe branch deletion:
+After the user chooses cleanup, check the worktree is clean and its work is merged or otherwise preserved. Then remove it and use safe branch deletion:
 
 ```bash
 git worktree remove <path>
 git branch -d <branch-name>
 ```
 
-If deletion is refused because the branch is unmerged, stop and report it. Never force deletion without explicit user approval, and never force it in hands-off mode. `git worktree prune` removes stale administrative records.
+If deletion is refused because work is unmerged, stop and report it. Never force deletion without explicit approval. Never delete or repair another worktree's environment during cleanup.
 
-## Never
+## Completion
 
-- Create a project-local worktree without verifying it's gitignored
-- Skip the baseline test run
-- Proceed with failing baseline tests without asking
-- Hardcode setup commands — detect from project files
+The requested worktree exists with verified identity and isolated mutable state, or the setup blocker is reported. Record unrun checks and the next authorized action.

@@ -1,137 +1,76 @@
 ---
 name: job-guardian
-description: Use to babysit a long-running process (training run, batch job, migration, deploy) on a remote pod or locally while the user is away. Defines a launch contract, gates on immediate crash, polls for stability, triages anomalies as recoverable (fix + resume) or not (tear down + notify). Auto-triggers when the user asks you to launch a job and watch it / keep it alive / shut it down if it dies.
+description: Use when the user explicitly asks to launch and supervise a job. Require an authorized launch, monitoring, recovery, and teardown contract. Detect failures without inventing permission to restart or spend money.
 ---
 
-# Job Guardian
+# Job guardian
 
-You are taking custody of a process the user will not be watching. Their trust is: it runs to completion, or it dies cleanly and you tell them why — never silently burning a pod for hours on a job that crashed in minute two.
+Supervise the approved process until it finishes or reaches an authorized stop condition. Liveness, progress, and completion require separate evidence.
 
-**Iron law:** silence is not success. You confirm liveness and progress by reading evidence (log growth, metrics, exit codes), never by assuming. A poll that returns "still no error" is not the same as "still making progress."
+## Authority
 
-## Away by default
+- Global and project scope, spending, duration, and remote-execution limits apply. This skill does not override them.
+- Asking to watch a job authorizes observation, not configuration changes or restarts. Asking to stop it on failure authorizes stopping that exact job, not deleting its data or destroying its host.
+- Hands-off mode reduces interruptions within the approved contract. It does not create authority. Read the [hands-off contract](../handsoff/SKILL.md) when that mode is explicitly active.
+- Clarify missing launch-critical information before launch. If the user is unavailable, report the blocker and do not launch.
+- Recovery is disabled unless the user has approved the exact recovery commands, allowed configuration changes, maximum attempts, and spend or runtime limits. Never infer these from a suggested playbook.
+- If the user becomes unavailable during the run, stay within the approved contract. Capture unexpected failures and notify rather than guessing a repair.
 
-Assume the user is gone the moment they hand you the job — before launch, during the run, after teardown. You do not ask questions, ever. Not at intake, not mid-flight, not at the end. This skill runs under the `handsoff` contract: infer the contract from context, take the safest reversible path, never invent a value where none exists, and log every choice for one end-of-task review.
+## Establish the contract
 
-- **Never ask a question.** Not even at intake. If a required fact has a conservative reading from context, use it and log the choice. If it has none, do not guess (handsoff no-default rule).
-- **Structural blocker before launch → stop, don't launch.** Log it under `### Deferred (needs user input)` and notify. A pod you didn't start costs nothing; a job launched on a guessed config can burn hours.
-- **Ambiguity while running → take the reversible side.** Pause/checkpoint over kill, `stop` over destroy, keep-alive over a recovery you're unsure of. When unsure whether an action is reversible, assume it isn't.
-- **Tell the user at the end.** Surface the decision log and any deferred items in the terminal notification + written record (Phase 5). That review replaces the questions you didn't ask.
+Read relevant project instructions and existing evidence. For remote work, read `remote-ssh`. For training, read `ml-experiments`. If required guidance or monitoring capabilities are unavailable, report that before launch. These skills do not authorize extra trial runs.
 
-## When to invoke
+Record the following in the existing task file or `docs/jobs/<slug>.md` before launch:
 
-Any process that outlives a single foreground command and will run while the user is away or asleep:
-- Remote training run / sweep on a rented pod (RunPod, vast.ai, Lambda)
-- Long batch / data pipeline, migration, backfill, eval harness
-- Any "launch it and shut it down if it dies" request
+1. Launch command, working directory, and environment, exactly as authorized.
+2. Unique job identity and its authoritative status interface.
+3. Progress signal and the expected interval between updates for this workload.
+4. Completion evidence, including terminal status and expected outputs.
+5. Approved recovery commands and limits, or an explicit statement that recovery is disabled.
+6. Approved stop and resource-release commands, with preservation requirements for outputs.
+7. Run bounds and stop conditions supplied by the user. Do not invent a budget, attempt cap, or execution duration.
+8. Log location, monitoring mechanism, and terminal notification destination.
 
-Read the [handsoff contract](../handsoff/SKILL.md) and [global principles](../_principles.md). For remote work, also read `remote-ssh`. For training, read `ml-experiments` before launch. These two skills are external dependencies, not bundled with ultrapack. If a required skill is unavailable, stop before launch and report it.
+The file records the approved contract. Writing a proposed action into it does not authorize that action. Keep approved changes and unresolved decisions distinct.
 
-`ScheduleWakeup`, `Monitor`, and `PushNotification` below name scheduling, optional log watching, and terminal notification capabilities. Use the host's supported tools for these roles. Confirm the required scheduling and notification capabilities before launch. If unavailable, record the blocker and do not launch an unguarded job.
+## Launch and check immediate failures
 
-## Phase 0 — Contract (before launching anything)
+- Perform only authorized preparation with the project's existing tools and environment.
+- Capture output at launch. Record the exact job identifier, command, revision, and launch receipt.
+- Check immediate launch errors and confirm the configured progress signal before declaring the job stable.
+- Use native completion notifications where available. For remote work without them, verify a supported scheduler and notification path before launch.
+- Derive check intervals and stalled-progress thresholds from the workload and approved contract. Do not hardcode a cadence based on an assumed provider cache lifetime.
+- Do not wait on a log substring as the sole health check or block the session in a sleep loop.
 
-You cannot guard a process whose health you can't define. Derive these from what the user gave you and the repo (their instructions, configs, `train.py`, env, prior runs), per Away by default.
+## Monitor
 
-<required>
-1. **Launch command** — exact command, working dir, env. Take it as the user wrote it (handsoff rigid path); never reword it into something "equivalent." Output must be captured to a file (GPC5; never run-then-grep).
-2. **Liveness signal** — how you know it's still running (PID alive, container up, log mtime advancing).
-3. **Health signal** — how you know it's making *progress*, not just alive: step count climbing, loss finite and trending, throughput > 0, rows written increasing. A hung process is alive but not healthy. If the log gives no progress signal you can read, that's a structural blocker — say so before launch, don't guess one.
-4. **Done signal** — what successful completion looks like (exit 0, "training complete", checkpoint N saved, expected row count).
-5. **Recovery playbook** — for each failure you can anticipate, the fix. (OOM → lower batch size / grad-accum; transient network/NCCL → retry; NaN loss → restart from last checkpoint; disk full → clean + resume.) Anything not on this list is unrecoverable by default — escalate, don't improvise.
-6. **Teardown command** — the exact command to release resources. Asking this skill to "shut it down if it dies" authorizes the *reversible* teardown — `runpodctl stop pod <id>` (pausable, keeps the disk). It does NOT authorize destroying state: no `remove pod` / terminate unless the user named that command explicitly. When in doubt, stop, don't destroy.
-7. **Budget / stop conditions** — max wall-clock or spend, max recovery attempts per failure class. If the user gave a number, use it. If not, this is a no-default value — don't invent a cap; default the *behavior* to the safe side (on repeated unexplained failure, stop + tear down rather than restart-loop) and log that you had no explicit budget.
-8. **Notify-on** — terminal events that pull the user back: done, torn down, gave up. Routine progress does not.
-</required>
+At each scheduled check:
 
-### Contract file (mandatory)
+1. Read the contract and any approved changes.
+2. Check the authoritative job state, terminal record, and fresh progress evidence.
+3. Classify the job as progressing, complete, failed, stalled, or unknown. A missing record is unknown, not success or proof of continued execution.
+4. Apply the approved stop conditions. A stalled job requires evidence against its workload-specific progress threshold.
+5. Arrange the next check only when supervision is still required. Do not duplicate a native completion-notification loop.
 
-Always write the contract to a file before launch — no exceptions, even for "quick" jobs. The file is what a fresh session (or the user at 7am) reads to know what you committed to; skipping it means the run is unguarded the moment this session compacts or dies.
+If status cannot be established, report the failed check and apply only the contract's authorized response. Do not restart to recover visibility.
 
-- Path: `docs/jobs/<slug>.md`. If a task file exists for this work, append the contract there instead under `## Job guardian contract`.
-- Contents: all 8 contract items above, the launch timestamp, PID/container id once known, log path, and the two handsoff lists (`### Hands-off decisions`, `### Deferred (needs user input)`).
-- Do not launch until the file is written. The file is the gate.
+## Recover only within approval
 
-**Keep the file live.** Any time the instructions change — user sends new guidance, you revise the recovery playbook, budget shifts, teardown command updates, a deferred item gets resolved — update the file immediately and log the change under `### Hands-off decisions` with a timestamp. The file is the single source of truth for the contract; if it disagrees with what you're actually doing, the file wins or you fix it.
+Before each recovery attempt, verify all of the following:
 
-## Phase 1 — Setup
+- The failure matches an explicitly approved recovery case.
+- The exact command and configuration change are authorized.
+- The attempt and spend or runtime limits permit another attempt.
+- Outputs and checkpoints required for recovery are preserved.
 
-Do the prep the job needs, idempotently (GPC5): env / deps installed, data and checkpoints in place, output dir and log path created, secrets present (`.env`, never hardcoded). Verify the launch command exists and is runnable *before* committing to it. For remote: confirm the pod is reachable and connection multiplexing is up (`remote-ssh`).
+Then execute the approved command, record the attempt and resulting job identity, and repeat the immediate-failure checks. Stop recovery when any condition fails. A deterministic repeat failure is evidence to investigate, not permission to loop.
 
-## Phase 2 — Launch + crash gate
+Lowering batch size, changing precision, cleaning disk contents, retrying paid work, or resuming from a checkpoint all require the relevant explicit approval. An inferred conservative choice does not suffice.
 
-Launch with output redirected to the log file. Then **do not leave** until you've cleared the immediate-crash window — most failures (bad path, OOM on first batch, import error, auth) surface in the first minutes.
+## Finish
 
-<required>
-1. Launch; record PID / container id and the log path.
-2. `ScheduleWakeup` 270s. On wake, read the contract file, then tail the log and pull the latest metric directly. Confirm the *health* signal has fired — first step logged, first batch through, first rows written — not merely "no error yet."
-3. If it crashed or never reached the health signal: triage now (Phase 4). Do not start the long poll on a job that never got off the ground.
-4. Only once you've seen real progress: declare stable and enter Phase 3.
-</required>
-
-Do not gate the crash window on a `Monitor` grep filter waiting for a success token — the line you're watching for may never be emitted (silent hang, different format, redirected stream), and the gate then waits forever. Always wake on the timer and read the full tail yourself.
-
-## Phase 3 — Stability poll loop
-
-Now poll on a cadence. Each tick is a real check, not a heartbeat:
-
-<required>
-1. Re-read the contract file first — session memory may have compacted or this may be a fresh wake. The file is the source of truth for launch command, log path, health/done signals, recovery playbook, budget, and teardown.
-2. Read fresh evidence: tail the log, check PID/container, pull the latest metric.
-3. Classify: progressing / done / anomaly. Progress means the health signal advanced *since last tick* — same step count after 5 min is a hang, treat as anomaly.
-4. Progressing → schedule the next tick, say nothing.
-5. Done → Phase 5 (tear down if the user wants the resource released; notify).
-6. Anomaly → Phase 4.
-7. Each tick, check budget/stop conditions. Hit one → stop, tear down per contract, notify.
-</required>
-
-### Poll mechanics
-
-The harness cannot notify you about remote pod state — you must re-wake yourself.
-
-- **Always `ScheduleWakeup` at 270s.** Fixed cadence. Just under the 5-min prompt-cache TTL, so each tick stays cheap. Do not stretch to 300s+ "because the job is long" — the cache miss costs more than the saved tick, and a longer interval delays catching a hang. Do not shorten either — 270s is the cadence.
-- The wakeup `prompt` must point at the contract file — e.g. `"Job guardian tick: read docs/jobs/<slug>.md and run Phase 3."` — so the next tick reloads the contract regardless of session state.
-- **Never wait on a `Monitor` grep filter as the primary signal.** Grep waiting for specific tokens (`step=`, `loss=`, success markers) silently misses when the log format shifts, the line is buffered, or the stream is redirected — and you wait forever. Wake on the timer, read the tail, decide. `Monitor` is fine as an additive watch for known failure signatures (`Traceback|OOM|NaN|Killed`) but it never replaces the 270s tick.
-- Don't block the session on long foreground `sleep`s. Schedule the next tick and yield.
-
-## Phase 4 — Triage: recoverable or not
-
-Match the failure against the Phase 0 playbook. Fail fast and loud (GPC6) — a wrong recovery that corrupts a checkpoint is worse than a clean stop.
-
-Recoverable (on the playbook, under the attempt cap):
-1. Apply the named fix.
-2. Resume from the last good checkpoint if the job supports it; else restart.
-3. Re-run the Phase 2 crash gate — confirm the fix actually took and progress resumed before trusting it.
-4. Increment the attempt counter for this failure class.
-
-Unrecoverable — escalate, do not improvise — when any holds:
-- Not on the playbook, or root cause is unclear.
-- Attempt cap for this failure class is hit (don't loop a restart forever).
-- It needs a human decision (config change, code fix, data problem, budget call).
-- Repeated identical crashes — restarting a deterministic failure just burns money.
-
-On unrecoverable: capture the failure (last log lines, error, what you tried), then go to Phase 5.
-
-## Phase 5 — Terminal: teardown + notify
-
-<required>
-1. Preserve outputs first — pull checkpoints, logs, results off the pod *before* any teardown, in case teardown destroys the disk.
-2. Release the resource (done, gave up, budget hit) with the reversible teardown (`stop`, not destroy). Verify it actually released (pod stopped) — a teardown you didn't confirm is not done (GPC5).
-3. Write the record: outcome, final metrics or error, recovery actions taken, where logs/checkpoints live, plus the two handsoff lists — `### Hands-off decisions` (every inferred choice, one line each) and `### Deferred (needs user input)`.
-4. `PushNotification` on the contracted terminal events, lead with what the user acts on: `"train done: 50k steps, loss 1.8, pod stopped"`, `"job died — OOM, 3 restarts failed, pod stopped, log saved"`. Not routine progress.
-</required>
-
-## Never
-
-- Declare stable from "no error yet" without seeing the health signal fire.
-- Read a metric once and assume it's still true an hour later — re-read each tick.
-- Restart a deterministic crash past the attempt cap.
-- Destroy a pod (`remove`/terminate) the user didn't explicitly name — `stop` ends the spend reversibly.
-- Tear down a pod holding the only copy of checkpoints/logs before pulling them off.
-- Ask the user anything — at intake, mid-flight, or at teardown. They're away. Infer + log, or defer + stop.
-- Launch without the contract file written. No file, no launch.
-- Let the contract file drift from current instructions — update it the moment guidance changes.
-- Burn budget on a hung job because liveness ≠ progress.
-- Block the session on long foreground sleeps instead of `ScheduleWakeup`.
-- Wait on a `Monitor` grep for a success token as the gate — it misses and you wait forever. Wake at 270s, read the tail.
-- Stretch or shrink the 270s cadence. Fixed.
+- Record terminal evidence and verify the required outputs or failure artifacts.
+- Preserve outputs before an approved teardown that could lose them. Large transfers still require capacity checks and authorization.
+- Release resources only as specified in the contract. Verify the resulting resource state and report any continuing charges that can be established. Do not assume every provider's stop operation ends all charges.
+- Notify the user with the outcome, recovery attempts, output or log locations, unresolved status, and next required action.
+- Do not report completion until the job's terminal state and the contracted preservation and resource actions are verified. If any step is blocked, report the blocker rather than success.
