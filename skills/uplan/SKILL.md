@@ -5,197 +5,120 @@ description: Use after design to turn a validated spec into a lean implementatio
 
 # Plan
 
-Convert the approved Design into a lean, concrete implementation plan. Output fills the `## Plan` section of `docs/tasks/<slug>.md`. The plan is the contract that `up:uexecute` will follow.
+Convert the approved design into an implementation contract for [uexecute](../uexecute/SKILL.md). Fill `## Plan` in the existing `docs/tasks/<slug>.md`. Do not create a separate plan file.
 
-## What a plan is
+Read the [brevity rules](../_brevity.md) and [global principles](../_principles.md) before planning. Preserve required content and omit optional sections with no useful content. Deviations, deferrals, failures, and risks retain evidence and reasons.
 
-Plan answers: how do we get from where we are now to the Design's vision? It's the delta — the concrete path from current code to the approved spec. Design owns what it should be; Plan owns how we get there from here.
+## Scope
 
-A plan is the minimum information an engineer needs to implement the Design without re-doing the thinking. That means:
-
-- Concrete locations: exact file paths, line number ranges, class/method/interface names. "Modify `parser.py`" is not enough — `parser.py:120-160, Parser.tokenize()` is.
-- Per-file change bullets: what changes in each file, by name. Not prose.
-- Interface signatures: new or changed function/method signatures. No bodies.
-- Phases with commits: ordered phases, one commit per phase minimum.
-- Test strategy: the behaviors to cover, not test code.
-- Snippets only where words fail: one regex, one tricky algorithm, one non-obvious API call. Never full implementations.
-
-If an engineer could read your plan and implement the wrong thing, the plan is incomplete. If they need to re-derive the Design to understand the plan, the plan is bloated.
-
-## Scope is decided in design, not here
-
-By the time you plan, the task's scope is fixed. If you discover a subsystem-split issue now, it means design missed it — stop planning, go back to the user, and decide whether to re-open design or keep the current scope.
-
-Do **not** silently split the task here. Do not silently expand it either.
-
-## Output
-
-Fill `## Plan` in `docs/tasks/<slug>.md`. Do not create a separate plan file.
-
-## Brevity
-
-<required>
-Before responding or writing the Plan, read the [brevity rules](../_brevity.md). Apply its principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Treat every subsection in the Format block below as optional — include only when the content is non-default. Failures, deviations, deferrals, and known risks always include evidence.
-</required>
+Design decides the outcome and scope. Planning names the concrete changes needed to reach it. If a new finding requires splitting the task, changing the design, or expanding scope, stop and ask the user. Do not silently rewrite the goal.
 
 ## Process
 
-<required>
-1. Read the task file's `## Context`, `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK). Know what you're planning for.
-2. Sketch the file structure — which files change, which are new, which classes/methods. Fold an in-scope or easy-win smell you pass into a phase; record the rest to `## Code smells` (see [global principles](../_principles.md) → Incidental code smells).
-3. Break into phases. Each phase is a coherent commit.
-4. Write phase-by-phase plan entries. Concrete locations, per-file bullets, interfaces.
-5. Write test strategy (per task's TDD decision).
-6. Write order + dependencies, open questions, risks, rollback.
-7. Add snippets only for the single most critical component per phase.
-8. Backwards-compat check — restate Design's compat risks in concrete plan terms.
-9. Self-review inline (placeholders, consistency, invariants, spec coverage).
-10. Scope-creep / simpler-way check — see below. This is the final step before handoff.
-11. Present the plan to the user. In interactive mode, wait for approval, then invoke `up:uexecute`. In hands-off mode (task-file `**Mode:** hands-off`), auto-invoke `up:uexecute` after presenting, and log `- uplan: plan auto-approved (hands-off)` to `## Conclusion → ### Hands-off decisions`.
-</required>
+1. Read context, design, invariants, principles, assumptions, and unknowns in the task file.
+2. Identify files, symbols, and interfaces to change. Include in-scope or easy, low-risk defects in the plan. Record other findings under `## Code smells` per the global principles.
+3. Divide the work into coherent phases with at least one commit per phase.
+4. Write concrete file changes, interfaces, verification behavior, and dependencies. Follow the design's test-driven-development decision.
+5. Map compatibility risks to phases and mitigation steps. If a new break was not covered by the design, stop and ask the user. For greenfield work, state that this check does not apply.
+6. Review the plan for coverage, correctness, and simplicity using the checks below.
+7. Present the plan. In interactive mode, wait for approval before invoking [uexecute](../uexecute/SKILL.md). In hands-off mode, follow the contract below.
 
 ## Required contents
 
-Required always:
-- Approach: 1-2 sentences on the strategy and why it fits the Design
-- File structure: for each file, `path/to/file.ext:lineA-lineB` (create|modify) + affected class/method names
-- Per-file bullets: what changes, by name
-- New/changed interfaces: signatures only
-- IV/PC/AS referenced by ID: which Design entities each phase preserves or relies on
+Always include:
 
-## ID conventions in Plan
+- Approach and why it fits the design.
+- Each changed or new file as `path:lineA-lineB`, with affected symbols and concrete changes. For example, name `Parser.tokenize()` rather than just "modify parser".
+- New or changed signatures without implementation bodies.
+- Ordered phases and intended commits.
+- References to the design constraints each phase preserves or relies on.
 
-Plan introduces two entity types, numbered within the task file:
+Include when relevant:
 
-- PH1, PH2, … — Phases. Each phase heading is `### PH<N> — <name>`.
-- RK1, RK2, … — Risks. Each is one sentence.
+- Test strategy: behaviors to cover, with failing tests first when `TDD: yes`.
+- Dependencies, open questions, risks, and rollback.
+- Cross-phase interfaces when two or more phases share a signature, anchor, or other contract.
+- An interface graph for multi-phase plans. Omit it for a single phase.
+- A snippet only when prose cannot express the most critical detail in a phase. Do not write full implementations in the plan.
 
-References to Design entities use IDs (IV3, AS1, UK2) — never re-quote the full sentence.
+## ID conventions
 
-Required when relevant (omit the subsection when it would say "single phase, no deps", "none", or similar):
-- Test strategy: behaviors to cover. If `TDD: yes`, list the failing tests to write first.
-- Order + dependencies: phases, what blocks what
-- Open questions / risks / rollback: what could go wrong, how to back out
-- Interfaces: declare cross-phase contracts when ≥2 phases share a signature / anchor / API shape. Omit for single-phase plans.
-- Interface graph: declare phase shape when ≥2 phases exist. Omit for single-phase plans.
-
-Optional:
-- Code snippets: only for the most critical component per phase. If tempted to include full code, you're over-planning.
+- `PH1`, `PH2`, and so on identify phases. Each phase heading is `### PH<N> — <name>`.
+- `RK1`, `RK2`, and so on identify risks, each defined in one sentence.
+- `IF1`, `IF2`, and so on identify cross-phase interfaces.
+- Reference existing design entities by their IDs rather than repeating definitions.
 
 ## Format
 
 ```markdown
 ## Plan
 
-Approach: <1-2 sentences>
+Approach: <strategy and reason>
 
 ### PH1 — <name>
-
-- **1.1** `path/to/file.ext:lineA-lineB` (create|modify)
-  - `ClassName.method_name(arg: Type) -> Ret` — <what changes, by name>
+- 1.1 `path/to/file.ext:lineA-lineB` (create|modify)
+  - `Class.method(arg: Type) -> Ret` — <concrete change>
   - Respects: IV2, AS1
-- **1.2** ...
-- Commit: `<message>`
+- Commit: <message>
 
-### PH2 — <name>
-...
+### Test strategy
+- <behavior and affected file or phase>
 
-### Test strategy   (optional — omit if no tests / doc-only)
-<behavior list, per file or per phase>
+### Order & dependencies
+- <what blocks what>
 
-### Order & dependencies   (optional — omit for single-phase or obviously-sequential plans)
-<what blocks what, parallelizable phases>
+### Risks / rollback
+- RK1 — <risk and mitigation>
 
-### Risks / rollback   (optional — omit if none non-trivial)
-- RK1 — <one-sentence risk and mitigation>
-- RK2 — <...>
+### Interfaces
+- IF1 — <signature and contract>
+- IF2 [blocks] — <signature, contract, and why the consumer must wait>
 
-### Interfaces   (optional — omit for single-phase plans)
-- IF1 — `<signature>` — <contract sentence>
-- IF2 [blocks] — `<signature>` — <contract sentence> (consumer must wait for producer; see "Blocking interfaces" below)
-
-### Interface graph   (optional — omit for single-phase plans)
-- PH1              -> IF1, IF2   @ skills/foo/SKILL.md
-- PH2  IF1         -> IF3        @ skills/bar/SKILL.md
-- PH3  IF2, IF3 ->               @ agents/baz/AGENT.md
+### Interface graph
+- PH1 -> IF1, IF2 @ src/producer.py
+- PH2 IF1 -> @ src/consumer.py
+- PH3 IF2 -> @ src/generated_consumer.py
 ```
+
+Repeat phase entries as needed. The graph above illustrates dependencies for three phases, whose concrete change bullets must also be written. Omit irrelevant optional sections.
 
 ## When to declare interfaces
 
-- An interface is a cross-phase contract: a function/method signature, a shared SKILL.md section anchor, or any API shape that one phase produces and another phase consumes.
-- The consume arrow (`IF<N> ->`) means runtime coupling — one phase's output is the other phase's input. Doc-only phases that merely reference a prior phase's plan text are sources, not consumers; leave the consume side empty (the line starts with `PH<N>  -> <produces>`).
-- `@ <paths>` marks the filesystem boundary for each phase. Paths declared by phases in the same wave must be disjoint; `up:uexecute` uses this to detect boundary violations after each commit.
-- Waves are derived from the graph by topo-sort over `[blocks]` edges only — non-blocking IF edges (the default) do not create wave boundaries, since the IF declaration is sufficient context for the consumer. Phases linked only by non-blocking IFs land in the same wave and run in parallel. Do not hand-declare waves; declare the graph and the blocking flags, and let the executor derive them.
-- Omit both `### Interfaces` and `### Interface graph` for single-phase plans.
+An interface is a contract shared by phases: a function signature, class shape, file format, or skill section anchor. The consume arrow names an interface the phase uses. A phase that only reads an earlier phase's plan text does not consume its output.
+
+For each graph line, declare consumed interfaces, produced interfaces, and owned paths after `@`. An empty consume side is a source. An empty produce side is a sink.
+
+Only `[blocks]` interfaces create wave boundaries. Non-blocking consumers can be implemented against the declared signature while the producer runs. Do not hand-declare waves. The executor derives them and checks that concurrent phases own disjoint paths.
 
 ## Blocking interfaces
 
-By default, an IF is non-blocking: its declared signature is the contract, and a consumer can be implemented in parallel with the producer (the wiring check reconciles any drift after the wave). Mark an IF `[blocks]` when:
+Use `[blocks]` when a consumer needs actual producer output, such as a generated file or applied migration, or when a large or critical producer must be completed and verified first. State the reason in the interface contract.
 
-- The consumer needs the producer's actual output, not just the signature — e.g. a generated config file, an applied DB migration, a fixture that must exist on disk, a doc anchor that must resolve at lint time.
-- The producer is large, risky, or critical enough that the planner does not want dependent work running concurrently — better to land it, verify it, then build on top. Planner/dispatcher discretion.
+Leave ordinary signature dependencies non-blocking when their declarations provide enough context. The executor's wiring check reconciles drift after the final wave.
 
-Use `[blocks]` sparingly — every block reduces parallelism. The default of non-blocking is correct for ordinary code interfaces (function signatures, class shapes, SKILL.md anchors) where the IF declaration carries the contract.
+## Self-review
 
-## Self-review (inline, no subagent)
-
-<required>
-1. Spec coverage — every IV / PC / AS / UK item maps to at least one plan bullet, or is explicitly deferred to execute / verify.
-2. Placeholder scan — no "TBD", "handle edge cases", "add validation", "similar to task N", "write tests for the above".
-3. Consistency — method/class names match across bullets; later phases' interfaces reference what earlier phases define.
-4. Leanness — plan size should fit the task. If it exceeds ~1 screen per day of expected work, trim.
-5. IV / AS coverage — each IV and AS has a referencing bullet somewhere (by ID).
-6. If `### Interface graph` is present: every phase declares `@ <paths>`; paths declared by phases in the same wave are disjoint (where waves are derived by topo-sort over `[blocks]` edges); every IF consumed by any phase is defined in `### Interfaces`; every IF defined is produced by exactly one phase; every `[blocks]` annotation has a stated reason in the IF's contract sentence.
-</required>
-
-Fix issues inline. No re-review loop.
-
-## Backwards-compat check — restate the design's risks in plan terms
-
-<required>
-Design should already have surfaced backwards-compat risks. In the plan, restate each one with its concrete phase and the mitigation step. If you discover a new break the Design missed (schema rename in phase 2, config key no longer read, output format drift), stop planning and go back to the user — don't smuggle it in.
-</required>
-
-<good-example>
-"Phase 3 renames `log_level` → `logging.level`. Per Design decision, Phase 3 also adds a one-release compat read of the old key with a deprecation warning. Removal is out of scope for this task."
-</good-example>
-
-<bad-example>
-Plan includes a schema migration with no mention of the compat strategy. Execute runs the migration; the old service version in prod breaks on the next deploy.
-</bad-example>
-
-If the task is greenfield, skip this check explicitly in one line.
-
-## Default principles
-
-<required>
-Read the [global principles](../_principles.md) before sketching phases. Every phase must be consistent with GPC1–GPC8; where a phase deviates, the bullet names the GPC and the reason in one line (e.g. "breaks GPC3 — single call site, split would obscure the flow").
-</required>
+1. Every invariant, principle, assumption, and unknown maps to a plan bullet or an explicit deferral to execution or verification.
+2. File paths and symbols are concrete and consistent. Remove placeholders such as "handle edge cases" or "similar to phase 1".
+3. Every phase follows the global principles. A deviation names the principle and the reason.
+4. The test strategy and compatibility mitigations match the design.
+5. If a graph is present, every phase declares owned paths, every consumed interface is defined, every defined interface has exactly one producer, and every blocking annotation has a reason. Paths within a derived wave must be disjoint.
+6. Keep the plan proportional to the work. Fix these issues inline without a review subagent.
 
 ## Final check — scope creep, elegance, simpler way
 
-<required>
-Before handing off to the user, check:
+- Does each phase serve the approved design, without unrelated refactors, extra validation layers, or speculative abstractions?
+- Can phases or duplicate paths be combined without losing clear ownership?
+- Would a simpler approach meet the goal with less work? Present a material alternative to the user rather than changing scope silently.
 
-1. Scope creep: is every phase directly serving the Design, or have I snuck in "while I'm here" refactors, extra validation layers, speculative generality?
-2. Elegance: can any pair of phases merge? Are there accidental duplicate data paths? Does the plan introduce abstractions that aren't pulling their weight?
-3. Simpler way: is there a one-paragraph alternative plan that gets 90% of the value with 30% of the work? If yes, propose it to the user as an option.
-</required>
-
-<good-example>
-"Plan says 7 phases. It's really 3 — phases 4-7 are a generalization layer for a second caller that doesn't exist. Cut to 3, flag the generalization as future work."
-</good-example>
-
-<bad-example>
-"Plan is 12 phases. I'll just hand it off — the user can decide what to cut." No. That's the agent's job here, not the user's.
-</bad-example>
-
-If this check surfaces real simplifications, rewrite the plan. Don't stack warnings on top of a bloated plan.
+Revise a bloated plan before handoff. For example, remove a generalization phase whose only justification is a second caller that does not exist.
 
 ## Hands-off mode
 
-See `up:handsoff` for the full contract. Stage-specific delta: skip the approval wait — present the plan highlights, log `- uplan: plan auto-approved` to `### Hands-off decisions`, invoke `up:uexecute` directly. Self-review, scope-creep check, and backwards-compat restatement are unchanged. Ambiguities that would require a user call go to `### Deferred (needs user input)` and the plan stops — do not guess around them.
+Read [handsoff](../handsoff/SKILL.md). Present the completed plan, log `uplan: plan auto-approved` under `### Hands-off decisions`, and invoke [uexecute](../uexecute/SKILL.md) without waiting for routine approval. Keep all self-review and compatibility checks.
+
+Record ambiguities requiring user input under `### Deferred (needs user input)` and stop. Do not invent a choice to complete the plan.
 
 ## Terminal state
 
-Plan written, self-reviewed, scope-checked. Interactive: present highlights, wait for approval, invoke `up:uexecute`. Hands-off: present highlights, log auto-approval, invoke `up:uexecute`.
+The plan is written, self-reviewed, scope-checked, and approved explicitly or through hands-off mode before execution begins.

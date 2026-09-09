@@ -1,62 +1,39 @@
 # Brevity principles for long-lived artifacts
 
-Applies to anything that outlives the conversation: code, comments, docstrings, frontmatter descriptions, task files (`docs/tasks/<slug>.md`), READMEs, commit messages. Every skill that writes to such artifacts applies these rules to the section it owns. The goal is an audit trail, not a retelling.
+Apply to code, comments, docstrings, skill descriptions, task files, documentation, and commit messages. Keep the information needed to use, audit, or maintain the artifact.
 
 ## Principles
 
-1. **Omit, don't fill.** A subsection with default content ("none", "n/a", "single phase, no deps", "no open questions") is deleted, not written. The absence of the header *is* the signal that nothing needed saying.
+1. Omit empty or default-only sections. Do not fill them with "none", "no findings", or placeholders.
+2. Summarize routine passed checks in one line. Attach evidence to failures, deferrals, and surprising results.
+3. Do not retell the diff or conversation. Use the commit and file references for changes. Explain decisions, deferred work, and constraints the diff cannot express.
+4. Use one sentence per outcome or reason unless more is needed to explain a material fact.
+5. Keep task files proportional to the work. Aim for one screen for a small task and three for a medium task, without hard word limits.
+6. Remove text that needs the original conversation to make sense. Keep operational requirements, cross-file references, and non-obvious reasons.
 
-2. **Evidence only on surprise.** Passed checks are a one-line bullet. Attach evidence — command output, a grep that confirmed emptiness, a file:line reference — only to failures, deferrals, or genuinely surprising passes.
+## What to keep
 
-3. **Don't re-narrate.** The commit, the diff, and `git log` are authoritative. Task-file prose only adds context the artifacts can't express: why a choice was made, what was explicitly deferred, what would bite a future reader. Never summarize the diff in prose — a SHA and a short name is enough.
+- "Dispatched from up:ureview" identifies a real workflow relationship.
+- "The reviewer receives the diff and plan, without the controller's rationale" defines an operational constraint.
+- "This guard prevents integer overflow in billing totals" explains a non-obvious reason.
 
-4. **One sentence, not a paragraph.** Outcomes, rationales, and deferrals fit in one sentence unless there's a concrete reason they can't. If you're writing a second sentence, check whether the first was padding.
-
-5. **Soft caps, hard judgment.** No word limits. Lean toward ≤1 screen for a Small task's full task file; ≤3 screens for Medium. Over? Cut.
-
-6. **No orphan text (a.k.a. conversation bleed).** Cut anything that doesn't help the reader understand the artifact now. Usual cause: scaffolding Claude used while writing — framing, rejected alternatives, references to the task or the user's last critique. Scaffolding stays in the chat. Conversation bleed is the visible symptom; orphaning is the rule. Test: does the line earn its place by informing?
-
-   - DONT: `train_vlm_layers: 10  // train 10, NOT all` — "don't train on all" was a chat critique; once the value is 10, the comment is orphaned.
-   - DONT: agent description "…Fresh context, never sees session history or later phases. Sonnet 4.6." — session semantics and an inlined model string are orphan; the description should say what the agent *does*.
-   - DONT: `action_frame_stride: int = field(kw_only=True)  # must be set explicitly (no default — comes from config)` — `kw_only=True` with no default already forces explicit passing; the comment narrates the chat where the default was removed. Redundant with the code and orphaned once the dialogue is gone.
-   - DO: agent description "…Dispatched per-phase from `up:uexecute`." — naming the dispatching skill is wiring, not orphan. Claude Code reads the description to decide when to dispatch; the referent is another long-lived file, renamed atomically if it moves. Wiring test: if the referent is a file a stranger can `grep` for, keep; if it's a dialogue, critique, or transient decision, cut.
-   - DONT: task file narrating the dialogue to a reader:
-
-     <bad>
-     (Both resolved in design dialogue; kept here as record.)
-     - UK1 — Pre-seed `### Assumptions` and `### Unknowns` in the `/up:make` template. Resolved: yes.
-     - UK2 — Conclusion gets dedicated `### Assumptions check` and `### Unknowns outcome` subsections. Resolved: yes, dedicated.
-     </bad>
-
-     <good>
-     - UK1 — Pre-seed `### Assumptions` and `### Unknowns` in the `/up:make` template. Resolved: yes.
-     - UK2 — Conclusion gets dedicated `### Assumptions check` and `### Unknowns outcome` subsections. Resolved: yes, dedicated.
-     </good>
-
-     Why it's bleed: the parenthetical addresses a reader ("kept here as record") and references "the design dialogue" — a conversation that, from the file's point of view, never happened. The file is the record; it doesn't need to explain why it's the record. A stranger reading six months later sees the two resolved items and understands them on their own; the parenthetical only makes sense if you were in the chat where they were being debated.
-   - DO: `// integer overflow here caused the 2026-02 billing incident` — timeless reason, still useful after the fix.
-   - DO: agent description "Implement one phase of an approved plan — code, tests, commit." — stands alone, describes purpose.
+Remove narration such as "kept here as a record of our discussion" or a comment that only restates the code. A configured value does not need a comment listing alternatives rejected in chat.
 
 ## Compression
 
-Applies to the prose you write — task-file sections, summaries, PR bodies, and your own responses:
-
-- **Say it once.** If a point is restated later, cut the restatement, not the elaboration.
-- **One name per concept.** Don't alias the same thing two ways in one piece of writing.
-- **No self-narration.** "Let me…", "what this means is…", "so the plan is…" — drop the framing, state the thing.
-- **No hedge words.** "honest", "actually", "basically", "essentially" add nothing.
-- **One closing question max.** Don't soften it with a second.
-- **Lede first.** Verdict in sentence 1, then the evidence.
-- **No phantom contrasts.** "Not X but Y" earns its place only when X is a tempting wrong answer — a mistake that's easy to make and looks like a good choice on the surface. Otherwise X is a phantom — drop it and just say "do Y". Same for "rather than X, do Y" / "instead of X, Y" / "X? No — Y."
+- Say each rule once. Keep elaboration only when it adds a necessary condition or example.
+- Use one name per concept.
+- Lead with the result or decision. Remove self-narration and empty qualifiers.
+- Ask at most one closing question.
+- Use a contrast only when it rules out a plausible mistake. Do not invent an opposing claim just to negate it.
 
 ## Checklist before saving
 
-- Can any subsection be removed entirely because its content is "none" or the default?
-- Does any bullet re-state what the diff or commit message already shows? Drop it.
-- Any evidence citation on a check that just passed? Drop it.
-- Any second sentence that adds no new information? Cut it.
-- Any text that references this conversation — the current task, my last critique, session semantics, an inlined model string? Cut it. (Exception: naming another long-lived skill/command/agent file — e.g. "Dispatched from `up:ureview`" — is wiring, not bleed. Keep.)
+- Does every section add information needed by a reader without the conversation?
+- Can repeated instructions be removed without losing a requirement?
+- Are references and necessary context explicit?
+- Do failures, deviations, deferrals, and risks still explain what happened and why?
 
 ## Exception — never abbreviate these
 
-Failures, deviations from plan, deferrals, and known risks ALWAYS carry their evidence and their "why". Brevity means not padding the trivially-fine cases; it never means losing a finding.
+Failures, deviations from plan, deferrals, and known risks always carry evidence and a reason. Brevity must not hide a finding or remove the steps needed to act on it.

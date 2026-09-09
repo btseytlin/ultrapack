@@ -22,11 +22,14 @@ Worktrees let you work on multiple branches simultaneously without stashing or s
 
 ## Safety — confirm project-local dirs are gitignored before creating
 
-For project-local directories (`.worktrees/` or `worktrees/`), verify gitignore:
+For a project-local directory, verify the selected directory is ignored before creating the worktree:
 
 ```bash
-git check-ignore -q .worktrees 2>/dev/null || git check-ignore -q worktrees 2>/dev/null
+directory="<selected-dir>"
+git check-ignore -q "$directory/"
 ```
+
+An ignored sibling directory does not make the selected directory safe.
 
 If not ignored: add the line to `.gitignore`, commit (`chore: ignore worktree directory`), then proceed.
 
@@ -80,12 +83,14 @@ Baseline: <test summary, or "skipped — no test command">
 
 ## Cleanup when task is done
 
+After the user chooses cleanup, check the worktree is clean and the work is merged or otherwise preserved. Then remove it and use safe branch deletion:
+
 ```bash
 git worktree remove <path>
-git branch -D <branch-name>  # only if not merged
+git branch -d <branch-name>
 ```
 
-Don't leave stale worktrees around. `git worktree prune` cleans up broken references.
+If deletion is refused because the branch is unmerged, stop and report it. Never force deletion without explicit user approval, and never force it in hands-off mode. `git worktree prune` removes stale administrative records.
 
 ## Never
 

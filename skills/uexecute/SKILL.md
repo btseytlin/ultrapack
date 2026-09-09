@@ -5,345 +5,154 @@ description: Use to implement an approved plan. When the plan declares `### Inte
 
 # Execute
 
-Implement the approved `## Plan` from `docs/tasks/<slug>.md`. You are the dispatcher — each concurrent phase is handed to a fresh implementer subagent. After each phase returns, run the plan-diff check and consistency pass before moving on. The goal is a working change that honors Design and Plan.
+Implement the approved `## Plan` from `docs/tasks/<slug>.md`. Dispatch concurrent phases to independent implementers. Execute single phases inline.
 
 ## Harness adaptation
 
-On Claude Code, use the packaged `up:implementer`, `up:implementer-sonnet`, `up:explorer`, and `up:researcher` agents. On Codex or Pi, delegate with the host's subagent/task mechanism and include the role's prompt contract from this skill; do not claim a particular model or custom agent type is available. References to `TodoWrite` mean the harness's available task checklist. In either harness, pass the absolute working directory and preserve the same ownership, commit, and report rules.
+On Claude Code, use `up:implementer`, `up:implementer-sonnet`, `up:explorer`, and `up:researcher`. On Codex or Pi, use the host's delegation mechanism with the role contract below. Confirm available capabilities rather than assuming a model, tool, or custom agent exists. Use the host's task checklist.
+
+Pass the absolute working directory and expected branch to every child. Preserve file ownership, commit ownership, and report requirements across harnesses.
 
 ## Before starting
 
-<required>
-1. Read the full task file — Context, Design, Invariants (IV), Principles (PC), Assumptions (AS), Unknowns (UK), Plan. Plan is not optional reading.
-2. Scan the plan for ambiguity, missing dependencies, or contradictory steps. Raise now, not after writing half the code.
-3. Verify branch + worktree. Check `git rev-parse --show-toplevel` and `git branch --show-current` match the task file's `**Branch:**` and `**Worktree:**` headers. If mismatched: stop and ask.
-4. Build the checklist — one task per plan phase (or per task if phases are coarse) using the harness's task tracker.
-</required>
+1. Read the full task file: context, design, invariants, principles, assumptions, unknowns, and plan.
+2. Raise ambiguity, missing dependencies, or contradictory instructions before editing.
+3. Confirm `git rev-parse --show-toplevel` and `git branch --show-current` match the task file's worktree and branch. Recheck before writes. If the worktree is `none`, use the main checkout. Stop on a mismatch.
+4. Create a checklist entry per phase.
+5. Read the [brevity rules](../_brevity.md) before writing task progress or responding. Omit empty deviations and risks. Deferrals name the needed path, command, or decision and include evidence and a reason.
 
-## Brevity
+## Derive execution waves
 
-<required>
-Before responding or writing anything into the task file (deviations, hands-off decisions, known risks), read the [brevity rules](../_brevity.md). Apply its principles. Specifically:
-- `### Deviations from plan` — create the subsection only when a deviation happens. Do not add an empty "no deviations" line.
-- `### Hands-off decisions` — when every stage auto-approved with no interventions, collapse to a single entry `- all stages auto-approved, no interventions`. When a stage did intervene (reviewer fix, deferral, etc.), keep its own entry.
-- `### Deferred (needs user input)` — one line per deferral, with the concrete artifact the user needs (file path / command / question).
-The Exception clause still holds: deviations, deferrals, and known risks always carry evidence and "why".
-</required>
+Without `### Interface graph`, execute phases in order, inline. With a graph, read each line as:
 
-## Branch / worktree correctness
+```text
+PH<N>  <consumed-interfaces> -> <produced-interfaces> @ <owned-paths>
+```
 
-<system-reminder>
-Editing the wrong repository is one of the most common bugs. Before any write, confirm:
-
-- `pwd` matches the task file's `**Worktree:**` (or the main repo if `none`)
-- `git branch --show-current` matches `**Branch:**`
-
-When you dispatch a subagent (`up:explorer`, `up:researcher`), pass the intended working directory explicitly in the prompt. Subagents do not inherit your `cwd` reliably across harnesses.
-</system-reminder>
-
-## Per-wave loop
-
-If the plan contains a `### Interface graph` subsection (declared by `up:uplan`), derive execution waves via topo-sort over `[blocks]` edges only:
-
-- An IF declared with `[blocks]` in `### Interfaces` is a blocking dependency — its consumer must wait for the producer's actual output (e.g. a generated file, an applied migration), or the planner has marked the producer as large/critical enough that downstream work should not start until it lands.
-- An IF without `[blocks]` is non-blocking — the IF declaration is sufficient context for the consumer to be implemented in parallel with the producer.
-- Wave 1: phases with no blocking Consumes. Wave N+1: phases whose every blocking Consumes IF is produced by phases in waves 1..N. Non-blocking IF edges are ignored when computing waves.
-
-Mismatches between an implementer's actual output and the IF declaration surface in the wiring check (post-wave) and are reconciled there. Otherwise fall back to the serial one-phase-at-a-time loop (IV6).
-
-**Serial fallback (no `### Interface graph`):** execute phases in order, one at a time, inline — never dispatch a single implementer (see "When to skip dispatch and do it inline").
-
-**Wave preparation:**
-
-<required>
-Before dispatching a wave:
-1. Collect the `@` paths declared by every phase in the wave.
-2. Verify pairwise disjointness: no path may appear in more than one phase of the same wave. On overlap, stop execution and log under `### Deferred (needs user input)` with the conflicting paths and phase names. Do not dispatch the wave (PC4, IV2).
-3. If the wave contains only one phase, skip dispatch and edit inline.
-</required>
-
-For each phase (serial fallback) or wave (parallel):
-
-<required>
-1. Mark the phase(s) `in_progress` in the harness's task tracker.
-2. Dispatch implementers (multi-phase wave only — see "Wave dispatch" below). Otherwise edit inline yourself.
-3. On implementer return, handle status:
-   - `DONE` → continue to step 4.
-   - `DONE_WITH_CONCERNS` → read the concerns. Resolve or record them, then continue.
-   - `NEEDS_CONTEXT` → supply missing context, re-dispatch.
-   - `BLOCKED` → diagnose. If the plan is wrong, invoke `up:uplan`. If context-only, re-dispatch. Do not retry identically.
-4. **Plan-diff check.** Read the phase's commit (`git show <sha>`). For every plan bullet in this phase: is it reflected in the diff? For every change in the diff: is it covered by a bullet, or by a deviation the implementer reported? Any unreported structural gap → record as a deviation, or re-dispatch with correction.
-5. **Consistency pass.** If the implementer tightened a rule, renamed a symbol, or changed a pattern in one spot, grep the diff and the wider repo for the same pattern. Apply the same change everywhere. If the implementer already did this (their self-review requires it), confirm and move on. If they missed siblings, either re-dispatch or fix inline and amend.
-6. Mark the phase `completed`.
-</required>
-
-Parallelism comes only from the Plan's `### Interface graph` via the wave scheduler; the scheduler ignores non-blocking IF edges and respects `[blocks]` ones; never infer ordering at runtime (IV4, PC5).
+- An empty consume side means no input interfaces. An empty produce side means no output interfaces.
+- Look up each consumed interface in `### Interfaces`. Only `[blocks]` creates an ordering dependency. A consumer of a non-blocking interface can use its declared signature while the producer runs.
+- Wave 1 contains phases with no blocking inputs. Each later wave contains phases whose blocking producers have completed in earlier waves. Never invent ordering or hand-declare waves.
+- Before each wave, check that its phases' owned paths are disjoint. On overlap, stop and record the conflicting paths and phases under `### Deferred (needs user input)`.
+- If only one phase would run, edit inline. Also stay inline for a phase needing interactive input or a small follow-up fix. Plan-diff and consistency checks still apply.
 
 ## Dispatch per phase
 
-Applies only when two or more phases fire concurrently in a wave. Each phase runs in a fresh implementer subagent. You coordinate. For single-implementer cases (single-phase plan, serial fallback, or a wave that reduced to one phase), do the work inline — see "When to skip dispatch and do it inline" below.
-
 ### Choosing the implementer agent
 
-<required>
-Choose the implementer role appropriate to the phase:
+- Complex implementer is the default for judgment, multi-file changes, new logic, test-driven development, or interface changes.
+- Trivial implementer is limited to mechanical, localized edits such as a typo, import cleanup, or version bump. A documentation edit qualifies only when it makes no behavioral claims.
+- If the trivial implementer returns `NEEDS_CONTEXT` to request escalation, send the same phase to the complex implementer.
 
-- **Complex implementer** — default. Use for any phase requiring judgment: multi-file changes, new logic, TDD, introducing or changing an interface, anything where reading multiple files informs the implementation.
-- **Trivial implementer** — only for an unambiguously mechanical, well-localized edit: a single-file typo/copy fix, mechanical rename, import/lint cleanup, version bump, or doc edit with no behavioral claims.
+### Dispatch contract
 
-Default to the complex implementer. Pick the trivial role only when every criterion is met. If unsure, use the complex role.
+Pass the phase verbatim, its design constraints, and these fields:
 
-If the trivial implementer returns `NEEDS_CONTEXT` with an escalation, re-dispatch the same phase to the complex implementer — its scope check correctly bounced a non-trivial phase.
-</required>
-
-<required>
-**Pass in the dispatch prompt:**
-- Full verbatim text of the phase from `## Plan` (e.g. PH3)
-- `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS) from `## Design`
-- TDD decision (from Design — `yes` or `no (reason)`)
-- Absolute working directory (subagents do not inherit `cwd` reliably across harnesses)
-- Expected git branch (from task file `**Branch:**` header)
-- `Commit mode: defer` — dispatch only happens in multi-phase waves; the dispatcher commits, implementers stage and report
-- `Owns`, `Implements`, `Consumes` — sourced from `### Interface graph`; see "Wave dispatch" below for how they're passed
-
-**Do not pass:**
-- Session history or prior-phase chatter
-- The full task file (pass only the sections above)
-- Later phases (keep the implementer scoped to one phase)
-- Rationale behind design decisions — the plan is the contract
-</required>
-
-**Dispatch prompt skeleton** (guidance — fill the fields, skip sections that don't apply):
-
-```
-Phase: <verbatim PHN text from ## Plan>
-Invariants: <IV1, IV2, ...>
-Principles: <PC1, PC2, ...>
-Assumptions: <AS1, AS2, ...>
+```text
+Phase: <verbatim phase text from the plan>
+Invariants: <definitions from design>
+Principles: <definitions from design>
+Assumptions: <definitions from design>
 TDD: <yes | no (reason)>
 Working directory: <absolute path>
-Branch: <expected branch from task file header>
+Branch: <expected branch>
 Commit mode: defer
-Owns: <comma-separated paths from the graph's @>
-Implements: <IF<n>, ...>                                    (if this phase produces any)
-Consumes: <IF<n>, ...>                                      (if this phase consumes any)
+Owns: <paths from the graph>
+Implements: <produced interface IDs, if any>
+Consumes: <consumed interface IDs, if any>
+Interfaces: <declarations for those interfaces>
 ```
 
-**When to skip dispatch and do it inline:**
-- Only one implementer would fire — single-phase plan, serial-fallback step, or a wave that reduced to one phase. Implementer subagents exist to enable parallelism; with one implementer there is no parallelism to enable, so the dispatcher does the work directly. Plan-diff and consistency steps still run.
-- Phase needs mid-work interactive user input
-- A phase-N-and-N+1 fix follows from review findings, small enough to just edit
+Do not pass session history, prior-phase chatter, later phases, the full task file, or rationale behind design decisions. The child needs the contract, not the conversation.
 
-## Wave dispatch
+Implementers edit only their owned paths, test, stage those paths, and report status, changed files, checks and results, concerns, deviations, and a proposed commit message. They do not commit in defer mode. On Codex or Pi, include these duties explicitly in the child prompt.
 
-Used when the Plan declares `### Interface graph` (written by `up:uplan`) and a wave contains two or more phases. Waves are derived by topo-sort over `[blocks]` edges only — never hand-declared (PC5). If a wave reduces to one phase, do it inline instead.
+### Wave dispatch
 
-**Reading the graph:**
-Parse each line of the form `PH<N>  <consumes-CSV> -> <produces-CSV>   @ <paths-CSV>`. Empty left of `->` = source (no consumed IFs). Empty right = sink. Collect Owns (`@`), Consumes (left), Produces (right) per phase. For each IF in Consumes, look up its kind in `### Interfaces`: `[blocks]` = blocking edge (creates wave boundary), bare = non-blocking (ignored by topo-sort).
+Launch all phases in a wave concurrently. On Claude Code, use concurrent `Agent` calls with `run_in_background: true`. On Codex and Pi, use the host's parallel workflow mechanism.
 
-**Wave derivation:**
-- Wave 1: phases with no blocking Consumes (their consumed IFs are all non-blocking, or they consume nothing).
-- Wave N+1: phases whose every blocking Consumes IF is produced by phases in waves 1..N.
-- Repeat until all phases are assigned.
+If dispatch was accidentally sequential, report it and track the existing runs. Never relaunch active or completed work merely to make dispatch parallel.
 
-**Disjointness check:**
-Before dispatching a wave, verify the `@` sets of all phases in that wave are pairwise disjoint. On overlap: halt, log the conflicting paths under `### Deferred (needs user input)`, do not dispatch.
+## Per-wave loop
 
-**Dispatching the wave:**
+1. Mark the phase or wave `in_progress`.
+2. Implement inline or dispatch the wave. Follow the design's test-driven-development decision.
+3. Wait for all dispatched phases to finish. Do not abort siblings because one phase failed.
+4. Process successful phases in ascending phase order using the serialized commit protocol below.
+5. Handle unsuccessful phases after successful work is committed:
+   - `NEEDS_CONTEXT`: supply the missing context and re-dispatch.
+   - `BLOCKED`: diagnose. Re-dispatch only with corrected context, invoke [uplan](../uplan/SKILL.md) if the plan is wrong, or stop and record the blocker. Do not retry identically.
+6. Mark a phase completed only after its commit and checks. A failed phase never rolls back a sibling's committed work.
 
-<system-reminder>
-All implementer dispatches for the wave MUST occur in a single assistant response containing multiple concurrent `Agent` tool calls (AS1). Set `run_in_background: true` on each Agent call so they fire concurrently and you receive notifications as each completes.
+### Serialized commit protocol
 
-Do NOT dispatch one implementer, wait for its result, then dispatch the next — that is sequential, not parallel, regardless of how the preamble reads. If you announce "Wave: PH2 + PH3 in parallel" and your next message contains exactly one Agent call, you have lied to the user. Stop and re-dispatch all wave phases together.
-</system-reminder>
+A successful phase returns `DONE` or `DONE_WITH_CONCERNS`. Resolve or record concerns before continuing. For inline work, the dispatcher performs the same checks and commits.
 
-Choose `up:implementer` or `up:implementer-sonnet` per phase using "Choosing the implementer agent" above. Pass `commit: defer` to each (AS3 — only the dispatcher touches git in defer mode). Include `Owns`, `Implements`, `Consumes` from the graph line (IF3). A consumer is dispatched in parallel with its producer; the IF declaration in `### Interfaces` is the consumer's ground truth for signatures it depends on.
+1. Stage the phase's owned changes and inspect its diff. Check every plan bullet is covered and every change has a plan bullet or reported deviation. Run the consistency pass and the phase's checks before committing.
+2. Commit only that phase's paths. In a shared worktree, use `git commit --only -m "<message>" -- <owned-paths>` so another phase's staged changes do not enter this commit.
+3. Read `git show <sha>` for the plan-diff check. Record structural gaps as deviations or correct them. Confirm sibling patterns were handled.
+4. Run `git show <sha> --name-only` for the boundary check. Every changed path must belong to that phase. On trespass, halt the wave, record the paths and phase under `### Deferred (needs user input)`, then re-dispatch with corrected ownership or escalate to [uplan](../uplan/SKILL.md).
 
-**Serialized commit protocol:**
-After all `Agent` calls in the response return, process successful implementers in ascending PH order:
-
-<required>
-For each phase whose implementer returned `DONE` or `DONE_WITH_CONCERNS`:
-1. `git add <paths staged by the implementer>`.
-2. `git commit -m "<proposed message from implementer report>"`.
-3. **Boundary check (IF5):** run `git show <sha> --name-only`. Every changed path must be a member of the phase's declared `@` set. On trespass: halt the wave, log under `### Deferred (needs user input)` with the trespassed path and phase, then either re-dispatch with tightened scope or escalate to `up:uplan`.
-4. Plan-diff check: every plan bullet reflected in the diff? every diff change covered?
-5. Consistency pass: grep for sibling patterns; apply missing changes if any.
-</required>
-
-Only after all successful phases are committed, handle failures.
-
-**Failure handling:**
-- On `BLOCKED` or `NEEDS_CONTEXT` from one phase: do not abort sibling phases mid-work. Wait for all siblings to return, commit their successful results per the protocol above, then diagnose the failure — re-dispatch with corrected context, invoke `up:uplan` if the plan is wrong, or stop and log under `### Deferred (needs user input)` (PC4).
-- A failure in one phase never rolls back a sibling's already-committed work.
+Do not skip phase commits or amend history without user approval.
 
 ## Wiring check
 
-Runs once, after the final wave's phases commit (IF6). For non-blocking IFs, consumers were dispatched in parallel against the IF declaration rather than against the producer's actual output — this check is the reconciliation step, catching every place a producer drifted from the declared signature.
+Run once after the final wave's commits. For each interface in `### Interfaces`:
 
-<required>
-For each `IF<n>` declared in the Plan's `### Interfaces`:
-1. Identify the IF's named symbol or anchor (the identifier named in the IF's signature bullet).
-2. Grep the repo for callers or references of that symbol.
-3. For code IFs: verify each call site matches the declared signature.
-4. For doc IFs (non-code IFs where the "signature" is a section anchor or declared public contract of a SKILL.md): grep for the declared anchor or reference and verify it resolves.
-5. On mismatch: log under `## Conclusion → ### Deviations from plan` with `IF<n>: <mismatch description>`. Decide whether to re-dispatch the offending phase (implementation error), invoke `up:uplan` (plan declared the wrong signature), or continue with a recorded deviation.
-</required>
+1. Find its named symbol or section anchor and all callers or references.
+2. For code, check each call matches the declared signature. For documentation, check each target and anchor resolves.
+3. Record mismatches under `## Conclusion → ### Deviations from plan` with the interface ID and evidence. Re-dispatch an implementation error, invoke [uplan](../uplan/SKILL.md) for a wrong contract, or continue with an explicitly recorded deviation.
 
-## TDD
+## Test-driven development
 
-If Design recorded `TDD: yes`, invoke `up:test-driven-development` for each unit under test:
+If design records `TDD: yes`, follow [test-driven-development](../test-driven-development/SKILL.md): observe a failing test, implement the minimum change, and refactor with tests green. If `TDD: no`, skip test-first development and verify through [uverify](../uverify/SKILL.md).
 
-- Write the failing test, watch it fail for the right reason
-- Write the minimal implementation to pass
-- Refactor with tests green
-- Commit
+## Supporting investigation
 
-If `TDD: no`, skip the test-first loop; verification happens in `up:uverify`.
+Use an explorer when missing code context, a call graph, or essential-file discovery exceeds a quick local read or search. Use a researcher for external information requiring synthesis across sources. A single documentation lookup does not need delegation.
 
-## When to dispatch `up:explorer`
+Pass a tight question or scope and the absolute working directory. For research, include relevant subquestions and source or depth limits. Use tools available in the host, without assuming a particular documentation service is installed.
 
-- The implementer reported `NEEDS_CONTEXT` and a code map would unblock them
-- You need a call graph or execution path beyond what a quick Grep gives
-- You need a ranked list of essential files for a feature
+## Consistency pass
 
-Dispatch with tight scope and pass the working directory explicitly. Don't over-use — inline Grep/Read beats a subagent for one-shot lookups.
+When tightening a rule, renaming a symbol, or changing a pattern, search the diff and wider repository for siblings. Check the introducing commit when it helps locate them. Apply the same in-scope change in the same commit, or record a justified deferral. Verify a child's claimed consistency pass rather than repeating it blindly.
 
-**Dispatch prompt skeleton:**
-
-```
-Scope: <what to trace — feature name, entry point, or specific question>
-Working directory: <absolute path>
-```
-
-## When to dispatch `up:researcher`
-
-- You need external info: library docs beyond a quick Context7 lookup, how other projects solve a problem, SOTA landscape, cross-source tradeoffs
-- The question spans web + library docs + current codebase and needs synthesis
-
-If the question is purely about the current codebase, prefer `up:explorer`. If it's a single doc lookup, inline Context7 is enough.
-
-**Dispatch prompt skeleton:**
-
-```
-Question: <the research question, in the shape you want the answer to take>
-Sub-questions: <optional — pre-decomposed bullets if you already know the shape>
-Working directory: <absolute path, if codebase context is relevant>
-Scope hints: <optional — preferred sources, depth, time budget>
-```
-
-## Consistency pass — when changing a pattern, sweep for others
-
-<required>
-Any time you (or the implementer) change how code handles a pattern — tightening a fallback, renaming a symbol, adding a guard, flipping a default — grep the diff and the wider repo for the same pattern. Skim `git log -p` for the commit that introduced it, in case siblings were added the same way. Apply the change everywhere in the same commit.
-</required>
-
-<good-example>
-Implementer made `compute_at_k_cursor_l2` raise on empty input to honor "no silent fallbacks". Before the commit lands, grep the diff for sibling metrics (`cursor_l2@L`, `click_f1@L`, `cursor_std_*`) and tighten those the same way, or flag them as deferred with justification.
-</good-example>
-
-<bad-example>
-Fix one spot, commit, reviewer finds four more siblings, two rounds of fixups, noisier history, tighter-in-some-places-not-others inconsistency in the file.
-</bad-example>
+For example, if a metric now rejects empty input, check sibling metrics for the same silent fallback.
 
 ## Incidental code smells
 
-Implementers and `up:explorer` report smells they pass; you also hit them while reading code to coordinate. For each: fix it in the same commit when it's in task scope or an easy, low-risk win (Boy-Scout); otherwise append it to the task file's `## Code smells` section — `file:line — one-line smell` — and leave it for review's Future-work call. Don't let out-of-scope smells balloon the change. See [global principles](../_principles.md) → Incidental code smells.
+Follow the [global principles](../_principles.md): fix in-scope or easy, low-risk defects. Record other smells under `## Code smells` as `file:line — issue` for review to consider as future work. Do not expand the task into a broad refactor.
 
-## Don't modify upstream specs or external design docs
+## External specs and deviations
 
-<required>
-The plan is the contract. External spec files (e.g. anything under `docs/specs/`) are inputs — read-only during execute. If the implementer finds the spec is wrong, they report it and stop. You (the dispatcher) surface it to the user. The user decides whether to update the spec, revise the plan, or continue with a deviation.
+External specs, including `docs/specs/`, are read-only inputs. If a spec is wrong, stop and let the user choose whether to revise it, revise the plan, or accept a deviation.
 
-Never edit the plan inline to hide a deviation. Never silently edit an external spec. Deviations live in the task file's `## Conclusion → Deviations from plan` section.
-</required>
+Never edit the approved plan to hide what changed. Record a deviation under `## Conclusion → ### Deviations from plan` as `what changed — why`, with evidence.
 
-## Forbidden: inventing fallbacks, defaults, or best-effort behavior
+- Minor changes, such as a helper rename or a small reorder, can continue when later phases remain valid.
+- Structural changes that invalidate later phases stop execution. Give [uplan](../uplan/SKILL.md) the completed work, invalidated steps, and new facts so it can revise the plan through its approval process.
 
-<system-reminder>
-No silent fallbacks. No invented defaults. No "best effort" try/except that swallows the error. If you're tempted to write `.get("attr", 0)` and zero is not a genuine, intended default — don't. Crash > corrupt state.
+## No silent fallbacks
 
-Never add `try: ... except: pass`. Never catch a broad exception to "keep going". Never substitute a placeholder value so the code "works for now".
+Do not invent defaults, swallow exceptions, or return placeholder success. If required data is missing and the plan defines no fallback, fail loudly. Tell the user immediately and record the failure point under `## Conclusion → Known risks`.
 
-If the plan is silent on what to do when X is missing, the answer is: let it raise. Then tell the user this is a potential failure point and add it to the task file's `## Conclusion` as a known risk.
-</system-reminder>
-
-<bad-example>
-```python
-# Plan said nothing about missing config. Agent "helpfully" defaults.
-timeout = config.get("timeout", 30)
-user_id = payload.get("user_id", "anonymous")
-```
-
-This hides real bugs. "anonymous" user_ids leak into downstream systems. 30s timeouts mask misconfigured services.
-</bad-example>
-
-<good-example>
-```python
-# Rigid. If it breaks, it breaks loudly.
-timeout = config["timeout"]
-user_id = payload["user_id"]
-```
-
-Then append to the task file's `## Conclusion` under "Known risks":
-> `- config["timeout"] will KeyError if config is partial. Plan didn't specify a default; recommend either adding one with user approval, or validating config at load time.`
-</good-example>
-
-Raise these potential failure points with the user immediately, not after execute completes.
-
-## Deviations from plan
-
-A deviation is any structural change from what the plan says. File moved to a different location, method signature different, phase ordering swapped, a phase cut, a phase added.
-
-<required>
-When a deviation happens:
-
-1. Do not edit the Plan inline. The plan is the contract that was approved; it stays as-is for the review.
-2. Record the deviation in the task file's `## Conclusion` under a `### Deviations from plan` subsection (create if missing). Format: `- <what changed> — <why>`. If no deviation happens, do not create the subsection at all — per the [brevity rules](../_brevity.md), empty subsections are deleted, not written.
-3. If the deviation is minor (renamed a helper, swapped two steps) — continue execution.
-4. If the deviation is structural enough that later phases in the plan no longer apply — stop executing. Invoke `up:uplan` with enough context (what was done, what no longer applies, what new reality is). Let the planner skill update the plan before resuming.
-</required>
-
-<good-example>
-"Phase 3 planned a new `CacheBackend` class. During phase 2 I discovered an existing `cache/backend.py` with a usable interface. Extending it is simpler.
-
-Appended to `## Conclusion`:
-> - Phase 3: used existing `cache.backend.CacheBackend` instead of creating a new one.
-
-Continuing to phase 4 — later phases are unaffected."
-</good-example>
-
-<bad-example>
-Agent edits `## Plan` inline with `<!-- deviation: ... -->` comments. Reviewer now can't tell what the plan *was*, only what it became. Plan-alignment check is compromised.
-</bad-example>
+For a required timeout, use `config["timeout"]`, not `config.get("timeout", 30)`. If partial configuration is possible, record that it raises and ask whether the contract needs explicit validation or an approved default.
 
 ## When to stop and ask
 
-- A plan instruction is ambiguous or self-contradictory
-- A dependency the plan assumes is missing
-- A test fails in a way that suggests the plan is wrong (not just the implementation)
-- Verify would obviously fail even after you finish
-- You're about to invent a fallback / default / catch-all
+- An instruction is ambiguous or self-contradictory.
+- A required dependency is missing.
+- A failed test shows the plan is wrong.
+- Verification cannot pass with the current approach.
+- Continuing would require an invented fallback or default.
 
-Don't force through. Ask. This list applies in both interactive and hands-off modes — it defines the "genuinely impossible without user input" exception. Log each such stop under `## Conclusion → ### Deferred (needs user input)` in hands-off mode.
+In hands-off mode, record these blockers under `### Deferred (needs user input)` and follow the contract below.
 
 ## Hands-off mode
 
-See `up:handsoff` for the full contract, including the safety principles (worktree-first, no destructive git ops, no push to remote, additive-over-subtractive edits). Stage-specific delta: execute's own behavior is unchanged — the existing fail-fast rules and "when to stop and ask" list above *are* the hands-off handling. Each such stop is logged under `### Deferred (needs user input)` with enough context for the user to resume.
+Read [handsoff](../handsoff/SKILL.md). Keep its worktree-first safety rules, external-spec protection, and prohibition on destructive git operations and unauthorized pushes.
 
-Never invent a default to keep moving. Conservative = fewer assumptions = stop and log.
-
-## Never
-
-- Start on `main`/`master` without explicit user consent if the plan specified a branch
-- Skip the commit between phases
-- Claim complete without running what you built
-- Push to remote without explicit user consent
-- Edit the Plan section to hide a deviation
-- Edit an upstream spec file during execute (flag issues, don't mutate)
-- Invent a silent fallback to avoid stopping
-- Commit without running the plan-diff check and consistency pass
+When every stage auto-approved without intervention, collapse the decision log to `all stages auto-approved, no interventions`. Otherwise keep one entry per intervention. Deferrals and risks retain evidence and reasons.
 
 ## Terminal state
 
-All phases done and committed → invoke `up:uverify`. Do not skip to review. Do not finish the branch yourself.
+All phases committed and checked → invoke [uverify](../uverify/SKILL.md). Do not skip to review, claim completion without verification, merge, push, or finish the branch yourself.

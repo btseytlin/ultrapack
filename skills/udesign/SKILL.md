@@ -5,234 +5,120 @@ description: Use before any creative work — features, components, behavior cha
 
 # Design
 
-Turn an idea into a validated spec through collaborative dialogue. Output lives in `docs/tasks/<slug>.md` — `## Context`, `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK) — with a TDD decision recorded. Nothing is planned or written until the user approves.
+Turn the goal into an approved specification. Write `## Context` and `## Design` in `docs/tasks/<slug>.md`, including constraints, assumptions, unknowns, and a test-driven-development decision. Design produces words, not implementation code.
 
-<required>
-Before responding or writing the task file, read the [brevity rules](../_brevity.md) and [global principles](../_principles.md). Apply them throughout design.
-</required>
+Read the [brevity rules](../_brevity.md) and [global principles](../_principles.md) before responding or writing the task file.
 
 ## What design is
 
-Design answers: given what we want, how should it work? Reason forward from the goal — if this were built right, what would it look like? — then distill into invariants and principles.
+Describe how the system should work to meet the goal. Study existing behavior and patterns as evidence without letting today's implementation constrain the desired outcome. The plan will describe how to get there.
 
-Explore how it works now and what's been tried (step 1) to inform that answer, never to constrain it. "We already have X, so our options are…" is banned — it anchors the ideal to the accident of what exists. Getting from today's code to the design is the Plan's job.
+Invoke before features, components, behavior changes, and architectural work. Skip only for a trivial change when the user confirms the skip.
 
-## Context — the observations that motivate the design
-
-`## Context` comes before `## Design` in the task file and holds a short list of observations about how things are today: what exists, how it behaves, what hurts. It is the evidence; Design is the response to it. A reader should be able to look at the list and see why this task exists without having been in the room.
-
-Distil it from the step-1 exploration. Each bullet is one observation, one sentence, checkable against the repo or the user's stated experience. Aim for 3–6; if a bullet doesn't push toward some part of the design, cut it.
-
-State facts, not solutions — no "we should", no chosen approach. Anything you can't confirm is an assumption (AS) or an unknown (UK), not a context bullet.
-
-<good-example>
 ## Context
-- Every task file jumps straight to the chosen approach; the observations behind it live only in the design chat.
-- Reviewers arriving months later re-derive the problem from the diff, and sometimes get it wrong.
-- The `## Design` section already runs long, so motivation gets buried in the approach prose.
-</good-example>
 
-<bad-example>
-## Context
-- We should add a Context section before Design.        ← a solution, not an observation
-- The workflow could probably be better documented.     ← not checkable, pushes toward nothing
-- Task files live in `docs/tasks/` and are markdown.    ← true, but motivates nothing
-</bad-example>
+Record observations that motivate the design: current behavior, limits, and failures. Each bullet is a checkable fact from the repository or the user's stated experience. Cut facts that do not explain a design choice.
+
+Example: "The importer holds a whole shard in memory and fails on shards larger than available memory."
+
+Do not put solutions in context. Unconfirmed premises belong under assumptions or unknowns.
 
 ## The Goal — definition of done
 
-Every task has one Goal: the observable end state that means the work is finished. Write it to the `**Goal:**` header and confirm it with the user as part of design approval. It is the definition of done — the task is not `done` until the workflow's goal-validation step confirms it, not when code merely verifies and reviews clean.
+Write one observable outcome in the task file's goal header and confirm it with the user during design approval. A passing diff, verification, or review does not establish the goal by itself.
 
-State it as an outcome, not an activity: "training runs end-to-end on the full converted dataset and loss matches the old format", not "convert the dataset". If confirming the Goal needs a step beyond the diff — a run at full scale, an expensive / remote job, or an outcome only visible in the user's environment — say so in the Goal, so verify and the done-gate know a local proxy isn't the real thing.
-
-## When to invoke
-
-Before any creative work: new features, component builds, behavior changes, architectural moves. Even "simple" tasks — five minutes of design prevents hours of rework. Skip only when the task is trivial (typo, one-line fix) and the user has confirmed the skip.
+Use an outcome such as "the importer completes on the full dataset within available memory", not an activity such as "rewrite the importer". If confirmation needs an expensive run, remote environment, or user observation, state that requirement. A local proxy does not prove the real outcome.
 
 ## Process
 
-<required>
-Follow these steps in order. Do not combine or skip.
+Follow these steps in order:
 
-1. Explore project context — how it works now, what's been tried, existing patterns, recent commits. Inform the ideal; don't let current state constrain it. No exceptions. Record incidental code smells you pass — if one is in scope or an easy win, note it for the plan to fix, else add it to `## Code smells` (see [global principles](../_principles.md) → Incidental code smells).
-2. Scope check — split into multiple tasks now if the ask is too large.
-3. Ask clarifying questions, one at a time. Prefer multiple choice.
-4. Propose 2–3 approaches. Each with explicit tradeoffs and unknowns.
-5. Backwards-compat check — flag anything that could break already-running or already-used systems. Ask the user how to resolve before proceeding.
-6. Present the design in sections. Get per-section approval.
-7. Identify invariants (IV), principles (PC), assumptions (AS), and unknowns (UK).
-8. Decide TDD — yes or no, with reason. Use `up:test-driven-development`'s applicability rule.
-9. Write to task file — set the `**Goal:**` header (the definition of done — see below), then `## Context`, `## Design`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns`.
-10. Self-review for placeholders, contradictions, scope, ambiguity. Fix inline.
-11. Wait for user approval before invoking `up:uplan`.
-</required>
+1. Read project context, existing patterns, recent commits, and previous attempts. Follow [global principles](../_principles.md#incidental-code-smells) for incidental defects: include in-scope or easy fixes in the design, and record other findings under `## Code smells`.
+2. Check scope. If the request spans independent goals, propose separate task files and ask which to design first. Each task must be independently implementable and testable.
+3. Ask clarifying questions one at a time, preferably with choices.
+4. Propose two or three approaches with tradeoffs and unknowns. Recommend one and explain why. If the tradeoffs do not settle the choice, ask the user.
+5. Identify compatibility risks and ask how to resolve them before proceeding.
+6. Present the design in sections and get per-section approval.
+7. Identify invariants, task-specific principles, assumptions, and unknowns.
+8. Apply [test-driven-development](../test-driven-development/SKILL.md)'s applicability rule. Record `TDD: yes` or `TDD: no (reason)`.
+9. Save the approved context and design, the goal header, and the constraint sections to the task file.
+10. Check for placeholders, contradictions, scope drift, and ambiguity. Correct the text.
+11. Wait for user approval before invoking [uplan](../uplan/SKILL.md).
 
-## Scope check — split before planning
+Hands-off changes to these approval steps are defined below.
 
-If the ask spans multiple independent subsystems, stop and propose a split. Each piece gets its own task file. We work on one in this dialogue; the rest wait.
+## Approaches
 
-<good-example>
-User: "Add auth, billing, and admin dashboard."
+For each option state its mechanism, benefits, costs, reversibility, and unresolved questions.
 
-Agent: "That's three independent tasks. I'd split into:
-- `docs/tasks/add-auth.md`
-- `docs/tasks/add-billing.md`
-- `docs/tasks/add-admin-dashboard.md`
+Example: an in-memory rate limiter adds no infrastructure but loses counters on restart and cannot enforce a shared limit across replicas. A shared store can enforce that limit but adds latency and an operational dependency. Measure the unknown latency before relying on it.
 
-Each is a separate task file, designed and built in its own session. Which one should we start with?"
-</good-example>
+## Backwards compatibility
 
-<bad-example>
-Agent designs all three at once in a single task file. Later agents can't resume a coherent piece of work; plans become gigantic and unreviewable.
-</bad-example>
+List changes that could break existing consumers: signatures, schemas, configuration keys, commands, file formats, outputs, or endpoint behavior. State who is affected and ask the user to choose a migration, compatibility layer, versioned behavior, or revised design. Do not add compatibility machinery without that decision.
 
-A good test: **can a plan for this piece produce working, testable software on its own?** If no, it's too big.
+Example: splitting `name` into `first_name` and `last_name` breaks clients reading the old field. Ask whether to retain it temporarily or require migration.
 
-## Proposing approaches — tradeoffs and unknowns, always
+For greenfield work with no consumers, say so briefly and do not invent risks.
 
-For every option, state:
-- What it is: 1-2 sentences
-- Tradeoffs: what you gain, what you give up (cost, complexity, flexibility, reversibility)
-- Unknowns: what you can't answer without more info or experiment
+## ID conventions
 
-End with a recommendation and why. Don't hedge on the recommendation — if the tradeoffs don't settle it cleanly, say *that* explicitly and ask the user to weigh in.
+Define each entity once in a concrete sentence, with numbering scoped to the task file:
 
-<good-example>
-"Option A: Redis-backed rate limiter.
-- Tradeoff: fast, durable across restarts. Adds Redis as a required dep in prod.
-- Unknown: our existing Redis cluster's latency from the edge nodes — need to measure before committing.
+- `IV` — invariant: a property the implementation must guarantee.
+- `PC` — principle: task-specific guidance or a justified deviation from a global principle.
+- `AS` — assumption: an unverified premise outside the implementation's control.
+- `UK` — unknown: an open question that needs an answer or explicit deferral.
 
-Option B: In-memory token bucket per pod.
-- Tradeoff: zero new infra, simpler code. Loses limits on pod restart; uneven limits across horizontally-scaled pods.
-- Unknown: how often pods cycle — if it's every 10 minutes, users see limit resets.
+Later task sections and child prompts reference these IDs rather than repeating definitions. In user-facing chat, explain the rule in plain words rather than using only an ID. Planning introduces `PH` for phases, `RK` for risks, and `IF` for interfaces. Verification introduces `CK` for checks.
 
-Option C: Postgres-backed counter with short TTL.
-- Tradeoff: uses existing DB; no new infra. DB write per request is expensive at our RPS.
-- Unknown: whether our DB can absorb the extra write load — need a napkin calc.
+## Invariants, principles, assumptions, and unknowns
 
-Recommendation: B for now, revisit when we outgrow it. The redis latency unknown (A) and write-load unknown (C) both need measurement work before committing, and B is cheap to replace."
-</good-example>
+- Invariants must be testable. Example: `IV1 — Every database write goes through transaction().`
+- Principles must guide a concrete choice. Do not restate global principles. Example: `PC1 — Error messages must tell an operator how to resume an interrupted import.` A deviation from a global principle names it and explains why.
+- Assumptions must be checked later. Example: `AS1 — The upstream users service returns email as UTF-8.` The conclusion reports whether each assumption held.
+- Unknowns must be resolved during planning or execution, or explicitly deferred. Example: `UK1 — Whether the existing shared store has spare capacity.` The conclusion records each outcome.
 
-## Backwards compatibility — flag breaks loudly
-
-<required>
-Before presenting the design, enumerate anything in the chosen approach that could break a system already in use: API shape changes, schema migrations, renamed config keys, removed commands, on-disk format changes, changes to outputs that other code/tools consume, behavioral changes to stable endpoints. Surface each one with its blast radius and ask the user how to resolve: deprecate with shim, hard break with migration, version the new behavior, or revise the approach.
-</required>
-
-<good-example>
-"Backwards-compat risks:
-- `GET /api/v1/users` response shape changes — field `name` splits into `first_name`/`last_name`. Any existing client expecting `name` breaks. Options: (a) return both until v2, (b) hard-break with a migration note, (c) ship as `/api/v2/users` and leave v1 alone. Which?
-- Config key `log_level` renamed to `logging.level`. Running deployments on old configs will silently fall through to the default. Options: (a) read both for one release, warn on old, (b) fail loud on old key. Which?"
-</good-example>
-
-<bad-example>
-Agent designs a schema change without flagging it. Execute runs the migration. Production service that still reads the old column 500s. Root cause: design never surfaced the break.
-</bad-example>
-
-If the task is greenfield (no existing consumers), say so in one line and move on. Don't invent risks.
-
-## ID conventions — define once, reference by ID
-
-Entities in the task file are assigned short IDs so later sections (Plan, Verify, Conclusion) can reference them without re-quoting full sentences.
-
-Design owns four entity types:
-
-- IV1, IV2, … — Invariants
-- PC1, PC2, … — Principles
-- AS1, AS2, … — Assumptions
-- UK1, UK2, … — Unknowns
-
-Rules:
-- Defined once with a full sentence at first appearance; later mentions are ID-only.
-- Max one sentence per definition.
-- Numbering is scoped to the task file. The same ID can recur across tasks with different meanings.
-- IDs are for persisted artifacts (task file, commit messages, agent-to-agent prompts). When talking to the user in chat, expand the ID — write out the invariant, principle, or assumption in plain English. "IV3 was violated" is fine in the task file; to the user say "the invariant that Dataset must not import from training/ was violated". Mentioning the ID alongside is OK; replacing the content with just the ID is not.
-
-Plan owns PH (phases) and RK (risks). Verify owns CK (checks). Those are introduced in their stage's skill.
-
-## Identifying invariants, principles, assumptions, unknowns
-
-<invariants>
-IV — specific things that must hold. Concrete enough to check against the code.
-- IV1 — The `Dataset` class must not import from `training/`.
-- IV2 — All DB writes go through the `transaction()` helper.
-</invariants>
-
-<principles>
-PC — softer abstract guidance. Still concrete enough to audit. Task-specific only — the Global Principles (GPC1–GPC8) in [global principles](../_principles.md) apply everywhere and don't need to be restated. List a PC only when the task deviates from a GPC (name which one and why) or when it needs an extra rule the GPCs don't cover.
-- PC1 — Fail fast, no silent fallbacks.
-- PC2 — Prefer composition over inheritance.
-</principles>
-
-<assumptions>
-AS — unverified premises the design rests on. Conclusion must report whether each held.
-- AS1 — The upstream `users` service returns `email` as UTF-8 in every response.
-- AS2 — Nightly batch volume stays under 10M rows for the next quarter.
-</assumptions>
-
-<unknowns>
-UK — open questions the design cannot answer alone. Resolved during plan, execute, or explicitly deferred. Conclusion must report outcome.
-- UK1 — Whether the existing Redis cluster has spare capacity for this workload.
-- UK2 — Exact failure mode when the upstream API rate-limits mid-batch.
-</unknowns>
-
-**Not principles:** "prefer composition" (too vague without "over inheritance"). "Be consistent." "Write clean code."
-
-**Assumptions vs invariants:** an IV is something the code guarantees. An AS is something the world is assumed to give you. If the code can enforce it, it's an IV; if it depends on something outside your control, it's an AS.
-
-## TDD decision
-
-Invoke the applicability rule from `up:test-driven-development`. Record in Design:
-
-```
-TDD: yes
-```
-or
-```
-TDD: no (reason: one-off migration script; no reusable logic)
-```
+If code can enforce a condition, make it an invariant. If the condition depends on the outside world, record an assumption. Avoid vague principles such as "write clean code".
 
 ## Task-file output shape
 
 ```markdown
 ## Context
-- <observation about how things are now that motivates the design>
-- <...>
+- <observation motivating the design>
 
 ## Design
-<purpose, scope, chosen approach, key decisions, tradeoffs that settled it>
-<TDD: yes|no (reason)>
+<purpose, scope, approach, decisions, and tradeoffs>
+TDD: <yes | no (reason)>
 
 ### Invariants
-- IV1 — <specific thing that must hold>
-- IV2 — <...>
+- IV1 — <testable requirement>
 
 ### Principles
-- PC1 — <softer guidance — concrete enough to check>
-- PC2 — <...>
+- PC1 — <task-specific guidance or justified global-principle deviation>
 
 ### Assumptions
-- AS1 — <unverified premise the design rests on>
-- AS2 — <...>
+- AS1 — <unverified premise>
 
 ### Unknowns
-- UK1 — <open question left to plan / execute>
-- UK2 — <...>
+- UK1 — <question for planning or execution>
 ```
+
+Also set the task file's goal header. Omit empty sections, including unused sections seeded by the workflow template. Do not leave placeholders or "none" entries.
 
 ## Rules
 
-- One question per message. No batching. (Hands-off: ask only when genuinely blocking; prefer conservative defaults logged in the task file.)
-- YAGNI ruthlessly. Cut anything not needed for the stated goal.
-- Follow existing patterns. Targeted improvements only if they serve this task.
-- Isolation. Units with one clear purpose; interfaces understandable without reading internals.
-- No code yet. Design's output is words, not code.
-- Omit empty subsections. `## Context`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns` are pre-seeded by the `/up:make` template. Delete any that end up with no entries — never leave a placeholder like `<empty>`, "none", or "n/a". See [brevity rules](../_brevity.md) principle 1.
+- Keep interactive questions one per message.
+- Include only what serves the stated goal. Follow existing patterns where they fit.
+- Keep units focused and interfaces understandable without reading internals.
+- Do not implement code during design.
 
 ## Hands-off mode
 
-See `up:handsoff` for the full contract. Stage-specific delta: Design is still the one interactive stage — run the full process. The only relaxation is "one question per message" → "ask only when genuinely blocking; prefer a conservative default". Log each defaulted answer as `- udesign: <what> — <rationale>` in `### Hands-off decisions`; log no-default gaps under `### Deferred (needs user input)`.
+Read [handsoff](../handsoff/SKILL.md). Run the full design process, asking only when genuinely blocking. Use conservative choices with a recorded reason instead of routine per-section approval prompts.
+
+Log each choice under `### Hands-off decisions` as `udesign: choice — reason`. Record gaps with no safe default under `### Deferred (needs user input)`.
 
 ## Terminal state
 
-User has approved the Context and Design sections and the `**Goal:**` header (interactive) or both have been written and self-reviewed (hands-off) → invoke `up:uplan`. Do not write code. Do not invoke any other skill.
+Interactive: the user has approved context, design, and the goal. Hands-off: they are written and self-reviewed under its contract. Then invoke [uplan](../uplan/SKILL.md). Do not implement code or jump to another workflow stage.

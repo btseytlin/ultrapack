@@ -25,7 +25,9 @@ Any process that outlives a single foreground command and will run while the use
 - Long batch / data pipeline, migration, backfill, eval harness
 - Any "launch it and shut it down if it dies" request
 
-For remote work, also read `remote-ssh` (nohup launch, log redirection, connection reuse). For training specifically, `ml-experiments` owns the pre-launch checks — run those first; this skill takes over once the job is live.
+Read the [handsoff contract](../handsoff/SKILL.md) and [global principles](../_principles.md). For remote work, also read `remote-ssh`. For training, read `ml-experiments` before launch. These two skills are external dependencies, not bundled with ultrapack. If a required skill is unavailable, stop before launch and report it.
+
+`ScheduleWakeup`, `Monitor`, and `PushNotification` below name scheduling, optional log watching, and terminal notification capabilities. Use the host's supported tools for these roles. Confirm the required scheduling and notification capabilities before launch. If unavailable, record the blocker and do not launch an unguarded job.
 
 ## Phase 0 — Contract (before launching anything)
 

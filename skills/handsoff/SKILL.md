@@ -78,7 +78,7 @@ This rule is strictly stronger than the interactive-mode `uexecute` rule ("no si
 
 ## End-of-task summary
 
-The final stage (the workflow entry point's step 12) presents the `### Hands-off decisions` list plus any `### Deferred (needs user input)` items to the user with the verbatim prompt:
+At the end of [make](../make/SKILL.md), present the `### Hands-off decisions` list and any `### Deferred (needs user input)` items before offering finish actions. Use this prompt:
 
 > Here's what I did to make it hands-off. Want to change anything?
 
