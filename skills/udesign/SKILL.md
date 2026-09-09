@@ -7,6 +7,10 @@ description: Use before any creative work — features, components, behavior cha
 
 Turn an idea into a validated spec through collaborative dialogue. Output lives in `docs/tasks/<slug>.md` — `## Context`, `## Design`, `### Invariants` (IV), `### Principles` (PC), `### Assumptions` (AS), `### Unknowns` (UK) — with a TDD decision recorded. Nothing is planned or written until the user approves.
 
+<required>
+Before responding or writing the task file, read the [brevity rules](../_brevity.md) and [global principles](../_principles.md). Apply them throughout design.
+</required>
+
 ## What design is
 
 Design answers: given what we want, how should it work? Reason forward from the goal — if this were built right, what would it look like? — then distill into invariants and principles.
@@ -50,7 +54,7 @@ Before any creative work: new features, component builds, behavior changes, arch
 <required>
 Follow these steps in order. Do not combine or skip.
 
-1. Explore project context — how it works now, what's been tried, existing patterns, recent commits. Inform the ideal; don't let current state constrain it. No exceptions. Record incidental code smells you pass — if one is in scope or an easy win, note it for the plan to fix, else add it to `## Code smells` (see `_principles.md` → Incidental code smells).
+1. Explore project context — how it works now, what's been tried, existing patterns, recent commits. Inform the ideal; don't let current state constrain it. No exceptions. Record incidental code smells you pass — if one is in scope or an easy win, note it for the plan to fix, else add it to `## Code smells` (see [global principles](../_principles.md) → Incidental code smells).
 2. Scope check — split into multiple tasks now if the ask is too large.
 3. Ask clarifying questions, one at a time. Prefer multiple choice.
 4. Propose 2–3 approaches. Each with explicit tradeoffs and unknowns.
@@ -155,7 +159,7 @@ IV — specific things that must hold. Concrete enough to check against the code
 </invariants>
 
 <principles>
-PC — softer abstract guidance. Still concrete enough to audit. Task-specific only — the Global Principles (GPC1–GPC8) in `skills/_principles.md` apply everywhere and don't need to be restated. List a PC only when the task deviates from a GPC (name which one and why) or when it needs an extra rule the GPCs don't cover.
+PC — softer abstract guidance. Still concrete enough to audit. Task-specific only — the Global Principles (GPC1–GPC8) in [global principles](../_principles.md) apply everywhere and don't need to be restated. List a PC only when the task deviates from a GPC (name which one and why) or when it needs an extra rule the GPCs don't cover.
 - PC1 — Fail fast, no silent fallbacks.
 - PC2 — Prefer composition over inheritance.
 </principles>
@@ -223,7 +227,7 @@ TDD: no (reason: one-off migration script; no reusable logic)
 - Follow existing patterns. Targeted improvements only if they serve this task.
 - Isolation. Units with one clear purpose; interfaces understandable without reading internals.
 - No code yet. Design's output is words, not code.
-- Omit empty subsections. `## Context`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns` are pre-seeded by the `/up:make` template. Delete any that end up with no entries — never leave a placeholder like `<empty>`, "none", or "n/a". See `_brevity.md` principle 1.
+- Omit empty subsections. `## Context`, `### Invariants`, `### Principles`, `### Assumptions`, `### Unknowns` are pre-seeded by the `/up:make` template. Delete any that end up with no entries — never leave a placeholder like `<empty>`, "none", or "n/a". See [brevity rules](../_brevity.md) principle 1.
 
 ## Hands-off mode
 

@@ -14,7 +14,7 @@ Steelman the critique: don't fish for cases that pass — fish for the case that
 ## Brevity
 
 <required>
-Before writing the Verify section, read `skills/_brevity.md`. Apply its five principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Passed checks are one line; evidence citations attach to failures, deferrals, or genuinely surprising passes. Omit `Smoke:`, `Goal:`, and `Notes:` when there's nothing to report (`Goal:` only when a proxy stood in for the real run). The Exception clause still holds: failures always carry evidence and a clear "how it should have worked" note.
+Before responding or writing the Verify section, read the [brevity rules](../_brevity.md). Apply its principles (omit / evidence-on-surprise / don't-re-narrate / one-sentence / soft-caps). Passed checks are one line; evidence citations attach to failures, deferrals, or genuinely surprising passes. Omit `Smoke:`, `Goal:`, and `Notes:` when there's nothing to report (`Goal:` only when a proxy stood in for the real run). The Exception clause still holds: failures always carry evidence and a clear "how it should have worked" note.
 </required>
 
 ## Phase 1 — Build the attack list (happy-path, negative, invariant, interface)

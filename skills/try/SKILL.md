@@ -5,7 +5,7 @@ description: Manually test the latest change with one realistic positive case an
 
 # Fast manual test
 
-Use this as Codex's equivalent of `/up:try`.
+Use this as the Codex and Pi equivalent of `/up:try`.
 
 1. Identify the latest relevant change from the conversation and `git status`.
 2. Design exactly two fast probes: one realistic happy path and one likely misuse or edge case that should fail or be rejected.

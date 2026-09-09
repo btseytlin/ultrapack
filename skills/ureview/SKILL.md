@@ -29,7 +29,7 @@ Review is a process, not just a section. Its end product is the `## Conclusion` 
 ## Brevity
 
 <required>
-Before writing the `## Conclusion`, read `skills/_brevity.md`. Apply its five principles. `Outcome:` is ≤1 sentence + the commit SHA — never re-narrate the diff. Omit subsections whose content would be "none" / "clean" / "no deviations" / "no findings" / the default: `Plan adherence`, `Review findings`, `Scope flag`, `Future work`, `Verified by`, `Deviations from plan`, `Known risks`. `Invariants:`, `Assumptions check:`, and `Unknowns outcome:` stay when the task had any IV / AS / UK — they carry audit value even on pass. The Exception clause still holds: findings, deviations, risks, violated assumptions, and deferrals always carry evidence and "why".
+Before responding or writing the `## Conclusion`, read the [brevity rules](../_brevity.md). Apply its principles. `Outcome:` is ≤1 sentence + the commit SHA — never re-narrate the diff. Omit subsections whose content would be "none" / "clean" / "no deviations" / "no findings" / the default: `Plan adherence`, `Review findings`, `Scope flag`, `Future work`, `Verified by`, `Deviations from plan`, `Known risks`. `Invariants:`, `Assumptions check:`, and `Unknowns outcome:` stay when the task had any IV / AS / UK — they carry audit value even on pass. The Exception clause still holds: findings, deviations, risks, violated assumptions, and deferrals always carry evidence and "why".
 
 `## Code smells` is shared across stages, not a Conclusion subsection: at task end delete the header if it stayed empty (brevity 1). Leave recorded smells in their own section; promote one to `Future work` only if this task decides to schedule its fix — don't duplicate.
 </required>
@@ -48,7 +48,7 @@ The asymmetry is deliberate. A tough reviewer catches more real issues; a fair d
 
 ## Harness adaptation
 
-On Claude Code, dispatch `up:reviewer`. On Codex, delegate an independent subagent with the same task file, SHAs, working directory, and review contract below. Do not pass session rationale in either harness, and do not review the change yourself in place of the independent reviewer.
+On Claude Code, dispatch `up:reviewer`. On Codex or Pi, delegate an independent subagent with the same task file, SHAs, working directory, and review contract below. Do not pass session rationale in either harness, and do not review the change yourself in place of the independent reviewer.
 
 ## Process
 
