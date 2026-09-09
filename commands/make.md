@@ -96,7 +96,7 @@ Based on the task description, classify size:
 - Small — single file or single concept change. Skip Design. Plan runs.
 - Medium / Large — full flow.
 
-Interactive mode: default to Medium silently. Jump to Trivial/Small only when the user's wording signals it — e.g. "quickly", "fast", "just", "one-line", "typo", "rename". Confirm before skipping any stage. When genuinely ambiguous, ask.
+Interactive mode: default to Medium silently. Jump to Trivial/Small only when the user's wording signals it — e.g. "quickly", "fast", "just", "one-line", "typo", "rename". Skip Design for trivial changes without confirmation. Confirm before skipping Plan or skipping Design for a non-trivial change. When genuinely ambiguous, ask.
 
 Hands-off mode: do not confirm. Default to Medium (full flow) unless the scope is unambiguously Trivial (true one-liner in one file). Never auto-pick Small or auto-skip Design — Design is the one interactive stage preserved in hands-off. Append the choice to `## Conclusion → ### Hands-off decisions` as `- size: <classification> — <rationale>`.
 
@@ -106,12 +106,7 @@ Invoke `up:udesign`. It populates `## Context`, `## Design`, `### Invariants` (I
 
 ### 6. Branch & worktree decision
 
-After Design (or immediately for trivial/small tasks), decide:
-
-- Complex / long-running / touches many files → suggest a dedicated branch + worktree. Use `up:git-worktrees`.
-- Easy fix / small scope → suggest working on current branch (usually `main`).
-
-Interactive mode: always confirm with the user.
+After Design (or immediately for trivial/small tasks), follow the existing branch and worktree rules without another approval. Use `up:git-worktrees` when isolation is required.
 
 Hands-off mode: default to the safest reversible option — always a dedicated branch + worktree via `up:git-worktrees`, never direct edits to `main`/`master`. Log the branch name and worktree path under `## Conclusion → ### Hands-off decisions`. The only exception: if `up:git-worktrees` itself fails (e.g. no gitignored worktree path available), log the failure under `### Deferred (needs user input)` and stop — do not silently fall back to working on `main`.
 
@@ -193,7 +188,7 @@ Stop and ask the user when:
 - Never skip Review (both modes)
 - Never auto-merge or auto-push — the user chooses at step 12 (both modes)
 - Never mark `done` until the Goal is confirmed achieved (step 11) — verified + reviewed is not done
-- Never create a worktree without confirming in interactive mode
+- Follow the existing branch and worktree rules without another approval
 - Never edit `main` / `master` directly in hands-off (see `up:handsoff` safety principles)
 - Keep the task file as the single source of truth — each stage reads it, each stage writes to it
 - External spec / design docs (e.g. anything under `docs/specs/`) are read-only during execute. If a stage finds the spec is wrong, surface it to the user — don't mutate it silently

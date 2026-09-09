@@ -34,7 +34,7 @@ Codex: `Use $make handsoff to fix the flaky login test.`
 
 Same, but ask you as few questions as possible.
 
-While you sleep, the agent picks the safest, most reversible choices: don't delete things (copy and rename instead), work in a git branch, don't introduce silent defaults and fallbacks, fix only critical and important issues.
+While you sleep, the agent makes direct, scoped edits, preserves reversibility through version control, works in a git branch, avoids silent defaults and fallbacks, and fixes only critical and important issues.
 
 Core ideas:
 

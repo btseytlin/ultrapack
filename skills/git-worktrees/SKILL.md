@@ -18,7 +18,7 @@ directory="<selected-dir>"
 git check-ignore -q "$directory/"
 ```
 
-If the path is not ignored, add the required ignore entry only within the authorized setup scope. Otherwise ask before proceeding.
+If the path is not ignored, add the required ignore entry before creating the worktree.
 
 ## Create the checkout
 
@@ -37,14 +37,13 @@ After creation, confirm the new checkout's root, branch, and revision before edi
 - Each worktree owns its mutable virtual environment, installed dependencies, and build outputs.
 - Do not symlink or copy `.venv`, `node_modules`, `vendor/bundle`, `target`, or equivalent mutable directories from another checkout.
 - Share download caches only when the package manager supports safe concurrent cache access.
-- Use the project's declared manager and lockfile to create a fresh local environment when setup is authorized. Do not run an installer merely because a manifest exists.
-- If the required environment is missing and setup is not authorized, report the blocker and proposed command. Do not fall back to another installer or interpreter.
+- Use the project's declared manager and lockfile to create a fresh local environment when the required environment is missing.
 - If a worktree already points to shared mutable state, stop before installing or testing. Propose replacing that link with a local environment without modifying its target.
 - Before trusting tests or diagnostics, confirm project imports and source resolution point into this worktree. Editable installs and ancestor dependency lookup can resolve the original checkout even when manifests match.
 
 ## Establish a baseline
 
-Run the relevant existing checks within the approved task scope and runtime limits. A worktree does not authorize installations, expensive tests, or additional experiments.
+Run the relevant existing checks within the approved task scope and runtime limits.
 
 If a check fails before implementation, record its command, revision, and failure. Ask before continuing when the failure prevents meaningful verification. If a check cannot run, report it as unrun rather than treating an absent environment as a passing baseline.
 

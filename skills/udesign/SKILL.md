@@ -13,7 +13,7 @@ Read the [brevity rules](../_brevity.md) and [global principles](../_principles.
 
 Describe how the system should work to meet the goal. Study existing behavior and patterns as evidence without letting today's implementation constrain the desired outcome. The plan will describe how to get there.
 
-Invoke before features, components, behavior changes, and architectural work. Skip only for a trivial change when the user confirms the skip.
+Invoke before non-trivial features, components, behavior changes, and architectural work. Skip formal design for trivial changes without asking.
 
 ## Context
 
@@ -38,7 +38,7 @@ Follow these steps in order:
 3. Ask clarifying questions one at a time, preferably with choices.
 4. Propose two or three approaches with tradeoffs and unknowns. Recommend one and explain why. If the tradeoffs do not settle the choice, ask the user.
 5. Identify compatibility risks and ask how to resolve them before proceeding.
-6. Present the design in sections and get per-section approval.
+6. Present the complete design once. Ask only about unresolved decisions that affect scope or correctness.
 7. Identify invariants, task-specific principles, assumptions, and unknowns.
 8. Apply [test-driven-development](../test-driven-development/SKILL.md)'s applicability rule. Record `TDD: yes` or `TDD: no (reason)`.
 9. Save the approved context and design, the goal header, and the constraint sections to the task file.
@@ -115,7 +115,7 @@ Also set the task file's goal header. Omit empty sections, including unused sect
 
 ## Hands-off mode
 
-Read [handsoff](../handsoff/SKILL.md). Run the full design process, asking only when genuinely blocking. Use conservative choices with a recorded reason instead of routine per-section approval prompts.
+Read [handsoff](../handsoff/SKILL.md). Run the full design process, asking only when genuinely blocking. Use conservative choices with a recorded reason instead of the final design approval prompt.
 
 Log each choice under `### Hands-off decisions` as `udesign: choice — reason`. Record gaps with no safe default under `### Deferred (needs user input)`.
 

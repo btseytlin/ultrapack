@@ -1,5 +1,5 @@
 ---
-description: Produce a summary so another session can continue with zero context beyond CLAUDE.md, the codebase, and the summary itself. Asks whether to append to the current task file or create a new summary task file.
+description: Produce a summary so another session can continue with zero context beyond CLAUDE.md, the codebase, and the summary itself. Save to the requested destination, active task file, or a new summary task file.
 ---
 
 # /up:summary
@@ -57,18 +57,9 @@ Quote the draft verbatim back to the user. Do not rewrite — if something is mi
 
 If the subagent reports it couldn't uniquely locate the JSONL (zero matches or multiple matches on both phrases), pick a different phrase and re-dispatch.
 
-### 5. Ask the user where to put it
+### 5. Select the destination
 
-<required>
-After showing the draft, ask:
-
-1. Append to the current task file's `## Conclusion` as a `### Summary — YYYY-MM-DD` subsection (provide the detected `docs/tasks/<slug>.md` path).
-2. Create a new file at `docs/tasks/summary-<new-slug>.md` (propose a slug based on the current work).
-
-Pick the destination based on the user's answer. Do not write anywhere without confirmation.
-</required>
-
-If no active task file was detected in step 2, option 1 is unavailable — only offer option 2.
+Use the requested destination. Otherwise append to the active task file's `## Conclusion` as a `### Summary — YYYY-MM-DD` subsection. If there is no active task, create `docs/tasks/summary-<new-slug>.md` with a slug based on the current work. Ask only when the destination is ambiguous.
 
 ### 6. Write
 
@@ -76,8 +67,8 @@ Perform the write in the main session using Edit (append) or Write (new file). T
 
 ## Rules
 
-- Subagent locates the JSONL, drafts the summary; main session picks the phrase, asks, and writes.
+- Subagent locates the JSONL and drafts the summary. Main session picks the phrase, selects the destination, and writes.
 - Concrete: exact commands, exact paths, exact error messages.
 - Terse: bullets over prose. No filler.
 - Include only info that can't be derived from code or git history. Don't restate `CLAUDE.md`.
-- Never write without confirmation.
+- Ask only when the destination is ambiguous.

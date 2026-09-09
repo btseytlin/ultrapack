@@ -32,7 +32,7 @@ The user trades per-step approval for one end-of-task review against the decisio
 In hands-off, every stage picks the **most reversible** path available. The user isn't there to catch a destructive move. Specifically:
 
 - **Always work on a dedicated branch + worktree.** Never edit `main` / `master` directly in hands-off. If `git-worktrees` cannot provision one, log under `### Deferred (needs user input)` and stop — do not fall back to working on the main branch.
-- **Prefer additive over subtractive edits.** Rename before deleting. Comment-out before removing. Add a new file before replacing the old one in place. The independent reviewer still catches unused cruft; better that than a deleted file the user wanted.
+- Make direct, scoped edits. Preserve reversibility through version control.
 - **Never destructive git operations.** No `reset --hard`, no `branch -D`, no force-push, no `clean -f`, no overwriting of uncommitted work. If a clean state is needed, stash.
 - **Never push to remote.** Pushing is always user-initiated, even in hands-off. The end-of-task step offers push/PR as an option; it does not execute it.
 - **Never skip hooks or bypass signing** (`--no-verify`, `--no-gpg-sign`). If a hook fails, fix the underlying issue, not the hook-skip.

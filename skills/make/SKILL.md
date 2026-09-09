@@ -36,8 +36,8 @@ Before responding or writing the task file, read the [brevity rules](../_brevity
 ### Hands-off decisions
 ### Deferred (needs user input)
 ```
-3. Classify the task. In interactive mode, confirm before skipping Design or Plan. In hands-off mode, default to Medium unless the task is unmistakably a one-line change.
-4. Run `udesign` unless skipped, then set Status to `planning`. Decide on a branch/worktree: ask in interactive mode; in hands-off mode use `git-worktrees` and stop rather than edit the main branch if it cannot provision isolation.
+3. Classify the task. Skip Design for trivial changes without confirmation. In interactive mode, confirm before skipping Plan or skipping Design for a non-trivial change. In hands-off mode, default to Medium unless the task is unmistakably a one-line change.
+4. Run `udesign` unless skipped, then set Status to `planning`. Follow the existing branch and worktree rules without another approval. In hands-off mode, use `git-worktrees` and stop rather than edit the main branch if it cannot provision isolation.
 5. Run `uplan` unless skipped, then set Status to `executing`. In hands-off mode, record that the plan was auto-approved.
 6. Run `uexecute`, then `uverify`. Send demonstrated failures back to execution until the verification attacks pass. Set Status to `reviewing` and run `ureview`.
 7. Set Status to `validating`. Mark `done` only when the task file's Goal has direct end-to-end evidence or the user confirms an outcome that the harness cannot observe. Do not equate a clean diff, passing tests, or review with a confirmed Goal.
