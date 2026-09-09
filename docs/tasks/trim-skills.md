@@ -1,12 +1,12 @@
 # Trim and fix skills
 
-Status: executing
+Status: complete, awaiting merge decision
 
 Branch: `trim-skills`
 
 Worktree: `.worktrees/trim-skills`
 
-Progress: phase 1 complete. Packaging and whitespace checks passed. Phase 2 pending.
+Progress: both phases complete.
 
 ## Context
 
@@ -52,3 +52,13 @@ Skills give concise, self-contained instructions with resolvable references, exp
 - Manual try, positive: walk a concrete approved two-phase task through the revised full-workflow instructions. Confirm inputs, dependency ordering, ownership, verification, and goal confirmation can be followed without unexplained references or unavailable tool assumptions.
 - Manual try, negative: walk an ordinary qplan request without plan approval through the revised instructions. Confirm it requires reading and saving every required plan section, then stops before implementation. A chat summary alone must fail this check.
 - Record these as instruction walkthroughs, not live harness execution. Append the actual results after implementation. No paid agent runs or additional smoke infrastructure.
+
+## Result
+
+- Completed the reference repairs and prose cleanup. Skill names and triggers remain intact. Qplan matches the original checkout byte-for-byte, including the existing whitespace change.
+- Packaging, whitespace, relative-link targets, linked section anchors, and the targeted stale-reference scan passed. Evidence: `tmp/trim-skills-checks.log` in the worktree.
+- Positive walkthrough passed: an approved parser phase producing a non-blocking interface and a consumer phase owning a separate file enter the same wave. Both receive the interface contract and defer commits. The dispatcher waits for both, commits only each phase's paths, checks boundaries and wiring, then proceeds through verification, independent review, and goal confirmation.
+- Negative walkthrough passed: an ordinary qplan request without approval must produce the saved plan and every required section, then stop. General implementation permission and a chat-only summary do not satisfy the gate.
+- Corrected related safety defects found during inspection: worktree ignore checks now test the selected directory, cleanup no longer defaults to force-deleting an unmerged branch, and guardian instructions identify external dependencies and require available host capabilities before launch. Phase commits exclude siblings' staged paths.
+- Verification used static checks and instruction walkthroughs. No live harness, remote job, or paid agent run was executed. Existing deferred-check verdict policy and guardian polling cadence were left unchanged.
+- Work is committed on `trim-skills`. No merge, push, version bump, or reinstall was performed.

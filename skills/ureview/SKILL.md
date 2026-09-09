@@ -1,206 +1,112 @@
 ---
 name: ureview
-description: Use after verify passes for the future maintainer's audit — sit in the chair of the person who'll touch this code in 3-6 months and ask "what will bite us later?" at the decision level. Surfaces wrong abstractions, load-bearing-but-unobvious shapes, next-change traps, drift from surrounding code; raises a Scope flag if the whole change looks like the wrong call. Delegates an independent, critical review and fills the task file's `## Conclusion`.
+description: Use after verify passes for the future maintainer's audit — sit in the chair of the person who'll touch this code in 3-6 months and ask "what will bite us later?" at the decision level. Surfaces wrong abstractions, load-bearing-but-unobvious shapes, next-change traps, drift from surrounding code. Raises a Scope flag if the whole change looks like the wrong call. Delegates an independent, critical review and fills the task file's `## Conclusion`.
 ---
 
 # Review
 
-Review's stance: the future maintainer's audit. Sit in the chair of the person who'll touch this code in 3-6 months and ask the headline question — what will bite us later?
+Find choices that will make the next change difficult: wrong abstractions, implicit constraints, checks in the wrong layer, or drift from surrounding code. Question the scope when the completed work exposes a wrong premise, but leave redesign to the user and [udesign](../udesign/SKILL.md).
 
-The job is to spot the design or structural choice that will force a nasty rewrite when someone next has to extend, migrate, or refactor. Catch the shape you'll regret in 6 months while it's still cheap to change.
-
-Four angles the audit looks for, all under the same headline:
-- Wrong abstraction / premature commit — a shape that fits today's case but will break under the N+1 case, forcing the whole thing to be ripped out.
-- Load-bearing but unobvious — an implicit invariant, default, or ordering that the next maintainer will violate by accident, then spend days debugging.
-- Bites the next change — a check in the wrong layer, a mutable default, an enum that'll silently accept new values; fine now, painful at the next touch.
-- Inconsistent with surrounding code — duplicates an existing helper, leaks an abstraction, drifts naming, or couples to untouched code, compounding the next refactor's cost.
-
-Review has license to question scope, surfacing it as a flag for the user. If review notices "this whole change may have been the wrong call" or "the design rests on a premise that looks wrong now that the code exists," it goes into the Conclusion as a `Scope flag` for the user to act on. Review surfaces; redesign belongs to udesign.
-
-Review is a process, not just a section. Its end product is the `## Conclusion` section of the task file, filled in based on an independent code review and the work that was done.
-
-## When to invoke
-
-- After `up:uverify` passes
-- Before merge to main
-- Before opening a PR
-- Never skipped, regardless of task size
+In the full [make](../make/SKILL.md) workflow, run after verification passes and before merge or a pull request, regardless of task size. Save the outcome in `## Conclusion`.
 
 ## Brevity
 
-<required>
-Before responding or writing the `## Conclusion`, read the [brevity rules](../_brevity.md). Apply its principles. `Outcome:` is ≤1 sentence + the commit SHA — never re-narrate the diff. Omit subsections whose content would be "none" / "clean" / "no deviations" / "no findings" / the default: `Plan adherence`, `Review findings`, `Scope flag`, `Future work`, `Verified by`, `Deviations from plan`, `Known risks`. `Invariants:`, `Assumptions check:`, and `Unknowns outcome:` stay when the task had any IV / AS / UK — they carry audit value even on pass. The Exception clause still holds: findings, deviations, risks, violated assumptions, and deferrals always carry evidence and "why".
+Read the [brevity rules](../_brevity.md). Keep the outcome to one sentence plus the commit ID. Omit empty findings, deviations, risks, scope flags, and future work. Retain invariant evidence and assumption or unknown outcomes whenever the task defined them.
 
-`## Code smells` is shared across stages, not a Conclusion subsection: at task end delete the header if it stayed empty (brevity 1). Leave recorded smells in their own section; promote one to `Future work` only if this task decides to schedule its fix — don't duplicate.
-</required>
+Keep `## Code smells` separate from the conclusion. Delete it if empty. Promote a recorded smell to future work only when scheduling its fix, without duplicating the entry.
 
-## Two roles, two attitudes
+## Independent reviewer and dispatcher
 
-<reviewer-role>
-The `up:reviewer` subagent is **critical**. It is dispatched with a diff, a plan, and invariants — but not the rationale behind the changes. It looks for violated invariants, plan misalignment, bugs, and risks. Confidence-filtered (≥80). Severity-tiered.
-</reviewer-role>
+The reviewer is critical and reports concrete issues at confidence 80 or above, classified by severity. The dispatcher verifies each finding before accepting or rejecting it.
 
-<dispatcher-role>
-You (the dispatcher) are **fair**. Fair means: take every finding seriously, but verify it against the codebase before acting. Fair is neither reflexive agreement nor reflexive pushback. Fair is: restate → verify → evaluate → decide.
-</dispatcher-role>
-
-The asymmetry is deliberate. A tough reviewer catches more real issues; a fair dispatcher avoids overcorrecting on mistaken calls.
-
-## Harness adaptation
-
-On Claude Code, dispatch `up:reviewer`. On Codex or Pi, delegate an independent subagent with the same task file, SHAs, working directory, and review contract below. Do not pass session rationale in any harness, and do not review the change yourself in place of the independent reviewer.
+On Claude Code, dispatch `up:reviewer`. On Codex or Pi, use an independent child with the same review contract: check design constraints, plan alignment, bugs, future-maintenance risks, and questionable scope. Do not replace independent review with your own inspection.
 
 ## Process
 
-### 1. Dispatch the independent reviewer
+### 1. Dispatch the reviewer
 
-Get git SHAs:
+Determine the task's branch point and current commit:
+
 ```bash
-BASE_SHA=$(git merge-base HEAD main)   # or the branch point for this task
+BASE_SHA=$(git merge-base HEAD main)
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-Dispatch the `up:reviewer` agent with:
-- Task file path (`docs/tasks/<slug>.md`)
-- `BASE_SHA` and `HEAD_SHA`
-- Working directory (explicitly — the agent does not inherit `cwd` reliably)
+Use the actual branch point if the task did not branch from `main`. Pass:
 
-<system-reminder>
-Do **not** pass session history to the reviewer. The reviewer must not see the rationale behind changes — only the Plan, Invariants, and diff. Independence is the point.
-</system-reminder>
-
-**Dispatch prompt skeleton** (guidance):
-
-```
-Task file: <docs/tasks/<slug>.md>
-BASE_SHA: <merge-base with main, or branch point>
-HEAD_SHA: <current HEAD>
-Working directory: <absolute path>
+```text
+Task file: <absolute path>
+BASE_SHA: <branch point>
+HEAD_SHA: <current commit>
+Working directory: <absolute worktree path>
 ```
 
-### 2. Read feedback without reacting
+The reviewer's evidence is the task contract and diff. Do not pass session history or the controller's rationale. On Codex or Pi, include the review contract above in the prompt.
 
-Receive the reviewer's output. Do not immediately reply with fixes or pushback. Classify first:
+### 2. Evaluate findings
 
-- Critical: fix before proceeding
-- Important: fix before merge
-- Plan finding: the plan itself may be wrong
+Classify findings as critical, important, or a problem with the plan. For each:
 
-### 3. Evaluate each item fairly
+1. Restate it. Ask the reviewer to clarify if its meaning is unclear.
+2. Open the affected code and verify that the defect exists.
+3. Check whether the proposed fix suits this design and codebase.
+4. Decide to fix, reject with technical reasons, or defer to the user.
 
-<required>
-For every finding:
+Do not blindly accept findings, batch unrelated fixes, or respond to part of a linked finding before understanding the rest. Reject suggestions that break intended behavior, contradict the design, or add unused complexity.
 
-1. Restate in your own words. If you can't restate it, ask the reviewer to clarify — don't guess.
-2. Verify against the codebase. Does the issue actually exist as described? Open the file, read the lines.
-3. Evaluate technically: is the suggested fix right for *this* codebase and the Design?
-4. Decide: implement, push back with technical reasoning, or escalate to the user.
-</required>
+### 3. Announce the decision before editing
 
-### 4. Announce the plan before editing
+Give one line per finding: the issue, your decision, and the exact change if fixing it. In interactive mode, allow the user to interject before applying fixes.
 
-<required>
-Before any fix goes in, tell the user what you decided for each finding. One line per finding:
-- what the reviewer said,
-- your verdict (fix / push back / defer),
-- if fixing: the exact change you are about to make.
+Example: "The parser accepts an empty identifier. Confirmed. Add rejection at the parser boundary and a regression test."
 
-In interactive mode, this is a short summary — the user can interject, then you apply the fixes.
+Hands-off changes to this pause are defined below.
 
-In hands-off mode, see `up:handsoff` for the contract. Stage-specific delta: announce and apply in the same step — no pause for interjection. The restate → verify → evaluate → decide process from step 3 is still required. Each applied fix is logged as `- ureview: fixed <finding> — <what changed>` under `### Hands-off decisions`. Low-confidence / ambiguous findings go to `### Deferred (needs user input)` and are not auto-fixed. Fixes must honor the safety principles (no destructive edits, no force-push, additive over subtractive).
-</required>
+### 4. Apply fixes
 
-<bad-example>
-"Evaluating reviewer findings fairly." *(then a flurry of edits with no explanation)*
-</bad-example>
+Fix critical and important issues in logical commits. Run [uexecute](../uexecute/SKILL.md#consistency-pass)'s consistency pass for each changed rule or pattern so sibling paths do not remain inconsistent. If fixes are substantial, dispatch the reviewer again on the new diff.
 
-<good-example>
-"Reviewer findings:
-- Important #1: reviewer tool list missing `Bash`. Verdict: fix. Editing Design section of task file.
-- Important #2: try.md and step-back.md missing frontmatter. Verdict: fix. Adding frontmatter to both.
-
-Applying now."
-</good-example>
-
-### 5. Apply fixes
-
-Fix Critical and Important issues. Commit each as its own logical unit.
-
-<required>
-For every fix, run the consistency pass (same rule as `up:uexecute`): if you're tightening a rule or changing a pattern, grep the diff and the wider repo for the same pattern and apply the change everywhere in the same commit. Do not leave siblings in a mixed state — that's how the reviewer's next round finds the same class of issue four more times.
-</required>
-
-If fixes are substantial, re-dispatch the reviewer on the new diff.
-
-### 6. Write the `## Conclusion`
+### 5. Write the conclusion
 
 ```markdown
 ## Conclusion
 
-Outcome: <≤1 sentence on whether the Goal is achieved or what real-world validation remains, + commit SHA. Don't re-narrate the diff.>
+Outcome: <goal achieved or remaining validation, plus commit ID>
 
 Invariants:
-- IV1 — <how it was verified>
-- IV2 — <...>
+- IV1 — <verification evidence>
 
-### Assumptions check   (omit entire subsection if the task had no AS)
-- AS1 — held | violated | unverifiable — <one-line evidence or "why unverifiable">
-- AS2 — ...
+### Assumptions check
+- AS1 — held | violated | unverifiable — <evidence or reason>
 
-### Unknowns outcome   (omit entire subsection if the task had no UK)
-- UK1 — resolved | still-open — <one-line resolution, or why it's still open>
-- UK2 — ...
+### Unknowns outcome
+- UK1 — resolved | still-open — <answer or blocker>
 
-Plan adherence: <deviations>   (omit entire subsection if no deviations)
+Plan adherence: <deviations>
 
-Review findings:   (omit entire subsection if no Critical or Important)
-- Critical: <resolved, how>
-- Important: <resolved or explicitly deferred with justification>
+Review findings:
+- Critical: <resolution>
+- Important: <resolution or justified deferral>
 
-Scope flag:   (omit unless reviewer raised one — never auto-act; surface verbatim for the user)
-- <reviewer's flag, 1-2 sentences>
+Scope flag:
+- <reviewer's flag, preserved for the user>
 
-Future work:   (omit entire subsection if none — do not write "none")
-- <item> — Justification: <Design-scope line> OR <new fact discovered>
+Future work:
+- <item and design-scope justification or newly discovered fact>
 
-Verified by: <only non-default items: deferred smokes, manual checks the next reader needs to know about>   (omit if only the routine reviewer+verify ran)
+Verified by: <material manual checks, deferred smokes, or other non-routine evidence>
 ```
 
-A violated AS is always material — it means the design rested on a premise that turned out false. Record evidence and, if it invalidates the outcome, either redo the affected phase or surface it to the user.
-
-## Receiving feedback — rules
-
-<dispatcher-rules>
-Never:
-- "You're absolutely right" / "Great catch" / "Thanks for catching that"
-- Implement blindly without verifying against the codebase
-- Batch fixes without checking each independently
-- Respond partial when multiple findings may be linked — clarify all first
-
-Do:
-- Verify against codebase reality before acting
-- Push back with technical reasoning when the reviewer is wrong
-- Ask for clarification when a finding is unclear
-- Show the fix in a diff — actions over words
-
-Pushback is legitimate when:
-- The suggestion breaks existing behavior
-- The reviewer lacks context only the Design has (e.g. intentional tradeoff)
-- The suggestion violates YAGNI (over-engineering an unused path)
-- The suggestion conflicts with explicit Design / Invariants decisions
-</dispatcher-rules>
-
-## Never
-
-- Accept "ready to merge" without evidence
-- Merge with open Critical or Important findings
-- Skip the Conclusion write-up
-- Run review on yourself (always use the subagent — preserve independence)
+Omit sections with no content. Do not omit violated assumptions or unresolved unknowns. A violated assumption needs evidence and, if it invalidates the outcome, a revised phase or a user decision. Preserve a scope flag for the user instead of silently redesigning the task.
 
 ## Hands-off mode
 
-See `up:handsoff` for the full contract. Stage-specific delta is embedded in step 4 above: announce-and-apply without the user interjection pause; high-confidence actionable findings are fixed in-line and logged under `### Hands-off decisions`; low-confidence / ambiguous findings go to `### Deferred (needs user input)`. All applied fixes must honor the safety principles (no destructive edits, no force-push, additive over subtractive).
+Read [handsoff](../handsoff/SKILL.md). Announce and apply high-confidence fixes without the interactive pause, but still verify each finding first. Log each fix under `### Hands-off decisions` as `ureview: fixed <finding> — <change>`.
+
+Record low-confidence or ambiguous findings under `### Deferred (needs user input)` instead of guessing. All fixes retain the contract's safety rules.
 
 ## Terminal state
 
-Conclusion written, all Critical/Important resolved or explicitly deferred with justification → Status → `validating`. Return to [make](../make/SKILL.md) for goal validation before any finish action. Review does not mark `done`. The user chooses the finish action.
+Save the conclusion after critical and important findings are resolved or explicitly deferred with justification. Set status to `validating` and return to [make](../make/SKILL.md) for goal validation. Review does not mark `done` or choose a finish action.
+
+Do not merge with open critical or important findings, accept a merge-ready verdict without evidence, or skip the independent reviewer or conclusion.
