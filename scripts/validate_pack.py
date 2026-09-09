@@ -59,23 +59,6 @@ def frontmatter(path: Path, errors: list[str]) -> dict[str, str]:
     return fields
 
 
-def validate_pi_prompts(errors: list[str]) -> None:
-    for name in ("make", "summary", "reflect", "try", "step-back", "e"):
-        path = ROOT / "pi" / "prompts" / f"{name}.md"
-        fields = frontmatter(path, errors)
-        if not fields:
-            errors.append(f"{path.relative_to(ROOT)}: missing prompt metadata")
-            continue
-        if not fields.get("description"):
-            errors.append(f"{path.relative_to(ROOT)}: missing description")
-        text = path.read_text(encoding="utf-8")
-        reference = f"../../skills/{name}/SKILL.md"
-        if reference not in text or not (path.parent / reference).is_file():
-            errors.append(f"{path.relative_to(ROOT)}: missing shared skill reference")
-        if text.count("$ARGUMENTS") != 1 or not text.rstrip().endswith("$ARGUMENTS"):
-            errors.append(f"{path.relative_to(ROOT)}: must forward arguments exactly once at the end")
-
-
 def main() -> int:
     errors: list[str] = []
     claude_marketplace = load_json(ROOT / ".claude-plugin/marketplace.json", errors)
@@ -122,9 +105,8 @@ def main() -> int:
         errors.append("Codex manifest: expected skills path ./skills/")
     if pi_package.get("keywords") != ["pi-package"]:
         errors.append("Pi package: expected pi-package keyword")
-    if pi_package.get("pi") != {"skills": ["./skills"], "prompts": ["./pi/prompts"]}:
-        errors.append("Pi package: expected shared skills and Pi prompt wrappers")
-    validate_pi_prompts(errors)
+    if pi_package.get("pi") != {"skills": ["./skills"]}:
+        errors.append("Pi package: expected only shared skills at ./skills")
     interface = codex_plugin.get("interface")
     required_interface = {"displayName", "shortDescription", "longDescription", "developerName", "category", "capabilities", "defaultPrompt"}
     if not isinstance(interface, dict) or not required_interface.issubset(interface):

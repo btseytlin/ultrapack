@@ -19,14 +19,14 @@ Use $make to fix the flaky login test.
 Pi:
 
 ```
-/make fix the flaky login test
+/skill:make fix the flaky login test
 ```
 
 Will take you through the process: design → plan → execute → verify → review → update docs.
 
 Each stage populates `docs/tasks/<slug>.md`. The task file is the source of truth — any fresh agent can read it and resume from wherever the last one stopped.
 
-For smaller tasks, use `/up:qplan add a date filter` in Claude Code or `Use $qplan to add a date filter.` in Codex. It combines short context, desired design, invariants and principles, sequential implementation phases, and a minimal verification plan in one task file. After explicit plan approval, it executes and finishes with a positive and negative manual try. Hands-off mode auto-approves the plan under the [handsoff contract](skills/handsoff/SKILL.md). No subagents or separate workflow stages. Plan-only requests stay read-only.
+For smaller tasks, use `/up:qplan add a date filter` in Claude Code, `Use $qplan to add a date filter.` in Codex, or `/skill:qplan add a date filter` in Pi. It combines short context, desired design, invariants and principles, sequential implementation phases, and a minimal verification plan in one task file. After explicit plan approval, it executes and finishes with a positive and negative manual try. Hands-off mode auto-approves the plan under the [handsoff contract](skills/handsoff/SKILL.md). No subagents or separate workflow stages. Plan-only requests stay read-only.
 
 Claude Code: `/up:make handsoff fix the flaky login test`.
 
@@ -77,11 +77,11 @@ Install the Git package, then start a new Pi session so it discovers the skills:
 pi install git:github.com/btseytlin/ultrapack@main
 ```
 
-Verify with `/make` or `/skill:make`.
+Verify with `/skill:make` or `/skill:qplan`.
 
 ## Design
 
-All three harnesses use the same `main` branch and shared `skills/`. Claude Code uses `commands/` and `agents/`. Pi loads thin wrappers from `pi/prompts/` through `package.json`. Each wrapper forwards the user's arguments and loads the shared skill by its installed absolute path.
+All three harnesses use the same `main` branch and shared `skills/`. Claude Code uses `commands/` and `agents/`. Pi loads only shared skills through `package.json`. Use `/skill:<name>` to load a workflow and append its arguments. Ultrapack provides no Pi prompt-template commands.
 
 Inspired by [feature-dev](https://github.com/anthropics/claude-code/tree/main/plugins/feature-dev) and [obra/superpowers](https://github.com/obra/superpowers). feature-dev is too barebones. superpowers is great, but creates huge plans with a lot of work duplication, changes too frequently and is geared to a specific type of dev work. Also it's a chore to type "superpowers" every time.
 
