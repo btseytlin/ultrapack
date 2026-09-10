@@ -66,7 +66,7 @@ Consumes: <consumed interface IDs, if any>
 Interfaces: <declarations for those interfaces>
 ```
 
-Do not pass session history, prior-phase chatter, later phases, the full task file, or rationale behind design decisions. The child needs the contract, not the conversation.
+Pass relevant design rationale and constraints with the phase contract. Omit unrelated session history, prior-phase chatter, later phases, and the full task file.
 
 Implementers edit only their owned paths, test, stage those paths, and report status, changed files, checks and results, concerns, deviations, and a proposed commit message. They do not commit in defer mode. On Codex or Pi, include these duties explicitly in the child prompt.
 

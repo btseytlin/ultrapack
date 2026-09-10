@@ -56,11 +56,11 @@ Do not blindly accept findings, batch unrelated fixes, or respond to part of a l
 
 ### 3. Announce the decision before editing
 
-Give one line per finding: the issue, your decision, and the exact change if fixing it. In interactive mode, allow the user to interject before applying fixes.
+Give one line per finding: the issue, your decision, and the exact change if fixing it. During authorized implementation, announce and apply verified in-scope fixes without another approval pause. Review-only requests remain read-only.
 
 Example: "The parser accepts an empty identifier. Confirmed. Add rejection at the parser boundary and a regression test."
 
-Hands-off changes to this pause are defined below.
+Hands-off decision logging is defined below.
 
 ### 4. Apply fixes
 
@@ -101,7 +101,7 @@ Omit sections with no content. Do not omit violated assumptions or unresolved un
 
 ## Hands-off mode
 
-Read [handsoff](../handsoff/SKILL.md). Announce and apply high-confidence fixes without the interactive pause, but still verify each finding first. Log each fix under `### Hands-off decisions` as `ureview: fixed <finding> — <change>`.
+Read [handsoff](../handsoff/SKILL.md). Apply only verified, high-confidence fixes within the authorized implementation scope. Log each fix under `### Hands-off decisions` as `ureview: fixed <finding> — <change>`.
 
 Record low-confidence or ambiguous findings under `### Deferred (needs user input)` instead of guessing. All fixes retain the contract's safety rules.
 
