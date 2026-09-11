@@ -144,7 +144,6 @@ For a required timeout, use `config["timeout"]`, not `config.get("timeout", 30)`
 ## When to stop and ask
 
 - An instruction is ambiguous or self-contradictory.
-- A required dependency is missing.
 - A failed test shows the plan is wrong.
 - Verification cannot pass with the current approach.
 - Continuing would require an invented fallback or default.
