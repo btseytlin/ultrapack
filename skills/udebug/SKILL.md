@@ -5,7 +5,7 @@ description: Use on any bug, test failure, or unexpected behavior before proposi
 
 # Debug
 
-**Iron law:** no fixes without root-cause investigation first. Symptom patches are failure.
+Reproduce the failure before claiming a fix. A controlled repair experiment may establish the cause of an uncertain numerical or learning failure.
 
 ## When to invoke
 
@@ -43,18 +43,18 @@ One cause at a time. Stacked guesses turn fixes into guesses about guesses.
 
 <required>
 1. Form a single hypothesis. Write it: "I think X is the root cause because Y."
-2. Test minimally — smallest possible change. One variable at a time.
+2. Isolate variables when distinguishing explanations. A complete repair may change coupled components. Compare it against the existing method under matched conditions.
 3. Verify or discard. Confirmed → Phase 4. Not confirmed → new hypothesis.
 4. If you don't know, say so. Research, ask. Don't pretend.
 </required>
 
 ## Phase 4 — Implement one fix, verify, stop at three failed attempts
 
-Now and only now do you change production code.
+Use the reproduced failure and controlled experiments to select a coherent repair.
 
 <required>
 1. Create a failing reproduction — automated test if possible; one-off script in `tmp/` otherwise. Must fail *now*.
-2. Implement one fix — root cause only. No "while I'm here" refactors.
+2. Implement the coherent repair within the requested scope. Test its known remaining failure mode before building extensive verification around it. A smaller diff is not better if it retains that failure. No "while I'm here" refactors.
 3. Verify — reproduction passes; nothing else broke.
 4. If three fixes have failed, stop. This is an architecture problem, not a hypothesis problem. Discuss with the user before a fourth attempt.
 </required>

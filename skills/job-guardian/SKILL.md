@@ -13,7 +13,7 @@ Supervise the approved process until it finishes or reaches an authorized stop c
 - Asking to watch a job authorizes observation, not configuration changes or restarts. Asking to stop it on failure authorizes stopping that exact job, not deleting its data or destroying its host.
 - Hands-off mode reduces interruptions within the approved contract. It does not create authority. Read the [hands-off contract](../handsoff/SKILL.md) when that mode is explicitly active.
 - Clarify missing launch-critical information before launch. If the user is unavailable, report the blocker and do not launch.
-- Recovery is disabled unless the user has approved the exact recovery commands, allowed configuration changes, maximum attempts, and spend or runtime limits. Never infer these from a suggested playbook.
+- Recovery authority comes from the task-authority rules in global guidance. Approval of the exact corrective command is unnecessary when the recovery stays within that authority.
 - If the user becomes unavailable during the run, stay within the approved contract. Capture unexpected failures and notify rather than guessing a repair.
 
 ## Establish the contract
@@ -26,7 +26,7 @@ Record the following in the existing task file or `docs/jobs/<slug>.md` before l
 2. Unique job identity and its authoritative status interface.
 3. Progress signal and the expected interval between updates for this workload.
 4. Completion evidence, including terminal status and expected outputs.
-5. Approved recovery commands and limits, or an explicit statement that recovery is disabled.
+5. Recovery actions permitted by the task, their limits, and required preservation of completed work.
 6. Approved stop and resource-release commands, with preservation requirements for outputs.
 7. Run bounds and stop conditions supplied by the user. Do not invent a budget, attempt cap, or execution duration.
 8. Log location, monitoring mechanism, and terminal notification destination.
@@ -58,14 +58,14 @@ If status cannot be established, report the failed check and apply only the cont
 
 Before each recovery attempt, verify all of the following:
 
-- The failure matches an explicitly approved recovery case.
-- The exact command and configuration change are authorized.
+- The failure and proposed recovery fall within the task authority defined by global guidance.
+- The command and configuration change stay within that authority.
 - The attempt and spend or runtime limits permit another attempt.
 - Outputs and checkpoints required for recovery are preserved.
 
 Then execute the approved command, record the attempt and resulting job identity, and repeat the immediate-failure checks. Stop recovery when any condition fails. A deterministic repeat failure is evidence to investigate, not permission to loop.
 
-Lowering batch size, changing precision, cleaning disk contents, retrying paid work, or resuming from a checkpoint all require the relevant explicit approval. An inferred conservative choice does not suffice.
+Distinguish checkpoint continuation, launch repair, and repeated training. Check the applicable task authority and resource limits. Do not classify every checkpoint continuation as a new experiment.
 
 ## Finish
 
