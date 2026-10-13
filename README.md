@@ -128,7 +128,7 @@ Discipline skills:
 - `/up:qplan <description>` — Combine design and planning, execute sequential phases, run focused checks and a manual try. Avoid overengineering and scope creep.
 - `/up:try` — Design one positive and one negative test case, run both, report.
 - `/up:attack-loop <description>` — Run bounded implement, independent attack, and repair rounds; require a maximum round count and stop condition.
-- `/up:expand <criticism>` — Turn one criticism into a fix of the violated principle everywhere it occurs. Asks before major changes unless hands-off.
+- `/up:expand [handsoff] <criticism>` — Turn one criticism into a fix of the violated principle everywhere it occurs. Asks before major changes unless hands-off.
 - `/up:step-back` — Circuit breaker: stop, diagnose why approaches failed, propose new direction.
 - `/up:summary` — Produce a summary so another session can continue with zero context.
 - `/up:reflect` — Reflect on the dialogue, extract learnings into CLAUDE.md / memory / docs.

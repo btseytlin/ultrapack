@@ -1,6 +1,6 @@
 ---
 name: expand
-description: "Turn one user criticism into a principle-level fix. Use when the user points out a flaw (\"this code doesn't handle exceptions properly\") and wants the root design flaw found, every similar occurrence fixed, and not just the one spot patched."
+description: "Turn one user criticism into a principle-level fix: find the violated principle, every similar occurrence, and fix the shared cause. Use only when the user explicitly invokes expand, $expand, /up:expand, or /skill:expand."
 ---
 
 # Expand a criticism
@@ -19,7 +19,9 @@ The user pointed at one instance of a problem. Treat it as a sample, not the who
 
 ## Approval gate
 
-After step 5, ask the user to approve the plan if the change is major. Do not ask in hands-off mode or when the user already told you to proceed without asking. In hands-off mode, follow the `handsoff` contract and log the decision.
+After step 5, ask the user to approve the plan if the change is major. Do not ask in hands-off mode or when the user already told you to proceed without asking.
+
+Hands-off mode is on when the first argument token is the literal `handsoff`, or when the active task file has `**Mode:** hands-off`. Strip the `handsoff` token before reading the criticism. In hands-off mode, follow the `handsoff` contract and log the decision.
 
 A change is major when it does any of these:
 
