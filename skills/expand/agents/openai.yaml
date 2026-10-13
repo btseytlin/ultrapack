@@ -1,0 +1,4 @@
+interface:
+  display_name: "Expand"
+  short_description: "Fix the principle behind a criticism everywhere"
+  default_prompt: "Use $expand on my last criticism: find the violated principle and fix every occurrence."
