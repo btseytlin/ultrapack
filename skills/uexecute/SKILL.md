@@ -52,6 +52,7 @@ Authority: <read-only or approved editing scope>
 Guidance: <absolute paths to applicable global and project instructions and guides>
 Limits: <approved commands, installations, spending, duration, and restart permissions>
 Precedence: user authorization and supplied guidance override conflicting workflow advice
+Purpose: <the task Goal with who uses it, for what, and its Useless if list, verbatim>
 Phase: <verbatim phase text from the plan>
 Invariants: <definitions from design>
 Principles: <definitions from design>

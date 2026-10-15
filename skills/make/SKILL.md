@@ -20,7 +20,7 @@ Before responding or writing the task file, read the [brevity rules](../_brevity
 **Status:** design
 **Branch:** main
 **Worktree:** none
-**Goal:** <observable end state>
+**Goal:** <observable end state; who uses the result and for what; Useless if: cheap results that pass the checks and defeat that purpose, per GPC9>
 **Mode:** <interactive|hands-off>
 
 ## Context
@@ -40,7 +40,7 @@ Before responding or writing the task file, read the [brevity rules](../_brevity
 4. Run `udesign` unless skipped, then set Status to `planning`. Follow the existing branch and worktree rules without another approval. In hands-off mode, use `git-worktrees` and stop rather than edit the main branch if it cannot provision isolation.
 5. Run `uplan` unless skipped, then set Status to `executing`. In hands-off mode, record that the plan was auto-approved.
 6. Run `uexecute`, then `uverify`. Send demonstrated failures back to execution until the verification attacks pass. Set Status to `reviewing` and run `ureview`.
-7. Set Status to `validating`. Mark `done` only when the task file's Goal has direct end-to-end evidence or the user confirms an outcome that the harness cannot observe. Do not equate a clean diff, passing tests, or review with a confirmed Goal.
+7. Set Status to `validating`. Mark `done` only when the task file's Goal has direct end-to-end evidence or the user confirms an outcome that the harness cannot observe. Do not equate a clean diff, passing tests, review, or a met number with a confirmed Goal. Check how the result met it against the Goal's `Useless if:` list, per GPC9.
 8. Once done, scan `CLAUDE.md`, `README.md`, and non-task project documentation for material updates. Present branch merge/PR, worktree cleanup, or defer options; never push or merge without the user's choice.
 
 Use `handsoff` for the shared safety contract. Record every automatic decision in `### Hands-off decisions`; never invent a value without a conservative, explicit basis. Ask the user only when there is no safe default or a blocker prevents the next stage.

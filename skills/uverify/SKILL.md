@@ -19,6 +19,7 @@ Cover these angles:
 - Invalid input: find missing values, type confusion, or malformed input that bypasses validation or raises the wrong error.
 - Invariants and assumptions: try to violate each relevant guarantee or disprove an external premise. Reference its design ID.
 - Interfaces: find callers, outputs, or documentation references that disagree with the declared contract. Reference its interface ID.
+- Purpose, per [GPC9](../_principles.md): look at real outputs, such as runs, files or screens, and state in one line how the result met the goal. Then try to show it met the checks by a route on the goal's `Useless if:` list, or by a new route that defeats the purpose. Two signs are a demonstrated break, not a finding: work that should be better scores worse, and a change kept for its score gain with no diagnosed failure behind it.
 
 For example, an item endpoint should reject `name: null` as a client error. Test whether it instead reaches the handler and returns a server error. "Test the happy path" is not a failure hypothesis.
 

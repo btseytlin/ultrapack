@@ -48,7 +48,7 @@ Template:
 **Status:** design
 **Branch:** main
 **Worktree:** none
-**Goal:** <observable success condition that defines done — note if confirming it needs a real-world run or user sign-off beyond the diff>
+**Goal:** <observable success condition that defines done — note if confirming it needs a real-world run or user sign-off beyond the diff; who uses the result and for what; Useless if: cheap results that pass the checks and defeat that purpose, per GPC9>
 **Mode:** <interactive|hands-off>
 
 ## Context
@@ -137,7 +137,7 @@ Status → `reviewing`. Invoke `up:ureview`. It dispatches `up:reviewer`, proces
 - The verified diff already demonstrates the full Goal (verify's smoke exercised the real end state, nothing out-of-band remains) → state the evidence; the Goal is met.
 - The Goal needs steps the agent can't or shouldn't finish alone — a run at full scale, an expensive / remote / paid job, or an outcome only observable in the user's environment ("training works on the dataset") → do what's safely in reach (the small or local proxy, captured in `## Verify`), then list the remaining steps and hand them to the user. Status stays `validating`.
 
-Set Status → `done` only once the Goal is confirmed: by the agent's own end-to-end evidence when it could observe it, or by the user when it couldn't. Never declare `done` off "verified + reviewed" alone.
+Set Status → `done` only once the Goal is confirmed: by the agent's own end-to-end evidence when it could observe it, or by the user when it couldn't. Never declare `done` off "verified + reviewed" alone. Never declare it off a met number alone either: check how the result met it against the goal's `Useless if:` list, per GPC9.
 
 If the Goal is still pending, proceed to step 12 to offer finish actions — the verified code can still merge — but keep Status `validating` and state that the task is not done until the Goal is confirmed; a later session resumes from `validating` to re-check it.
 

@@ -1,6 +1,6 @@
 # Global Principles
 
-GPC1–GPC8. Apply to every task unless clearly irrelevant. Deviations name the GPC and the reason in one line.
+GPC1–GPC9. Apply to every task unless clearly irrelevant. Deviations name the GPC and the reason in one line.
 
 - **GPC1 — Explicit interfaces, no defaults, no hidden config.** Caller passes every argument. Each constant / config / magic value is defined in exactly one place and threaded explicitly to its use site. No reading config behind the caller's back.
 - **GPC2 — One concern per unit.** One responsibility per function, class, file. Functions >~10 lines are a smell — split unless justified. Error handling is its own concern. Short files/classes follow from short functions; goal is fewer concerns per unit, not fewer symbols. Code reads top-to-bottom like prose.
@@ -10,6 +10,7 @@ GPC1–GPC8. Apply to every task unless clearly irrelevant. Deviations name the 
 - **GPC6 — Fail fast, fewest moving parts.** Crash loud on unexpected state — no silent fallbacks, no defaulted-to-zero metrics. Prefer the plan with fewer components, fewer code paths, fewer places a future bug can hide. Prefer reversible changes over clever ones.
 - **GPC7 — Plan for debugging.** Assume every new piece of functionality will need to be debugged. Design it so future-you can diagnose without a rewrite: structured logs at seams, meaningful IDs threaded through (request id, run id, sample id), state-transition logging for long-running processes, deterministic-where-possible execution, and a way to reproduce a single failing case in isolation. "We'll add logging when it breaks" means you'll add logging in production at 2am.
 - **GPC8 — DRY, reuse first.** Before writing new code, search for existing helpers, utilities, or patterns that already solve it — extend or call them rather than parallel-implementing. Duplicated logic across two call sites is a smell; three is a bug. Reuse wins over re-creation; the exception is when reuse would force a premature abstraction that mixes concerns (then prefer explicit over DRY per GPC2).
+- GPC9 — A number checks the goal; it never replaces it. Every goal says who uses the result and for what. It also lists the ways a result could pass every check and still be useless. Find them by asking for the cheapest result that passes. Every brief to another agent carries that purpose and list, never a bare target. Work tuned against a score keeps a change only to fix a diagnosed failure, never for the score gain. A result that meets the number by a route that defeats the purpose is a failure. When work that should be better scores worse, the measure or the system is broken: stop and report it.
 
 ## Incidental code smells
 

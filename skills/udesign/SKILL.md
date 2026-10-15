@@ -29,6 +29,8 @@ Write one observable outcome in the task file's goal header and confirm it with 
 
 Use an outcome such as "the importer completes on the full dataset within available memory", not an activity such as "rewrite the importer". If confirmation needs an expensive run, remote environment, or user observation, state that requirement. A local proxy does not prove the real outcome.
 
+Per [GPC9](../_principles.md), the goal also says who uses the result and for what, and ends with `Useless if:` and the cheap results that would pass its checks and defeat that purpose. For a test bot, one entry is "it wins by avoiding what it exists to test". Rule out each entry with a check or an invariant, and confirm the list with the user with the goal.
+
 ## Process
 
 Follow these steps in order:
